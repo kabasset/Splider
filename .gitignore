@@ -1,0 +1,63 @@
+#--------------------- 
+# Specific to Elements
+#--------------------- 
+/build
+/build.*
+/InstallArea
+/PAQA
+/.scannerwork
+/.coverage
+
+#--------------------- 
+# C++
+#--------------------- 
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Compiled Dynamic libraries
+*.so
+
+# Executables
+*.exe
+*.out
+*.app
+
+#--------------------- 
+# Python 
+#--------------------- 
+
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+
+#--------------------- 
+# Editors
+#--------------------- 
+
+/.project
+/.pydevprojec
+/.cproject
+/.settings
+/.idea
+*~
+*.swp
+/.vscode
+.~*
+
+#--------------------
+# Data
+#--------------------
+
+*.eps
+*.fit
+*.fits
+*.gif
+*.jpg
+*.jpeg
+*.png
+#*.svg For doc
