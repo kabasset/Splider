@@ -21,9 +21,7 @@ namespace Splider {
  */
 class SplineIntervals {
 
-  friend class SplineArguments;
-
-  template <typename>
+  template <typename T>
   friend class Spline;
 
 public:
@@ -48,7 +46,7 @@ public:
 
   /**
    * @brief Initializer list-based constructor.
-  */
+   */
   SplineIntervals(const std::initializer_list<double>& u) : SplineIntervals(u.begin(), u.end()) {}
 
   /**
@@ -56,6 +54,13 @@ public:
    */
   std::size_t size() const {
     return m_u.size();
+  }
+
+  /**
+   * @brief Get the length of the i-th interval.
+   */
+  inline double length(std::size_t i) const {
+    return m_h[i];
   }
 
   /**
@@ -88,89 +93,47 @@ private:
 };
 
 /**
- * @brief A collection of abscissae to be passed as arguments to the spline.
+ * @brief A spline argument.
  */
-class SplineArguments {
+class SplineArg {
 
   template <typename T>
   friend class Spline;
 
 public:
-  /**
-   * @brief Empty collection constructor.
-   */
-  SplineArguments(const SplineIntervals& domain) : m_domain(domain), m_x(), m_coefficients() {}
-
-  /**
-   * @brief Range-based constructor.
-   */
-  template <typename TIt>
-  SplineArguments(const SplineIntervals& domain, TIt begin, TIt end) :
-      m_domain(domain), m_x(std::move(begin), std::move(end)), m_coefficients(m_x.size()) {
-    compute();
-  }
-
-  /**
-   * @brief Initializer list-based constructor.
-  */
-  SplineArguments(const SplineIntervals& domain, const std::initializer_list<double>& x) :
-      SplineArguments(domain, x.begin(), x.end()) {}
-
-  /**
-   * @brief Get the number of arguments.
-   */
-  std::size_t size() const {
-    return m_x.size();
-  }
-
-  /**
-   * @brief Assign new abscissae.
-   */
-  template <typename TIt>
-  void assign(TIt begin, TIt end) {
-    m_x.assign(std::move(begin), std::move(end));
-    m_coefficients.resize(m_x.size());
-    compute();
+  SplineArg(const SplineIntervals& domain, double x) {
+    m_index = domain.index(x);
+    const auto h = domain.length(m_index);
+    const auto left = x - domain[m_index];
+    const auto right = h - left;
+    m_cv0 = right / h;
+    m_cv1 = left / h;
+    m_cs0 = right * right * right / (6. * h) - h * right / 6.;
+    m_cs1 = left * left * left / (6. * h) - h * left / 6.;
   }
 
 private:
-  /**
-   * @brief Update coefficients given m_x.
-   */
-  void compute() {
-    std::size_t index;
-    double x, h, left, right;
-    for (std::size_t i = 0; i < m_x.size(); ++i) {
-      x = m_x[i];
-      index = m_domain.index(x);
-      h = m_domain.m_h[index];
-      left = x - m_domain[index];
-      right = h - left;
-      m_coefficients[i] = Coefficients {
-          index,
-          right / h, // cv0
-          left / h, // cv1
-          right * right * right / (6. * h) - h * right / 6., // cs0
-          left * left * left / (6. * h) - h * left / 6. // cs1
-      };
-    }
-  }
-
-  /**
-   * @brief Spline coefficients related to x.
-   */
-  struct Coefficients {
-    std::size_t index; ///< Index of the interval of x
-    double cv0; ///< Coefficient of v[index]
-    double cv1; ///< Coefficient of v[index + 1]
-    double cs0; ///< Coefficient of s[index]
-    double cs1; ///< Coefficient of s[index + 1]
-  };
-
-  const SplineIntervals& m_domain; ///< Knot positions
-  std::vector<double> m_x; ///< Arguments
-  std::vector<Coefficients> m_coefficients; ///< Spline coefficients
+  std::size_t m_index;
+  double m_cv0;
+  double m_cv1;
+  double m_cs0;
+  double m_cs1;
 };
+
+template <typename TArgs>
+std::vector<SplineArg> makeSplineArgs(const SplineIntervals& domain, const TArgs& args) {
+  std::vector<SplineArg> out;
+  out.reserve(args.size());
+  for (const auto& a : args) {
+    out.push_back({domain, a});
+  }
+  return out;
+}
+
+template <typename T>
+std::vector<SplineArg> makeSplineArgs(const SplineIntervals& domain, const std::initializer_list<T>& args) {
+  return makeSplineArgs<std::initializer_list<T>>(domain, args);
+}
 
 /**
  * @brief Cubic spline.
@@ -184,12 +147,12 @@ class Spline {
 public:
   /**
    * @brief Null knots constructor.
-  */
+   */
   Spline(const SplineIntervals& u) : m_domain(u), m_v(u.m_u.size()), m_s(m_v.size()) {}
 
   /**
    * @brief Valued knots constructors.
-  */
+   */
   template <typename TKnots>
   Spline(const SplineIntervals& u, const TKnots& v) : m_domain(u), m_v(v.begin(), v.end()), m_s(m_v.size()) {
     compute();
@@ -209,25 +172,26 @@ public:
    * @brief Evaluate the spline on a scalar value.
    */
   T operator()(double x) const {
-    const auto i = m_domain.index(x);
-    const double h = m_domain.m_h[i];
-    const double left = x - m_domain.m_u[i];
-    const double right = h - left;
-    const double cv0 = right / h;
-    const double cv1 = left / h;
-    const double cs0 = right * right * right / (6. * h) - h * right / 6.;
-    const double cs1 = left * left * left / (6. * h) - h * left / 6.;
-    return m_v[i] * cv0 + m_v[i + 1] * cv1 + m_s[i] * cs0 + m_s[i + 1] * cs1;
+    return operator()(SplineArg(m_domain, x));
+  }
+
+  /**
+   * @brief Evaluate the spline on a scalar value.
+   */
+  T operator()(const SplineArg& x) const {
+    const auto i = x.m_index;
+    return m_v[i] * x.m_cv0 + m_v[i + 1] * x.m_cv1 + m_s[i] * x.m_cs0 + m_s[i + 1] * x.m_cs1;
   }
 
   /**
    * @brief Evaluate the spline on a vector value.
    */
-  std::vector<T> operator()(const SplineArguments& x) const {
+  template <typename TArgs>
+  std::vector<T> operator()(const TArgs& x) const {
     std::vector<T> out(x.size());
-    std::transform(x.m_coefficients.begin(), x.m_coefficients.end(), out.begin(), [&](const auto& c) {
-      const auto i = c.index;
-      return m_v[i] * c.cv0 + m_v[i + 1] * c.cv1 + m_s[i] * c.cs0 + m_s[i + 1] * c.cs1;
+    std::transform(x.begin(), x.end(), out.begin(), [&](const auto& e) {
+      const auto i = e.m_index;
+      return m_v[i] * e.m_cv0 + m_v[i + 1] * e.m_cv1 + m_s[i] * e.m_cs0 + m_s[i + 1] * e.m_cs1;
     });
     return out;
   }

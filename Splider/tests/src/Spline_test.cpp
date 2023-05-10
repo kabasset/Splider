@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(scalar_real_test) {
 
 BOOST_AUTO_TEST_CASE(vector_real_test) {
   const Splider::SplineIntervals u {1, 2, 3, 4};
-  const Splider::SplineArguments x(u, {1.1, 2.5, 3.9});
+  const auto x = makeSplineArgs(u, {1.1, 2.5, 3.9});
   const std::vector<double> v {10, 20, 30, 40};
   const Splider::Spline<double> spline(u, v);
   const auto y = spline(x);
