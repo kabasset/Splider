@@ -4,6 +4,7 @@
 #include "Splider/Spline.h"
 
 #include <boost/test/unit_test.hpp>
+#include <complex>
 
 //-----------------------------------------------------------------------------
 

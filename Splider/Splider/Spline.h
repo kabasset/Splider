@@ -3,10 +3,6 @@
 
 #ifndef _SPLIDER_SPLINE_H
 #define _SPLIDER_SPLINE_H
-
-#include "LinxCore/Raster.h"
-#include "LinxCore/Tiling.h"
-
 #include <algorithm>
 #include <stdexcept>
 #include <vector>
@@ -220,6 +216,29 @@ private:
   const SplineIntervals& m_domain; ///< The knots domain
   std::vector<T> m_v; ///< The knot values
   std::vector<T> m_s; ///< The knot second derivatives
+};
+
+class SplineResampler {
+
+public:
+  SplineResampler(const SplineIntervals& domain) : m_domain(domain), m_args() {}
+
+  template <typename TArgs>
+  void assign(const TArgs& x) {
+    for (const auto& e : x) {
+      m_args.emplace_back(m_domain, e);
+    }
+  }
+
+  template <typename TKnots>
+  std::vector<typename TKnots::value_type> operator()(const TKnots& v) {
+    Spline<typename TKnots::value_type> spline(m_domain, v);
+    return spline(m_args);
+  }
+
+private:
+  const SplineIntervals& m_domain;
+  std::vector<SplineArg> m_args;
 };
 
 } // namespace Splider
