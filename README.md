@@ -8,9 +8,12 @@ Spline libraries generally allow instantiating a spline and calling it on an arg
 ```cpp
 std::vector<double> u = ... // Knot abscissae
 std::vector<double> v = ... // Knot values
-double x = ... // Spline argument
+std::vector<double> x = ... // Spline arguments
 Spline spline(u, v);
-double y = spline(x);
+for (const auto& xi : x) {
+  double yi = spline(xi);
+  ...
+}
 ```
 
 This is generally sufficient, but in some cases yields huge recomputation where caching could be used.
@@ -27,17 +30,19 @@ This allows recomputing only what has changed.
 With Splider, the above example writes:
 
 ```cpp
-SplineBuilder b(u); // Compute domain-related coefficients
-auto spline = b.interpolant(v); // Compute knot-related coefficients
-double y = spline(x); // Compute argument-related coefficients
+SplineBuilder builder(u); // Compute domain-related coefficients
+auto spline = builder.interpolant(v); // Compute knot-related coefficients
+for (const auto& xi : x) {
+  double yi = spline(xi); // Compute argument-related coefficients
+}
 ```
 
 For resampling a function using spline interpolation, one can simply do:
 
 ```cpp
-SplineBuilder b(u); // Compute domain-related coefficients
-const auto resample = b.resampler(x); // Compute arguments-related coefficients
-auto y = resample(v); // Compute knot-related coefficients
+SplineBuilder builder(u); // Compute domain-related coefficients
+auto resample = builder.resampler(x); // Compute arguments-related coefficients
+auto y = resample(v); // Compute knots-related coefficients
 ```
 
 Moreover, Splider is compatible with any value type of a ring (i.e. with `+` and `*` operators), e.g. `std::complex`.
