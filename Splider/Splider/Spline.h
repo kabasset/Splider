@@ -252,7 +252,7 @@ private:
     T d1;
     const auto* vIt = m_v.data() + 1;
     const auto* hIt = m_domain.m_h.data() + 1;
-    for (auto sIt = &m_s[0] + 1; sIt != &m_s[size - 1]; ++sIt, ++vIt, ++hIt) {
+    for (auto sIt = &m_s[1]; sIt != &m_s[size - 1]; ++sIt, ++vIt, ++hIt) {
       // d[i] = (m_v[i + 1] - m_v[i]) / m_h[i];
       d1 = (*(vIt + 1) - *vIt) / *hIt;
       // m_s[i] = (m_v[i + 1] - m_v[i]) / m_h[i] - (m_v[i] - m_v[i - 1]) / m_h[i - 1];
