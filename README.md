@@ -32,9 +32,7 @@ With Splider, the above example writes:
 ```cpp
 SplineBuilder builder(u); // Compute domain-related coefficients
 auto spline = builder.interpolant(v); // Compute knot-related coefficients
-for (const auto& xi : x) {
-  double yi = spline(xi); // Compute argument-related coefficients
-}
+auto y = spline(x); // Compute argument-related coefficients
 ```
 
 For resampling a function using spline interpolation, one can simply do:

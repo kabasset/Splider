@@ -131,7 +131,7 @@ private:
 };
 
 /**
- * @brief Cubic spline.
+ * @brief Cubic spline interpolant.
  * 
  * A spline is parametrized with the list of knot abscissae and values,
  * and is evaluated on a scalar or vector argument.
@@ -143,8 +143,11 @@ public:
   /**
    * @brief Null knots constructor.
    */
-  explicit Spline(const SplineIntervals& u) : m_domain(u), m_v(u.m_u.size()), m_s(m_v.size()) {}
+  explicit Spline(const SplineIntervals& u) : m_domain(u), m_v(m_domain.size()), m_s(m_domain.size()) {}
 
+  /**
+   * @brief Iterator-based constructor.
+   */
   template <typename TIt>
   explicit Spline(const SplineIntervals& u, TIt begin, TIt end) :
       m_domain(u), m_v(std::move(begin), std::move(end)), m_s(m_v.size()) {
@@ -163,13 +166,28 @@ public:
   explicit Spline(const SplineIntervals& u, std::initializer_list<T> v) : Spline(u, v.begin(), v.end()) {}
 
   /**
-   * @brief Assign knot values.
+   * @brief Assign knot values from an iterator.
    */
-  template <typename TKnots>
-  void assign(const TKnots& v) { // FIXME it-based, list-based
-    m_v.assign(v.begin(), v.end());
+  template <typename TIt>
+  void assign(TIt begin, TIt end) {
+    m_v.assign(begin, end);
     // FIXME check size
     compute();
+  }
+
+  /**
+   * @brief Assign knot values from a range.
+   */
+  template <typename TRange>
+  void assign(const TRange& v) {
+    assign(v.begin(), v.end());
+  }
+
+  /**
+   * @brief Assign knot values from a list.
+   */
+  void assign(std::initializer_list<T> v) {
+    assign(v.begin(), v.end());
   }
 
   /**
@@ -185,6 +203,42 @@ public:
   T operator()(const SplineArg& x) const {
     const auto i = x.m_index;
     return m_v[i] * x.m_cv0 + m_v[i + 1] * x.m_cv1 + m_s[i] * x.m_cs0 + m_s[i + 1] * x.m_cs1;
+  }
+
+  /**
+   * @brief Evaluate the spline over an iterator.
+   * @return The vector of interpolated values
+   * 
+   * The iterator can either point to `double`s or `SplineArg`s.
+   */
+  template <typename TIt>
+  std::vector<T> operator()(TIt begin, TIt end) const {
+    std::vector<T> out;
+    for (; begin != end; ++begin) {
+      out.push_back(operator()(*begin));
+    }
+    return out;
+  }
+
+  /**
+   * @brief Evaluate the spline over a range.
+   * @return The vector of interpolated values
+   * 
+   * The iterator can either contain `double`s or `SplineArg`s.
+   */
+  template <typename TRange>
+  std::vector<T> operator()(const TRange& x) const {
+    return operator()(x.begin(), x.end());
+  }
+
+  /**
+   * @brief Evaluate the spline over a list.
+   * @return The vector of interpolated values
+   * 
+   * The list can either contain `double`s or `SplineArg`s.
+   */
+  std::vector<T> operator()(std::initializer_list<T> x) const {
+    return operator()(x.begin(), x.end());
   }
 
 private:
@@ -213,6 +267,12 @@ private:
   std::vector<T> m_s; ///< The knot second derivatives
 };
 
+/**
+ * @brief Cubic spline resampler.
+ * 
+ * A resampler is parametrized with the list of knot and resampling abscissae,
+ * and is evaluated on a vector of knot values.
+ */
 class SplineResampler {
 
 public:
@@ -239,82 +299,135 @@ public:
   explicit SplineResampler(const SplineIntervals& u, std::initializer_list<T> x) :
       SplineResampler(u, x.begin(), x.end()) {}
 
-  template <typename TRange>
-  void assign(const TRange& x) { // FIXME it-based, list-based
-    for (const auto& e : x) {
-      m_args.emplace_back(m_domain, e);
-    }
+  /**
+   * @brief Assign arguments from an iterator.
+   */
+  template <typename TIt>
+  void assign(TIt begin, TIt end) {
+    m_args.resize(std::distance(begin, end));
+    std::transform(std::move(begin), std::move(end), m_args.begin(), [&](const auto& x) {
+      return SplineArg(m_domain, x);
+    });
   }
 
+  /**
+   * @brief Assign arguments from a range.
+   */
+  template <typename TRange>
+  void assign(const TRange& x) {
+    assign(x.begin(), x.end());
+  }
+
+  /**
+   * @brief Assign arguments from a list.
+   */
+  void assign(const std::initializer_list<double>& x) {
+    assign(x.begin(), x.end());
+  }
+
+  /**
+   * @brief Resample a spline defined by an iterator over knot values.
+   */
   template <typename TIt>
   std::vector<typename std::iterator_traits<TIt>::value_type> operator()(TIt begin, TIt end) const {
     using T = typename std::iterator_traits<TIt>::value_type;
-    Spline<T> spline(m_domain, std::move(begin), std::move(end));
-    std::vector<T> out(m_args.size());
-    std::transform(m_args.begin(), m_args.end(), out.begin(), [&](const auto& e) {
-      return spline(e);
-    });
-    return out;
+    return Spline<T>(m_domain, std::move(begin), std::move(end))(m_args);
   }
 
+  /**
+   * @brief Resample a spline defined by a range of knot values.
+   */
   template <typename TRange>
   std::vector<typename TRange::value_type> operator()(const TRange& v) const {
     return operator()(v.begin(), v.end());
   }
 
+  /**
+   * @brief Resample a spline defined by a list of knot values.
+   */
   template <typename T>
   std::vector<T> operator()(std::initializer_list<T> v) const {
     return operator()(v.begin(), v.end());
   }
 
 private:
-  const SplineIntervals& m_domain;
-  std::vector<SplineArg> m_args;
+  const SplineIntervals& m_domain; ///< The knot abscissae
+  std::vector<SplineArg> m_args; ///< The resampling abscissae
 };
 
+/**
+ * @brief Helper class to build spline interpolants and resamplers.
+ */
 class SplineBuilder {
 public:
+  /**
+   * @brief Iterator-based constructor.
+   */
   template <typename TIt>
   explicit SplineBuilder(TIt begin, TIt end) : m_domain(std::move(begin), std::move(end)) {}
 
+  /**
+   * @brief Range-based constructor.
+   */
   template <typename TRange>
   explicit SplineBuilder(const TRange& u) : SplineBuilder(u.begin(), u.end()) {}
 
+  /**
+   * @brief List-based constructor.
+   */
   template <typename T>
   SplineBuilder(std::initializer_list<T> u) : SplineBuilder(u.begin(), u.end()) {}
 
+  /**
+   * @brief Iterator-based interpolant maker.
+   */
   template <typename TIt>
   Spline<typename std::iterator_traits<TIt>::value_type> interpolant(TIt begin, TIt end) const {
     return Spline<typename std::iterator_traits<TIt>::value_type>(m_domain, std::move(begin), std::move(end));
   }
 
+  /**
+   * @brief Range-based interpolant maker.
+   */
   template <typename TRange>
   Spline<typename TRange::value_type> interpolant(const TRange& v) const {
     return interpolant(v.begin(), v.end());
   }
 
+  /**
+   * @brief List-based interpolant maker.
+   */
   template <typename T>
   Spline<T> interpolant(std::initializer_list<T> v) const {
     return interpolant(v.begin(), v.end());
   }
 
+  /**
+   * @brief Iterator-based resampler maker.
+   */
   template <typename TIt>
   SplineResampler resampler(TIt begin, TIt end) const {
     return SplineResampler(m_domain, std::move(begin), std::move(end));
   }
 
+  /**
+   * @brief Range-based resampler maker.
+   */
   template <typename TRange>
   SplineResampler resampler(const TRange& x) const {
     return resampler(x.begin(), x.end());
   }
 
+  /**
+   * @brief List-based resampler maker.
+   */
   template <typename T>
   SplineResampler resampler(std::initializer_list<T> x) const {
     return resampler(x.begin(), x.end());
   }
 
 private:
-  SplineIntervals m_domain;
+  SplineIntervals m_domain; ///< The knot abscissae
 };
 
 } // namespace Splider
