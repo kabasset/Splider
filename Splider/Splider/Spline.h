@@ -22,7 +22,7 @@ class SplineIntervals {
 
 public:
   /**
-   * @brief Range-based constructor.
+   * @brief Iterator-based constructor.
    */
   template <typename TIt>
   SplineIntervals(TIt begin, TIt end) : m_u(std::move(begin), std::move(end)), m_h(m_u.size() - 1) {
@@ -41,7 +41,13 @@ public:
   }
 
   /**
-   * @brief Initializer list-based constructor.
+   * @brief Range-based constructor.
+   */
+  template <typename TRange>
+  SplineIntervals(const TRange& u) : SplineIntervals(u.begin(), u.end()) {}
+
+  /**
+   * @brief List-based constructor.
    */
   SplineIntervals(const std::initializer_list<double>& u) : SplineIntervals(u.begin(), u.end()) {}
 
@@ -97,6 +103,14 @@ class SplineArg {
   friend class Spline;
 
 public:
+  /**
+   * @brief Null constructor.
+   */
+  SplineArg() = default;
+
+  /**
+   * @brief Constructor.
+   */
   SplineArg(const SplineIntervals& domain, double x) {
     m_index = domain.index(x);
     const auto h = domain.length(m_index);
@@ -109,11 +123,11 @@ public:
   }
 
 private:
-  std::size_t m_index;
-  double m_cv0;
-  double m_cv1;
-  double m_cs0;
-  double m_cs1;
+  std::size_t m_index; ///< The interval index
+  double m_cv0; ///< The v[i] coefficient
+  double m_cv1; ///< The v[i + 1] coefficient
+  double m_cs0; ///< The s[i] coefficient
+  double m_cs1; ///< The s[i + 1] coefficient
 };
 
 template <typename TArgs>
@@ -146,50 +160,46 @@ public:
    */
   Spline(const SplineIntervals& u) : m_domain(u), m_v(u.m_u.size()), m_s(m_v.size()) {}
 
-  /**
-   * @brief Valued knots constructors.
-   */
-  template <typename TKnots>
-  Spline(const SplineIntervals& u, const TKnots& v) : m_domain(u), m_v(v.begin(), v.end()), m_s(m_v.size()) {
+  template <typename TIt>
+  Spline(const SplineIntervals& u, TIt begin, TIt end) :
+      m_domain(u), m_v(std::move(begin), std::move(end)), m_s(m_v.size()) {
     compute();
   }
+
+  /**
+   * @brief Range-based constructor.
+   */
+  template <typename TRange>
+  Spline(const SplineIntervals& u, const TRange& v) : Spline(u, v.begin(), v.end()) {}
+
+  /**
+   * @brief List-based constructor.
+   */
+  Spline(const SplineIntervals& u, const std::initializer_list<T>& v) : Spline(u, v.begin(), v.end()) {}
 
   /**
    * @brief Assign knot values.
    */
   template <typename TKnots>
-  void assign(const TKnots& v) {
+  void assign(const TKnots& v) { // FIXME it-based, list-based
     m_v.assign(v.begin(), v.end());
     // FIXME check size
     compute();
   }
 
   /**
-   * @brief Evaluate the spline on a scalar value.
+   * @brief Evaluate the spline.
    */
   T operator()(double x) const {
     return operator()(SplineArg(m_domain, x));
   }
 
   /**
-   * @brief Evaluate the spline on a scalar value.
+   * @brief Evaluate the spline with caching.
    */
   T operator()(const SplineArg& x) const {
     const auto i = x.m_index;
     return m_v[i] * x.m_cv0 + m_v[i + 1] * x.m_cv1 + m_s[i] * x.m_cs0 + m_s[i + 1] * x.m_cs1;
-  }
-
-  /**
-   * @brief Evaluate the spline on a vector value.
-   */
-  template <typename TArgs>
-  std::vector<T> operator()(const TArgs& x) const {
-    std::vector<T> out(x.size());
-    std::transform(x.begin(), x.end(), out.begin(), [&](const auto& e) {
-      const auto i = e.m_index;
-      return m_v[i] * e.m_cv0 + m_v[i + 1] * e.m_cv1 + m_s[i] * e.m_cs0 + m_s[i + 1] * e.m_cs1;
-    });
-    return out;
   }
 
 private:
@@ -221,24 +231,105 @@ private:
 class SplineResampler {
 
 public:
-  SplineResampler(const SplineIntervals& domain) : m_domain(domain), m_args() {}
+  /**
+   * @brief Iterator-based constructor.
+   */
+  template <typename TIt>
+  SplineResampler(const SplineIntervals& domain, TIt begin, TIt end) : m_domain(domain), m_args(end - begin) {
+    std::transform(std::move(begin), std::move(end), m_args.begin(), [&](const auto& e) {
+      return SplineArg(m_domain, e);
+    });
+  }
 
-  template <typename TArgs>
-  void assign(const TArgs& x) {
+  /**
+   * @brief Range-based constructor.
+   */
+  template <typename TRange>
+  SplineResampler(const SplineIntervals& u, const TRange& x) : SplineResampler(u, x.begin(), x.end()) {}
+
+  /**
+   * @brief List-based constructor.
+   */
+  template <typename T>
+  SplineResampler(const SplineIntervals& u, const std::initializer_list<T>& x) :
+      SplineResampler(u, x.begin(), x.end()) {}
+
+  template <typename TRange>
+  void assign(const TRange& x) { // FIXME it-based, list-based
     for (const auto& e : x) {
       m_args.emplace_back(m_domain, e);
     }
   }
 
-  template <typename TKnots>
-  std::vector<typename TKnots::value_type> operator()(const TKnots& v) {
-    Spline<typename TKnots::value_type> spline(m_domain, v);
-    return spline(m_args);
+  template <typename TIt>
+  std::vector<typename std::iterator_traits<TIt>::value_type> operator()(TIt begin, TIt end) const {
+    using T = typename std::iterator_traits<TIt>::value_type;
+    Spline<T> spline(m_domain, std::move(begin), std::move(end));
+    std::vector<T> out(m_args.size());
+    std::transform(m_args.begin(), m_args.end(), out.begin(), [&](const auto& e) {
+      return spline(e);
+    });
+    return out;
+  }
+
+  template <typename TRange>
+  std::vector<typename TRange::value_type> operator()(const TRange& v) const {
+    return operator()(v.begin(), v.end());
+  }
+
+  template <typename T>
+  std::vector<T> operator()(const std::initializer_list<T>& v) const {
+    return operator()(v.begin(), v.end());
   }
 
 private:
   const SplineIntervals& m_domain;
   std::vector<SplineArg> m_args;
+};
+
+class SplineBuilder {
+public:
+  template <typename TIt>
+  SplineBuilder(TIt begin, TIt end) : m_domain(std::move(begin), std::move(end)) {}
+
+  template <typename TRange>
+  SplineBuilder(const TRange& u) : SplineBuilder(u.begin(), u.end()) {}
+
+  template <typename T>
+  SplineBuilder(const std::initializer_list<T>& u) : SplineBuilder(u.begin(), u.end()) {}
+
+  template <typename TIt>
+  Spline<typename std::iterator_traits<TIt>::value_type> interpolant(TIt begin, TIt end) const {
+    return Spline<typename std::iterator_traits<TIt>::value_type>(m_domain, std::move(begin), std::move(end));
+  }
+
+  template <typename TRange>
+  Spline<typename TRange::value_type> interpolant(const TRange& v) const {
+    return interpolant(v.begin(), v.end());
+  }
+
+  template <typename T>
+  Spline<T> interpolant(const std::initializer_list<T>& v) const {
+    return interpolant(v.begin(), v.end());
+  }
+
+  template <typename TIt>
+  SplineResampler resampler(TIt begin, TIt end) const {
+    return SplineResampler(m_domain, std::move(begin), std::move(end));
+  }
+
+  template <typename TRange>
+  SplineResampler resampler(const TRange& x) const {
+    return resampler(x.begin(), x.end());
+  }
+
+  template <typename T>
+  SplineResampler resampler(const std::initializer_list<T>& x) const {
+    return resampler(x.begin(), x.end());
+  }
+
+private:
+  SplineIntervals m_domain;
 };
 
 } // namespace Splider

@@ -8,8 +8,8 @@ Spline libraries generally allow instantiating a spline and calling it on an arg
 ```cpp
 std::vector<double> u = ... // Knot abscissae
 std::vector<double> v = ... // Knot values
+double x = ... // Spline argument
 Spline spline(u, v);
-double x = ...
 double y = spline(x);
 ```
 
@@ -24,16 +24,20 @@ Splider separates the spline classes in components (intervals, knots and argumen
 For example `SplineIntervals` holds not only the knot positions but also associated byproducts like the spacing between positions.
 This allows recomputing only what has changed.
 
-For resampling several functions using spline interpolation, one can simply do:
+With Splider, the above example writes:
 
 ```cpp
-SplineIntervals u = ... // Compute domain-related coefficients
-SplineArguments x = ... // Compute arguments-related coefficients
-std::vector<std::vector<double>> vs = ...
-for (const auto& v : vs) {
-  auto y = Spline(u, v)(x); // Compute only what is left
-  ...
-}
+SplineBuilder b(u); // Compute domain-related coefficients
+auto spline = b.interpolant(v); // Compute knot-related coefficients
+double y = spline(x); // Compute argument-related coefficients
+```
+
+For resampling a function using spline interpolation, one can simply do:
+
+```cpp
+SplineBuilder b(u); // Compute domain-related coefficients
+const auto resample = b.resampler(x); // Compute arguments-related coefficients
+auto y = resample(v); // Compute knot-related coefficients
 ```
 
 Moreover, Splider is compatible with any value type of a ring (i.e. with `+` and `*` operators), e.g. `std::complex`.
