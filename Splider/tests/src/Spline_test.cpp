@@ -44,7 +44,7 @@ struct ComplexLinSplineFixture {
 };
 
 BOOST_FIXTURE_TEST_CASE(real_spline_test, RealLinSplineFixture) {
-  const Splider::Spline<double> spline(domain, v);
+  Splider::Spline<double> spline(domain, v);
   std::vector<double> out;
   for (const auto& e : x) {
     out.push_back(spline(e));
@@ -57,7 +57,7 @@ BOOST_FIXTURE_TEST_CASE(real_spline_test, RealLinSplineFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(real_interpolant_test, RealLinSplineFixture) {
-  const auto spline = builder.interpolant(v);
+  auto spline = builder.interpolant(v);
   std::vector<double> out;
   for (const auto& e : x) {
     out.push_back(spline(e));

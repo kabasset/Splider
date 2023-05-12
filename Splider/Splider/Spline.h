@@ -3,7 +3,9 @@
 
 #ifndef _SPLIDER_SPLINE_H
 #define _SPLIDER_SPLINE_H
+
 #include <algorithm>
+#include <set>
 #include <stdexcept>
 #include <vector>
 
@@ -13,11 +15,20 @@
 namespace Splider {
 
 /**
+ * @brief Caching strategy.
+ */
+enum class SplineCache {
+  None, ///< Do not cache
+  Early, ///< Cache at assignment
+  Lazy ///< Cache at usage
+};
+
+/**
  * @brief The knot abscissae.
  */
 class SplineIntervals {
 
-  template <typename T>
+  template <typename, SplineCache>
   friend class Spline;
 
 public:
@@ -99,7 +110,7 @@ private:
  */
 class SplineArg {
 
-  template <typename T>
+  template <typename, SplineCache>
   friend class Spline;
 
 public:
@@ -136,22 +147,30 @@ private:
  * A spline is parametrized with the list of knot abscissae and values,
  * and is evaluated on a scalar or vector argument.
  */
-template <typename T>
+template <typename T, SplineCache Cache = SplineCache::Early>
 class Spline {
 
 public:
   /**
    * @brief Null knots constructor.
    */
-  explicit Spline(const SplineIntervals& u) : m_domain(u), m_v(m_domain.size()), m_s(m_domain.size()) {}
+  explicit Spline(const SplineIntervals& u) : m_domain(u), m_v(m_domain.size()), m_s(m_domain.size()), m_cache() {
+    if constexpr (Cache != SplineCache::Early) {
+      m_cache.insert({0, m_s.size() - 1}); // Natural cubic splines
+    }
+  }
 
   /**
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
   explicit Spline(const SplineIntervals& u, TIt begin, TIt end) :
-      m_domain(u), m_v(std::move(begin), std::move(end)), m_s(m_v.size()) {
-    compute();
+      m_domain(u), m_v(std::move(begin), std::move(end)), m_s(m_v.size()), m_cache() {
+    if constexpr (Cache == SplineCache::Early) {
+      update();
+    } else {
+      m_cache.insert({0, m_s.size() - 1}); // Natural cubic splines
+    }
   }
 
   /**
@@ -172,7 +191,9 @@ public:
   void assign(TIt begin, TIt end) {
     m_v.assign(begin, end);
     // FIXME check size
-    compute();
+    if constexpr (Cache == SplineCache::Early) {
+      update();
+    }
   }
 
   /**
@@ -191,61 +212,38 @@ public:
   }
 
   /**
-   * @brief Evaluate the spline.
-   */
-  T operator()(double x) const {
-    return operator()(SplineArg(m_domain, x));
+   * @brief Get the knot value at given index.
+  */
+  inline const T& operator[](std::size_t i) const {
+    return m_v[i];
   }
 
   /**
-   * @brief Evaluate the spline with caching.
+   * @brief Set the knot value at given index.
    */
-  T operator()(const SplineArg& x) const {
-    const auto i = x.m_index;
-    return m_v[i] * x.m_cv0 + m_v[i + 1] * x.m_cv1 + m_s[i] * x.m_cs0 + m_s[i + 1] * x.m_cs1;
-  }
-
-  /**
-   * @brief Evaluate the spline over an iterator.
-   * @return The vector of interpolated values
-   * 
-   * The iterator can either point to `double`s or `SplineArg`s.
-   */
-  template <typename TIt>
-  std::vector<T> operator()(TIt begin, TIt end) const {
-    std::vector<T> out;
-    for (; begin != end; ++begin) {
-      out.push_back(operator()(*begin));
+  inline void set(std::size_t i, const T& value) {
+    m_v[i] = value;
+    if constexpr (Cache == SplineCache::Early) {
+      update();
     }
-    return out;
   }
 
   /**
-   * @brief Evaluate the spline over a range.
-   * @return The vector of interpolated values
-   * 
-   * The iterator can either contain `double`s or `SplineArg`s.
+   * @brief Get the second derivative at given index.
    */
-  template <typename TRange>
-  std::vector<T> operator()(const TRange& x) const {
-    return operator()(x.begin(), x.end());
+  inline const T& dv2(std::size_t i) {
+    if constexpr (Cache == SplineCache::Lazy) {
+      if (m_cache.find(i) == m_cache.end()) {
+        m_s[i] = (m_v[i + 1] - m_v[i]) / m_domain.m_h[i] - (m_v[i] - m_v[i - 1]) / m_domain.m_h[i - 1];
+      }
+    }
+    return m_s[i];
   }
 
   /**
-   * @brief Evaluate the spline over a list.
-   * @return The vector of interpolated values
-   * 
-   * The list can either contain `double`s or `SplineArg`s.
+   * @brief Update internal coefficients.
    */
-  std::vector<T> operator()(std::initializer_list<T> x) const {
-    return operator()(x.begin(), x.end());
-  }
-
-private:
-  /**
-   * @brief Update coefficients given m_v.
-   */
-  void compute() {
+  void update() {
     const auto size = m_v.size();
     // FIXME check size == doman.m_u.size()
     T d0 = (m_v[1] - m_v[0]) / m_domain.m_h[0]; // Because next loop starts at 1
@@ -262,9 +260,62 @@ private:
     // m_s[0] and m_s[size - 1] are left at 0 for natural splines
   }
 
+  /**
+   * @brief Evaluate the spline.
+   */
+  T operator()(double x) {
+    return operator()(SplineArg(m_domain, x));
+  }
+
+  /**
+   * @brief Evaluate the spline with caching.
+   */
+  T operator()(const SplineArg& x) {
+    const auto i = x.m_index;
+    return m_v[i] * x.m_cv0 + m_v[i + 1] * x.m_cv1 + dv2(i) * x.m_cs0 + dv2(i + 1) * x.m_cs1;
+  }
+
+  /**
+   * @brief Evaluate the spline over an iterator.
+   * @return The vector of interpolated values
+   * 
+   * The iterator can either point to `double`s or `SplineArg`s.
+   */
+  template <typename TIt>
+  std::vector<T> operator()(TIt begin, TIt end) {
+    std::vector<T> out;
+    for (; begin != end; ++begin) {
+      out.push_back(operator()(*begin));
+    }
+    return out;
+  }
+
+  /**
+   * @brief Evaluate the spline over a range.
+   * @return The vector of interpolated values
+   * 
+   * The iterator can either contain `double`s or `SplineArg`s.
+   */
+  template <typename TRange>
+  std::vector<T> operator()(const TRange& x) {
+    return operator()(x.begin(), x.end());
+  }
+
+  /**
+   * @brief Evaluate the spline over a list.
+   * @return The vector of interpolated values
+   * 
+   * The list can either contain `double`s or `SplineArg`s.
+   */
+  std::vector<T> operator()(std::initializer_list<T> x) {
+    return operator()(x.begin(), x.end());
+  }
+
+private:
   const SplineIntervals& m_domain; ///< The knots domain
   std::vector<T> m_v; ///< The knot values
   std::vector<T> m_s; ///< The knot second derivatives
+  std::set<std::size_t> m_cache; ///< Cached indices of m_s
 };
 
 /**
