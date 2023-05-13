@@ -1,8 +1,8 @@
 /// @copyright 2023, Antoine Basset
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef _SPLIDER_MULTISPLINE_H
-#define _SPLIDER_MULTISPLINE_H
+#ifndef _SPLIDER_BISPLINE_H
+#define _SPLIDER_BISPLINE_H
 
 #include "LinxCore/Raster.h"
 
