@@ -113,6 +113,9 @@ class SplineArg {
   template <typename, SplineCache>
   friend class Spline;
 
+  template <typename>
+  friend class BiSplineResampler;
+
 public:
   /**
    * @brief Null constructor.
@@ -212,36 +215,41 @@ public:
   }
 
   /**
-   * @brief Get the knot value at given index.
+   * @brief Get the i-th knot value.
   */
-  inline const T& operator[](std::size_t i) const {
+  inline const T& v(std::size_t i) const {
     return m_v[i];
   }
 
   /**
-   * @brief Set the knot value at given index.
+   * @brief Set the i-th knot value.
    */
-  inline void set(std::size_t i, const T& value) {
+  inline void v(std::size_t i, const T& value) {
     m_v[i] = value;
     if constexpr (Cache == SplineCache::Early) {
       update();
+    } else {
+      const auto max = std::min(i + 1, m_v.size() - 2);
+      for (auto j = std::max(i - 1, std::size_t(1)); j <= max; ++j) { // Natural cubic spline
+        m_cache.erase(i);
+      }
     }
   }
 
   /**
-   * @brief Get the second derivative at given index.
+   * @brief Get the i-th second derivative.
    */
   inline const T& dv2(std::size_t i) {
     if constexpr (Cache == SplineCache::Lazy) {
       if (m_cache.find(i) == m_cache.end()) {
-        m_s[i] = (m_v[i + 1] - m_v[i]) / m_domain.m_h[i] - (m_v[i] - m_v[i - 1]) / m_domain.m_h[i - 1];
+        update(i);
       }
     }
     return m_s[i];
   }
 
   /**
-   * @brief Update internal coefficients.
+   * @brief Update all the internal coefficients.
    */
   void update() {
     const auto size = m_v.size();
@@ -258,6 +266,22 @@ public:
       d0 = d1;
     }
     // m_s[0] and m_s[size - 1] are left at 0 for natural splines
+    if constexpr (Cache == SplineCache::Lazy) {
+      const auto max = m_s.size() - 2;
+      for (std::size_t i = 1; i <= max; ++i) {
+        m_cache.insert(i);
+      }
+    }
+  }
+
+  /**
+   * @brief Update the internal coefficients associated to the i-th knot.
+  */
+  inline void update(std::size_t i) {
+    m_s[i] = (m_v[i + 1] - m_v[i]) / m_domain.m_h[i] - (m_v[i] - m_v[i - 1]) / m_domain.m_h[i - 1];
+    if constexpr (Cache == SplineCache::Lazy) {
+      m_cache.insert(i);
+    }
   }
 
   /**
@@ -294,7 +318,7 @@ public:
    * @brief Evaluate the spline over a range.
    * @return The vector of interpolated values
    * 
-   * The iterator can either contain `double`s or `SplineArg`s.
+   * The range can either contain `double`s or `SplineArg`s.
    */
   template <typename TRange>
   std::vector<T> operator()(const TRange& x) {
