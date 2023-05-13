@@ -37,9 +37,12 @@ public:
       *it = {SplineArg(m_domain0, (*begin)[0]), SplineArg(m_domain1, (*begin)[1])};
       const auto i0 = (*it)[0].m_index;
       const auto i1 = (*it)[1].m_index;
-      for (auto j1 = i1 - 1; j1 <= i1 + 2; ++j1) {
-        for (auto j0 = i0 - 1; j0 <= i0 + 2; ++j0) {
-          // FIXME bounds
+      const auto min0 = i0 > 0 ? i0 - 1 : 0;
+      const auto max0 = std::min(i0 + 2, m_domain0.size() - 1);
+      const auto min1 = i1 > 0 ? i1 - 1 : 0;
+      const auto max1 = std::min(i1 + 2, m_domain1.size() - 1);
+      for (auto j1 = min1; j1 <= max1; ++j1) {
+        for (auto j0 = min0; j0 <= max0; ++j0) {
           m_mask[{j0, j1}] = true;
         }
       }
@@ -55,11 +58,13 @@ public:
     y.reserve(m_x.size());
     for (const auto& x : m_x) {
       const auto i1 = x[1].m_index;
-      const auto min = std::max(i1 - 1, std::size_t(0));
+      const auto min = i1 > 0 ? i1 - 1 : 0;
       const auto max = std::min(i1 + 2, m_domain1.size() - 1);
-      for (auto i = min; i < max; ++i) {
+      for (auto i = min; i <= max; ++i) {
+        printf("Update splines0[%li](x[0]) = %f\n", i, m_splines0[i](x[0]));
         m_spline1.v(i, m_splines0[i](x[0]));
       }
+      printf("y = %f\n", m_spline1(x[1]));
       y.push_back(m_spline1(x[1]));
     }
     return y;
