@@ -13,4 +13,8 @@ elements_add_unit_test(Spline tests/src/Spline_test.cpp
                      EXECUTABLE Splider_Spline_test
                      LINK_LIBRARIES Splider
                      TYPE Boost)
+elements_add_unit_test(BiSpline tests/src/BiSpline_test.cpp 
+                     EXECUTABLE Splider_BiSpline_test
+                     LINK_LIBRARIES Splider
+                     TYPE Boost)
 
