@@ -17,7 +17,7 @@ namespace Splider {
 /**
  * @brief Bivariate spline resampler.
  */
-template <typename T> // FIXME rm?
+template <typename T, SplineCache Cache = SplineCache::Early> // FIXME possible to rm T?
 class BiSplineResampler {
 
 public:
@@ -27,8 +27,7 @@ public:
   template <typename TIt>
   BiSplineResampler(const SplineIntervals& domain0, const SplineIntervals& domain1, TIt begin, TIt end) :
       m_domain0(domain0), m_domain1(domain1), // FIXME useful?
-      m_splines0(m_domain1.size(), Spline<T, SplineCache::Lazy>(m_domain0)), m_spline1(m_domain1),
-      m_x(std::distance(begin, end)),
+      m_splines0(m_domain1.size(), Spline<T, Cache>(m_domain0)), m_spline1(m_domain1), m_x(std::distance(begin, end)),
       m_mask(Linx::Position<2>::zero(), {m_domain0.size() - 1, m_domain1.size() - 1}, false) {
     auto it = m_x.begin();
     for (; begin < end; ++begin, ++it) {
@@ -87,8 +86,8 @@ public:
 private:
   const SplineIntervals& m_domain0; ///< The intervals along axis 0
   const SplineIntervals& m_domain1; ///< The intervals along axis 1
-  std::vector<Spline<T, SplineCache::Lazy>> m_splines0; ///< Splines along axis 0
-  Spline<T, SplineCache::Lazy> m_spline1; ///< Spline along axis 1
+  std::vector<Spline<T, Cache>> m_splines0; ///< Splines along axis 0
+  Spline<T, Cache> m_spline1; ///< Spline along axis 1
   std::vector<std::array<SplineArg, 2>> m_x; ///< The arguments
   Linx::Mask<2> m_mask; ///< The neighboring knot abscissae
 };

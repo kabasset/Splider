@@ -113,7 +113,7 @@ class SplineArg {
   template <typename, SplineCache>
   friend class Spline;
 
-  template <typename>
+  template <typename, SplineCache>
   friend class BiSplineResampler;
 
 public:
