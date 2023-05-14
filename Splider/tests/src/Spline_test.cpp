@@ -56,6 +56,19 @@ BOOST_FIXTURE_TEST_CASE(real_spline_test, RealLinSplineFixture) {
   }
 }
 
+BOOST_FIXTURE_TEST_CASE(real_lazy_spline_test, RealLinSplineFixture) {
+  Splider::Spline<double, Splider::SplineCache::Lazy> spline(domain, v);
+  std::vector<double> out;
+  for (const auto& e : x) {
+    out.push_back(spline(e));
+  }
+  BOOST_TEST(out.size() == x.size());
+  for (std::size_t i = 0; i < out.size(); ++i) {
+    BOOST_TEST(out[i] > v[i]);
+    BOOST_TEST(out[i] < v[i + 1]);
+  }
+}
+
 BOOST_FIXTURE_TEST_CASE(real_interpolant_test, RealLinSplineFixture) {
   auto spline = builder.interpolant(v);
   std::vector<double> out;

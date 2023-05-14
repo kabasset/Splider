@@ -197,6 +197,9 @@ public:
     if constexpr (Cache == SplineCache::Early) {
       update();
     }
+    if constexpr (Cache == SplineCache::Lazy) {
+      m_cache = {0, m_s.size() - 1};
+    }
   }
 
   /**
@@ -242,11 +245,22 @@ public:
    */
   inline const T& dv2(std::size_t i) {
     if constexpr (Cache == SplineCache::Lazy) {
-      if (m_cache.find(i) == m_cache.end()) {
+      if (not valid(i)) {
         update(i);
       }
     }
     return m_s[i];
+  }
+
+  /**
+   * @brief Check whether the internal coefficients of the i-th knot are valid in cache.
+  */
+  bool valid(std::size_t i) const {
+    if constexpr (Cache == SplineCache::Early) {
+      return true;
+    } else {
+      return m_cache.find(i) != m_cache.end();
+    }
   }
 
   /**
@@ -267,7 +281,7 @@ public:
       d0 = d1;
     }
     // m_s[0] and m_s[size - 1] are left at 0 for natural splines
-    if constexpr (Cache == SplineCache::Lazy) {
+    if constexpr (Cache != SplineCache::Early) {
       const auto max = m_s.size() - 2;
       for (std::size_t i = 1; i <= max; ++i) {
         m_cache.insert(i);
@@ -279,8 +293,8 @@ public:
    * @brief Update the internal coefficients associated to the i-th knot.
   */
   inline void update(std::size_t i) {
-    m_s[i] = (m_v[i + 1] - m_v[i]) / m_domain.m_h[i] - (m_v[i] - m_v[i - 1]) / m_domain.m_h[i - 1];
-    if constexpr (Cache == SplineCache::Lazy) {
+    if constexpr (Cache != SplineCache::Early) {
+      m_s[i] = (m_v[i + 1] - m_v[i]) / m_domain.m_h[i] - (m_v[i] - m_v[i - 1]) / m_domain.m_h[i - 1];
       m_cache.insert(i);
     }
   }
