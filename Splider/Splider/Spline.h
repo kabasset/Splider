@@ -508,4 +508,4 @@ private:
 
 } // namespace Splider
 
-#endif // _SPLIDER_SPLINE_H
+#endif

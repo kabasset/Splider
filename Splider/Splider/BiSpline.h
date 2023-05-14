@@ -17,21 +17,19 @@ namespace Splider {
 /**
  * @brief Bivariate spline resampler.
  */
-template <typename T>
+template <typename T> // FIXME rm?
 class BiSplineResampler {
 
 public:
   /**
-   * @brief The dimension.
+   * @brief Iterator-based constructor.
    */
-  static constexpr Linx::Index Dimension = 2;
-
   template <typename TIt>
   BiSplineResampler(const SplineIntervals& domain0, const SplineIntervals& domain1, TIt begin, TIt end) :
       m_domain0(domain0), m_domain1(domain1), // FIXME useful?
       m_splines0(m_domain1.size(), Spline<T, SplineCache::Lazy>(m_domain0)), m_spline1(m_domain1),
       m_x(std::distance(begin, end)),
-      m_mask(Linx::Position<Dimension>::zero(), {m_domain0.size() - 1, m_domain1.size() - 1}, false) {
+      m_mask(Linx::Position<2>::zero(), {m_domain0.size() - 1, m_domain1.size() - 1}, false) {
     auto it = m_x.begin();
     for (; begin < end; ++begin, ++it) {
       *it = {SplineArg(m_domain0, (*begin)[0]), SplineArg(m_domain1, (*begin)[1])};
@@ -49,22 +47,38 @@ public:
     }
   }
 
-  template <typename TKnots>
-  std::vector<typename TKnots::value_type> operator()(const TKnots& v) {
+  /**
+   * @brief Range-based constructor.
+   */
+  template <typename TRange>
+  BiSplineResampler(const SplineIntervals& domain0, const SplineIntervals& domain1, const TRange& x) :
+      BiSplineResampler(domain0, domain1, x.begin(), x.end()) {}
+
+  /**
+   * @brief List-based constructor.
+   */
+  BiSplineResampler(const SplineIntervals& domain0, const SplineIntervals& domain1, std::initializer_list<T> x) :
+      BiSplineResampler(domain0, domain1, x.begin(), x.end()) {}
+
+  /**
+   * @brief Resample an input raster of knot values.
+   */
+  template <typename TRaster>
+  std::vector<typename TRaster::value_type> operator()(const TRaster& v) {
     for (const auto& p : m_mask) {
       m_splines0[p[1]].v(p[0], v[p]);
     }
-    std::vector<typename TKnots::value_type> y;
+    std::vector<typename TRaster::value_type> y;
     y.reserve(m_x.size());
     for (const auto& x : m_x) {
       const auto i1 = x[1].m_index;
       const auto min = i1 > 0 ? i1 - 1 : 0;
       const auto max = std::min(i1 + 2, m_domain1.size() - 1);
       for (auto i = min; i <= max; ++i) {
-        printf("Update splines0[%li](x[0]) = %f\n", i, m_splines0[i](x[0]));
+        printf("m_spline1.v(%li, m_splines0[%li](%li) = %f)\n", i, x[0].m_index, i, m_splines0[i](x[0]));
         m_spline1.v(i, m_splines0[i](x[0]));
       }
-      printf("y = %f\n", m_spline1(x[1]));
+      printf("m_spline1(%li) = %f\n", x[1].m_index, m_spline1(x[1]));
       y.push_back(m_spline1(x[1]));
     }
     return y;
@@ -75,10 +89,10 @@ private:
   const SplineIntervals& m_domain1; ///< The intervals along axis 1
   std::vector<Spline<T, SplineCache::Lazy>> m_splines0; ///< Splines along axis 0
   Spline<T, SplineCache::Lazy> m_spline1; ///< Spline along axis 1
-  std::vector<std::array<SplineArg, Dimension>> m_x; ///< The arguments
-  Linx::Mask<Dimension> m_mask; ///< The neighboring knot abscissae
+  std::vector<std::array<SplineArg, 2>> m_x; ///< The arguments
+  Linx::Mask<2> m_mask; ///< The neighboring knot abscissae
 };
 
 } // namespace Splider
 
-#endif // _SPLIDER_SPLINE_H
+#endif
