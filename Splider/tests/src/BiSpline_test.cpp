@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_CASE(real_resampler_test) {
   const Linx::Raster<double> v(
       {u0.size(), u1.size()},
       {1, 2, 3, 4, 10, 20, 30, 40, 100, 200, 300, 400, 1000, 2000, 3000, 4000});
-  Splider::BiSplineResampler<double> resampler(u0, u1, x.begin(), x.end());
+  Splider::BiSplineResampler<double> resampler(u0, u1, x);
   const auto y = resampler(v);
   BOOST_TEST(y.size() == x.size());
   for (std::size_t i = 0; i < x.size(); ++i) {
