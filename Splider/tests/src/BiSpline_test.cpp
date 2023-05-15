@@ -5,6 +5,8 @@
 
 #include <boost/test/unit_test.hpp>
 #include <complex>
+#include <gsl/gsl_interp2d.h>
+#include <gsl/gsl_spline2d.h>
 
 //-----------------------------------------------------------------------------
 
@@ -12,14 +14,32 @@ BOOST_AUTO_TEST_SUITE(BiSpline_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(real_resampler_test) {
-  const Splider::SplineIntervals u0 {1, 2, 3, 4};
-  const Splider::SplineIntervals u1 {1, 10, 100, 1000};
-  const std::vector<Linx::Vector<double, 2>> x {{1.1, 2.}, {2.5, 10.}, {2.5, 20.}, {2.5, 50.}, {3.9, 50.}};
-  const Linx::Raster<double> v(
+template <typename U, typename V, typename X>
+std::vector<double> resampleWithGsl(const U& u0, const U& u1, const V& v, const X& x) {
+  gsl_interp_accel* xacc = gsl_interp_accel_alloc();
+  gsl_interp_accel* yacc = gsl_interp_accel_alloc();
+  gsl_spline2d* spline = gsl_spline2d_alloc(gsl_interp2d_bicubic, u0.size(), u1.size());
+  gsl_spline2d_init(spline, u0.data(), u1.data(), v.data(), u0.size(), u1.size());
+  std::vector<double> y;
+  for (const auto& e : x) {
+    y.push_back(gsl_spline2d_eval(spline, e[0], e[1], xacc, yacc));
+  }
+  return y;
+}
+
+struct RealLinExpSplineFixture {
+  std::vector<double> u0 {1, 2, 3, 4};
+  std::vector<double> u1 {1, 10, 100, 1000};
+  std::vector<Linx::Vector<double, 2>> x {{1.1, 2.}, {2.5, 10.}, {2.5, 20.}, {2.5, 50.}, {3.9, 50.}};
+  Linx::Raster<double> v = Linx::Raster<double>(
       {u0.size(), u1.size()},
       {1, 2, 3, 4, 10, 20, 30, 40, 100, 200, 300, 400, 1000, 2000, 3000, 4000});
-  Splider::BiSplineResampler<double> resampler(u0, u1, x);
+  Splider::SplineIntervals domain0 = Splider::SplineIntervals(u0);
+  Splider::SplineIntervals domain1 = Splider::SplineIntervals(u1);
+  Splider::BiSplineResampler<double> resampler = Splider::BiSplineResampler<double>(domain0, domain1, x);
+};
+
+BOOST_FIXTURE_TEST_CASE(real_resampler_test, RealLinExpSplineFixture) {
   const auto y = resampler(v);
   BOOST_TEST(y.size() == x.size());
   for (std::size_t i = 0; i < x.size(); ++i) {
@@ -37,6 +57,15 @@ BOOST_AUTO_TEST_CASE(real_resampler_test) {
     }
     BOOST_TEST(y[i] > v[p]);
     BOOST_TEST(y[i] < v[p + 1]);
+  }
+}
+
+BOOST_FIXTURE_TEST_CASE(real_resampler_vs_gsl_test, RealLinExpSplineFixture) {
+  const auto out = resampler(v);
+  const auto gsl = resampleWithGsl(u0, u1, v, x);
+  BOOST_TEST(out.size() == gsl.size());
+  for (std::size_t i = 0; i < out.size(); ++i) {
+    BOOST_TEST(out[i] == gsl[i]);
   }
 }
 

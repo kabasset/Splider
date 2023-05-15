@@ -74,10 +74,8 @@ public:
       const auto min = i1 > 0 ? i1 - 1 : 0;
       const auto max = std::min(i1 + 2, m_domain1.size() - 1);
       for (auto i = min; i <= max; ++i) {
-        printf("m_spline1.v(%li, m_splines0[%li](%li) = %f)\n", i, x[0].m_index, i, m_splines0[i](x[0]));
         m_spline1.v(i, m_splines0[i](x[0]));
       }
-      printf("m_spline1(%li) = %f\n", x[1].m_index, m_spline1(x[1]));
       y.push_back(m_spline1(x[1]));
     }
     return y;
