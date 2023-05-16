@@ -229,13 +229,13 @@ public:
    */
   inline void v(std::size_t i, const T& value) {
     m_v[i] = value;
-    if constexpr (Cache == SplineCache::Early) {
-      update();
-    } else {
-      const auto min = i > 1 ? i - 1 : 1;
-      const auto max = std::min(i + 1, m_v.size() - 2);
-      for (auto j = min; j <= max; ++j) { // Natural cubic spline
-        m_cache.erase(i);
+    const auto min = i > 1 ? i - 1 : 1;
+    const auto max = std::min(i + 1, m_v.size() - 2);
+    for (auto j = min; j <= max; ++j) { // Natural cubic spline
+      if constexpr (Cache == SplineCache::Early) {
+        update(j);
+      } else {
+        m_cache.erase(j);
       }
     }
   }
