@@ -6,6 +6,7 @@
 
 #include "LinxCore/Mask.h"
 #include "LinxCore/Raster.h"
+#include "LinxCore/Sequence.h"
 #include "Splider/Spline.h"
 
 #include <algorithm>
@@ -13,6 +14,12 @@
 #include <vector>
 
 namespace Splider {
+
+/**
+ * @brief Alias for a sequence of 2D position.
+ * @see `BiSplineResampler`
+ */
+using BiSplineTrajectory = Linx::Sequence<Linx::Vector<double, 2>>;
 
 /**
  * @brief Bivariate natural cubic spline resampler.
@@ -25,6 +32,7 @@ namespace Splider {
  * The trajectory is made of objects on which `operator[]()` is called to get the first and second components.
  * Typical classes which fulfill this requirement are raw arrays, `std::array<double, 2>` or `Linx::Vector<double, 2>`,
  * but `std::pair<double, double>` is not compatible.
+ * Type `BiSplineTrajectory` is defined for conciseness.
  * 
  * The values are given as a 2D `Linx::Raster`: see [Linx](https://github.com/kabasset/Linx) documentation.
  * 

@@ -31,7 +31,7 @@ template <Splider::SplineCache Cache>
 struct RealLinExpSplineFixture {
   std::vector<double> u0 {1, 2, 3, 4};
   std::vector<double> u1 {1, 10, 100, 1000};
-  std::vector<Linx::Vector<double, 2>> x {{1.1, 2.}, {2.5, 10.}, {2.5, 20.}, {2.5, 50.}, {3.9, 50.}};
+  Splider::BiSplineTrajectory x {{1.1, 2.}, {2.5, 10.}, {2.5, 20.}, {2.5, 50.}, {3.9, 50.}};
   Linx::Raster<double> v = Linx::Raster<double>(
       {u0.size(), u1.size()},
       {1, 2, 3, 4, 10, 20, 30, 40, 100, 200, 300, 400, 1000, 2000, 3000, 4000});
