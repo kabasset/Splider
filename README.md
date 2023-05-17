@@ -55,7 +55,8 @@ std::vector<double> y2 = resampler(v2);
 Moreover, Splider is compatible with any value type of a ring (i.e. with `+` and `*` operators), e.g. `std::complex`.
 
 2D interpolation is also provided as `Splider::BiSplineResampler`.
+It relies on [Linx](https://github.com/kabasset/Linx) for the data structures.
 
 ## Status
 
-Implementation is ongoing...
+Prototype is ready to be validated!

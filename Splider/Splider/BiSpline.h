@@ -32,9 +32,9 @@ using BiSplineTrajectory = Linx::Sequence<Linx::Vector<double, 2>>;
  * The trajectory is made of objects on which `operator[]()` is called to get the first and second components.
  * Typical classes which fulfill this requirement are raw arrays, `std::array<double, 2>` or `Linx::Vector<double, 2>`,
  * but `std::pair<double, double>` is not compatible.
- * Type `BiSplineTrajectory` is defined for conciseness.
+ * Alias `BiSplineTrajectory` is defined for conciseness as a `Linx::Sequence` (see [Linx](https://github.com/kabasset/Linx) documentation).
  * 
- * The values are given as a 2D `Linx::Raster`: see [Linx](https://github.com/kabasset/Linx) documentation.
+ * The values are given as a 2D `Linx::Raster`.
  * 
  * For optimization purpose, as opposed to the 1D `SplineResampler`, this class is templated by the value type.
  * 
