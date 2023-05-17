@@ -31,7 +31,7 @@ With Splider, the above example writes:
 
 ```cpp
 Splider::SplineIntervals domain(u); // Compute domain-related coefficients
-Splider::Spline<double> spline(u, v); // Compute knot-related coefficients
+Splider::Spline<double> spline(domain, v); // Compute knot-related coefficients
 std::vector<double> y = spline(x); // Compute argument-related coefficients
 ```
 
@@ -39,7 +39,7 @@ For resampling a function using spline interpolation, `x` is provided to Splider
 
 ```cpp
 Splider::SplineIntervals domain(u); // Compute domain-related coefficients
-Splider::SplineResampler resampler(u, x); // Compute arguments-related coefficients
+Splider::SplineResampler resampler(domain, x); // Compute arguments-related coefficients
 std::vector<double> y = resampler(v); // Compute knots-related coefficients
 ```
 
@@ -47,7 +47,7 @@ This is especially efficient when several functions must be resampled:
 
 ```cpp
 Splider::SplineIntervals domain(u);
-Splider::SplineResampler resampler(u, x);
+Splider::SplineResampler resampler(domain, x);
 std::vector<double> y0 = resampler(v0);
 std::vector<double> y1 = resampler(v1);
 std::vector<double> y2 = resampler(v2);
