@@ -28,7 +28,6 @@ BOOST_AUTO_TEST_CASE(index_test) {
 struct RealLinSplineFixture {
   std::vector<double> u {1, 2, 3, 4};
   Splider::SplineIntervals domain = Splider::SplineIntervals(u);
-  Splider::SplineBuilder builder = Splider::SplineBuilder(u);
   std::vector<double> x {1.1, 2.5, 3.9};
   std::vector<double> v {10, 20, 30, 40};
   std::vector<double> y {11, 25, 39};
@@ -37,7 +36,6 @@ struct RealLinSplineFixture {
 struct ComplexLinSplineFixture {
   std::vector<double> u {1, 2, 3, 4};
   Splider::SplineIntervals domain = Splider::SplineIntervals(u);
-  Splider::SplineBuilder builder = Splider::SplineBuilder(u);
   std::vector<double> x {1.1, 2.5, 3.9};
   std::vector<std::complex<double>> v {{10, -1}, {20, -2}, {30, -3}, {40, -4}};
   std::vector<std::complex<double>> y {{11, -1.1}, {25, -2.5}, {39, -3.9}};
@@ -70,7 +68,7 @@ BOOST_FIXTURE_TEST_CASE(real_lazy_spline_test, RealLinSplineFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(real_interpolant_test, RealLinSplineFixture) {
-  auto spline = builder.interpolant(v);
+  Splider::Spline<double> spline(domain, v);
   std::vector<double> out;
   for (const auto& e : x) {
     out.push_back(spline(e));
@@ -83,8 +81,8 @@ BOOST_FIXTURE_TEST_CASE(real_interpolant_test, RealLinSplineFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(real_resampler_test, RealLinSplineFixture) {
-  const auto resample = builder.resampler(x);
-  const auto out = resample(v);
+  Splider::SplineResampler resampler(domain, x);
+  const auto out = resampler(v);
   BOOST_TEST(out.size() == x.size());
   for (std::size_t i = 0; i < out.size(); ++i) {
     BOOST_TEST(out[i] > v[i]);
@@ -93,8 +91,8 @@ BOOST_FIXTURE_TEST_CASE(real_resampler_test, RealLinSplineFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(complex_interpolant_test, ComplexLinSplineFixture) {
-  const auto resample = builder.resampler(x);
-  const auto out = resample(v);
+  Splider::SplineResampler resampler(domain, x);
+  const auto out = resampler(v);
   BOOST_TEST(out.size() == x.size());
   for (std::size_t i = 0; i < out.size(); ++i) {
     BOOST_TEST(out[i].real() > v[i].real());

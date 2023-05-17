@@ -15,7 +15,23 @@
 namespace Splider {
 
 /**
- * @brief Bivariate spline resampler.
+ * @brief Bivariate natural cubic spline resampler.
+ * 
+ * The transform maps an input 2D rectilinear grid `u` to an output trajectory, i.e. collection of coordinates `x`.
+ * The resampler is called on a 2D map of knot values `v` to output the interpolated values `y` at abscissae `x`.
+ * 
+ * The grid is specified as a pair of `SplineIntervals` parameters.
+ * 
+ * The trajectory is made of objects on which `operator[]()` is called to get the first and second components.
+ * Typical classes which fulfill this requirement are raw arrays, `std::array<double, 2>` or `Linx::Vector<double, 2>`,
+ * but `std::pair<double, double>` is not compatible.
+ * 
+ * The values are given as a 2D `Linx::Raster`: see [Linx](https://github.com/kabasset/Linx) documentation.
+ * 
+ * For optimization purpose, as opposed to the 1D `SplineResampler`, this class is templated by the value type.
+ * 
+ * Similarly to `Spline`, the resampler can rely on various caching strategies:
+ * see `SplineCache` documentation for selecting the most appropriate one.
  */
 template <typename T, SplineCache Cache = SplineCache::Early> // FIXME possible to rm T?
 class BiSplineResampler {

@@ -30,20 +30,32 @@ This allows recomputing only what has changed.
 With Splider, the above example writes:
 
 ```cpp
-SplineBuilder builder(u); // Compute domain-related coefficients
-auto spline = builder.interpolant(v); // Compute knot-related coefficients
-auto y = spline(x); // Compute argument-related coefficients
+Splider::SplineIntervals domain(u); // Compute domain-related coefficients
+Splider::Spline<double> spline(u, v); // Compute knot-related coefficients
+std::vector<double> y = spline(x); // Compute argument-related coefficients
 ```
 
-For resampling a function using spline interpolation, one can simply do:
+For resampling a function using spline interpolation, `x` is provided to Splider prior to `v`:
 
 ```cpp
-SplineBuilder builder(u); // Compute domain-related coefficients
-auto resample = builder.resampler(x); // Compute arguments-related coefficients
-auto y = resample(v); // Compute knots-related coefficients
+Splider::SplineIntervals domain(u); // Compute domain-related coefficients
+Splider::SplineResampler resampler(u, x); // Compute arguments-related coefficients
+std::vector<double> y = resampler(v); // Compute knots-related coefficients
+```
+
+This is especially efficient when several functions must be resampled:
+
+```cpp
+Splider::SplineIntervals domain(u);
+Splider::SplineResampler resampler(u, x);
+std::vector<double> y0 = resampler(v0);
+std::vector<double> y1 = resampler(v1);
+std::vector<double> y2 = resampler(v2);
 ```
 
 Moreover, Splider is compatible with any value type of a ring (i.e. with `+` and `*` operators), e.g. `std::complex`.
+
+2D interpolation is also provided as `Splider::BiSplineResampler`.
 
 ## Status
 

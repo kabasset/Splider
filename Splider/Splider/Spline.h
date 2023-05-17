@@ -16,15 +16,31 @@ namespace Splider {
 
 /**
  * @brief Caching strategy.
+ * 
+ * Splines rely on knot-wise coefficients which need to be evaluated from the knot positions and values.
+ * This evaluation is expensive wrt. other operations.
+ * The coefficients can therefore be cached to speed-up computation.
+ * Several strategies are available:
+ * 
+ * - When the spline is to be evaluated over many arguments, i.e. most knots are effectively used, it is best to rely on early evaluation.
+ * - When knots are used sparsely, i.e. arguments lie in few of the known intervals only, lazy evaluation is faster.
+ * 
+ * In both of these cases, spline evaluation is guaranteed to be well-defined.
+ * However, for more advanced usage, cache can be user-managed.
+ * In this case, the user is responsible for updating the spline state before evaluating it... Use at your own risks.
+ * 
+ * In general, early and lazy options are preferrable, and should be compared through representative tests to select the fastest way.
  */
 enum class SplineCache {
-  None, ///< Do not cache
   Early, ///< Cache at assignment
-  Lazy ///< Cache at usage
+  Lazy, ///< Cache at usage
+  User ///< Do not cache automatically
 };
 
 /**
  * @brief The knot abscissae.
+ * 
+ * This class stores both the abscissae of the knots and precomputes some spline coefficients to speed-up spline evaluation.
  */
 class SplineIntervals {
 
@@ -107,6 +123,12 @@ private:
 
 /**
  * @brief A spline argument.
+ * 
+ * A spline argument is an absissa value for which a spline should be evaluated.
+ * It is bound to spline intervals in order to precompute a few spline coefficients.
+ * 
+ * Manually instantiating a spline argument is useful when it should be reused.
+ * It is not necessary for single-use: in this case, simply call the spline on a mere real value.
  */
 class SplineArg {
 
@@ -119,6 +141,8 @@ class SplineArg {
 public:
   /**
    * @brief Null constructor.
+   * 
+   * The such-constructed object is ill-formed and should only be used for compatibility, e.g. with `std::vector`.
    */
   SplineArg() = default;
 
@@ -145,10 +169,12 @@ private:
 };
 
 /**
- * @brief Cubic spline interpolant.
+ * @brief Natural cubic spline interpolant.
  * 
  * A spline is parametrized with the list of knot abscissae and values,
  * and is evaluated on a scalar or vector argument.
+ * 
+ * For repeated use of a spline over a constant set of arguments and varying values, see `SplineResampler`.
  */
 template <typename T, SplineCache Cache = SplineCache::Early>
 class Spline {
@@ -196,8 +222,7 @@ public:
     // FIXME check size
     if constexpr (Cache == SplineCache::Early) {
       update();
-    }
-    if constexpr (Cache == SplineCache::Lazy) {
+    } else {
       m_cache = {0, m_s.size() - 1};
     }
   }
@@ -254,7 +279,9 @@ public:
 
   /**
    * @brief Check whether the internal coefficients of the i-th knot are valid in cache.
-  */
+   * 
+   * This is always true for early caching and is the method is mostly useful for user-triggered caching.
+   */
   bool valid(std::size_t i) const {
     if constexpr (Cache == SplineCache::Early) {
       return true;
@@ -307,7 +334,7 @@ public:
   }
 
   /**
-   * @brief Evaluate the spline with caching.
+   * @brief Evaluate the spline.
    */
   T operator()(const SplineArg& x) {
     const auto i = x.m_index;
@@ -358,7 +385,7 @@ private:
 };
 
 /**
- * @brief Cubic spline resampler.
+ * @brief Natural cubic spline resampler.
  * 
  * A resampler is parametrized with the list of knot and resampling abscissae,
  * and is evaluated on a vector of knot values.
@@ -443,81 +470,6 @@ public:
 private:
   const SplineIntervals& m_domain; ///< The knot abscissae
   std::vector<SplineArg> m_args; ///< The resampling abscissae
-};
-
-/**
- * @brief Helper class to build spline interpolants and resamplers.
- */
-class SplineBuilder {
-public:
-  /**
-   * @brief Iterator-based constructor.
-   */
-  template <typename TIt>
-  explicit SplineBuilder(TIt begin, TIt end) : m_domain(std::move(begin), std::move(end)) {}
-
-  /**
-   * @brief Range-based constructor.
-   */
-  template <typename TRange>
-  explicit SplineBuilder(const TRange& u) : SplineBuilder(u.begin(), u.end()) {}
-
-  /**
-   * @brief List-based constructor.
-   */
-  template <typename T>
-  SplineBuilder(std::initializer_list<T> u) : SplineBuilder(u.begin(), u.end()) {}
-
-  /**
-   * @brief Iterator-based interpolant maker.
-   */
-  template <typename TIt>
-  Spline<typename std::iterator_traits<TIt>::value_type> interpolant(TIt begin, TIt end) const {
-    return Spline<typename std::iterator_traits<TIt>::value_type>(m_domain, std::move(begin), std::move(end));
-  }
-
-  /**
-   * @brief Range-based interpolant maker.
-   */
-  template <typename TRange>
-  Spline<typename TRange::value_type> interpolant(const TRange& v) const {
-    return interpolant(v.begin(), v.end());
-  }
-
-  /**
-   * @brief List-based interpolant maker.
-   */
-  template <typename T>
-  Spline<T> interpolant(std::initializer_list<T> v) const {
-    return interpolant(v.begin(), v.end());
-  }
-
-  /**
-   * @brief Iterator-based resampler maker.
-   */
-  template <typename TIt>
-  SplineResampler resampler(TIt begin, TIt end) const {
-    return SplineResampler(m_domain, std::move(begin), std::move(end));
-  }
-
-  /**
-   * @brief Range-based resampler maker.
-   */
-  template <typename TRange>
-  SplineResampler resampler(const TRange& x) const {
-    return resampler(x.begin(), x.end());
-  }
-
-  /**
-   * @brief List-based resampler maker.
-   */
-  template <typename T>
-  SplineResampler resampler(std::initializer_list<T> x) const {
-    return resampler(x.begin(), x.end());
-  }
-
-private:
-  SplineIntervals m_domain; ///< The knot abscissae
 };
 
 } // namespace Splider
