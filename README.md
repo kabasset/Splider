@@ -1,4 +1,6 @@
-# Splider
+# Project Overview
+
+![Splider logo](doc/diagrams/logo_square.svg)
 
 ## Purpose
 
@@ -59,4 +61,5 @@ It relies on [Linx](https://github.com/kabasset/Linx) for the data structures.
 
 ## Status
 
-Prototype is ready to be validated!
+Prototype is being validated!
+
