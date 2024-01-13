@@ -24,6 +24,9 @@ std::vector<double> resampleWithGsl(const U& u0, const U& u1, const V& v, const 
   for (const auto& e : x) {
     y.push_back(gsl_spline2d_eval(spline, e[0], e[1], xacc, yacc));
   }
+  gsl_interp_accel_free(xacc);
+  gsl_interp_accel_free(yacc);
+  gsl_spline2d_free(spline);
   return y;
 }
 
