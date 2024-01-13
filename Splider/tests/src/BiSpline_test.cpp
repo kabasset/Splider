@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_SUITE(BiSpline_test)
 //-----------------------------------------------------------------------------
 
 template <typename U, typename V, typename X>
-std::vector<double> resampleWithGsl(const U& u0, const U& u1, const V& v, const X& x) {
+std::vector<double> resample_with_gsl(const U& u0, const U& u1, const V& v, const X& x) {
   gsl_interp_accel* xacc = gsl_interp_accel_alloc();
   gsl_interp_accel* yacc = gsl_interp_accel_alloc();
   gsl_spline2d* spline = gsl_spline2d_alloc(gsl_interp2d_bicubic, u0.size(), u1.size());
@@ -69,7 +69,7 @@ BOOST_FIXTURE_TEST_CASE(real_resampler_test, EarlyRealLinExpSplineFixture) {
 
 BOOST_FIXTURE_TEST_CASE(real_resampler_vs_gsl_test, EarlyRealLinExpSplineFixture) {
   const auto out = resampler(v);
-  const auto gsl = resampleWithGsl(u0, u1, v, x);
+  const auto gsl = resample_with_gsl(u0, u1, v, x);
   BOOST_TEST(out.size() == gsl.size());
   for (std::size_t i = 0; i < out.size(); ++i) {
     BOOST_TEST(out[i] == gsl[i]);
@@ -78,7 +78,7 @@ BOOST_FIXTURE_TEST_CASE(real_resampler_vs_gsl_test, EarlyRealLinExpSplineFixture
 
 BOOST_FIXTURE_TEST_CASE(real_lazy_resampler_vs_gsl_test, LazyRealLinExpSplineFixture) {
   const auto out = resampler(v);
-  const auto gsl = resampleWithGsl(u0, u1, v, x);
+  const auto gsl = resample_with_gsl(u0, u1, v, x);
   BOOST_TEST(out.size() == gsl.size());
   for (std::size_t i = 0; i < out.size(); ++i) {
     BOOST_TEST(out[i] == gsl[i]);
