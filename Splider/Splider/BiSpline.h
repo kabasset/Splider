@@ -4,9 +4,9 @@
 #ifndef _SPLIDER_BISPLINE_H
 #define _SPLIDER_BISPLINE_H
 
-#include "LinxCore/Mask.h"
-#include "LinxCore/Raster.h"
-#include "LinxCore/Sequence.h"
+#include "Linx/Data/Mask.h"
+#include "Linx/Data/Raster.h"
+#include "Linx/Data/Sequence.h"
 #include "Splider/Spline.h"
 
 #include <algorithm>

@@ -2,13 +2,13 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 elements_subdir(SpliderRun)
 
-elements_depends_on_subdirs(Splider LinxRun)
+elements_depends_on_subdirs(Splider)
 
 find_package(GSL)
 
 elements_add_library(SpliderRun src/lib/*.cpp
-                     INCLUDE_DIRS Splider LinxRun
-                     LINK_LIBRARIES Splider LinxRun
+                     INCLUDE_DIRS Splider
+                     LINK_LIBRARIES Splider
                      PUBLIC_HEADERS SpliderRun)
 
 elements_add_executable(SpliderBenchmark src/program/SpliderBenchmark.cpp

@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "ElementsKernel/ProgramHeaders.h"
-#include "LinxCore/Sequence.h"
-#include "LinxRun/Chronometer.h"
-#include "LinxRun/ProgramOptions.h"
+#include "Linx/Data/Sequence.h"
+#include "Linx/Run/Chronometer.h"
+#include "Linx/Run/ProgramOptions.h"
 #include "Splider/Spline.h"
 
 static Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkConvolution");
@@ -41,7 +41,7 @@ public:
     options.named("knots", "Number of knots", 100L);
     options.named("args", "Number of arguments", 100L);
     options.named("seed", "Random seed", -1L);
-    return options.asPair();
+    return options.as_pair();
   }
 
   ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
