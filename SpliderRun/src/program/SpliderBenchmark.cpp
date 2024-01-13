@@ -7,6 +7,8 @@
 #include "Linx/Run/ProgramOptions.h"
 #include "Splider/Spline.h"
 
+#include <algorithm>
+
 static Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkConvolution");
 
 using Duration = std::chrono::milliseconds;
@@ -54,6 +56,7 @@ public:
     auto u = Linx::Sequence<double>(vSize).range();
     auto v = Linx::Sequence<double>(vSize).generate(Linx::GaussianNoise<double>(0, 1, seed));
     auto x = Linx::Sequence<double>(xSize).generate(Linx::UniformNoise<double>(0, vSize - 1, seed));
+    std::sort(x.begin(), x.end());
     std::vector<double> y;
     logger.info() << "  u: " << u;
     logger.info() << "  v: " << v;
