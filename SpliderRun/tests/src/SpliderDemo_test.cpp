@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE(default_interpolant_test) {
 
   //! [Default interpolant]
 
-  Splider::SplineIntervals u {1, 2, 3, 4};
+  Splider::Partition u {1, 2, 3, 4};
   std::vector<double> v {10, 20, 30, 40};
   Splider::Spline<double> spline(u, v);
 
@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(lazy_interpolant_test) {
 
   //! [Lazy interpolant]
 
-  Splider::SplineIntervals u {1, 2, 3, 4};
+  Splider::Partition u {1, 2, 3, 4};
   std::vector<double> v {10, 20, 30, 40};
   Splider::Spline<double, Splider::SplineCache::Lazy> spline(u, v);
 
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(default_resampler_test) {
 
   //! [Default resampler]
 
-  Splider::SplineIntervals u {1, 2, 3, 4};
+  Splider::Partition u {1, 2, 3, 4};
   std::vector<double> x {1.1, 2.5, 3.9};
   Splider::Cospline resampler(u, x);
 
@@ -57,8 +57,8 @@ BOOST_AUTO_TEST_CASE(default_bivariate_resampler_test) {
 
   //! [Default bivariate resampler]
 
-  Splider::SplineIntervals u0 {1, 2, 3, 4};
-  Splider::SplineIntervals u1 {1, 10, 100};
+  Splider::Partition u0 {1, 2, 3, 4};
+  Splider::Partition u1 {1, 10, 100};
   Splider::BiSplineTrajectory x {{1.1, 2.}, {2.5, 10.}, {2.5, 20.}, {2.5, 50.}, {3.9, 50.}};
   Splider::BiCospline<double> resampler(u0, u1, x);
 
@@ -72,8 +72,8 @@ BOOST_AUTO_TEST_CASE(lazy_bivariate_resampler_test) {
 
   //! [Lazy bivariate resampler]
 
-  Splider::SplineIntervals u0 {1, 2, 3, 4};
-  Splider::SplineIntervals u1 {1, 10, 100};
+  Splider::Partition u0 {1, 2, 3, 4};
+  Splider::Partition u1 {1, 10, 100};
   Splider::BiSplineTrajectory x {{1.1, 2.}, {2.5, 10.}, {2.5, 20.}, {2.5, 50.}, {3.9, 50.}};
   Splider::BiCospline<double, Splider::SplineCache::Lazy> resampler(u0, u1, x);
 

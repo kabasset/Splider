@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_SUITE(Spline_test)
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(index_test) {
-  const Splider::SplineIntervals u {1, 2, 3, 4};
+  const Splider::Partition u {1, 2, 3, 4};
   for (std::size_t i = 0; i < u.size() - 1; ++i) {
     BOOST_TEST(u.index(u[i]) == i);
   }
@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(index_test) {
 
 struct RealLinSplineFixture {
   std::vector<double> u {1, 2, 3, 4};
-  Splider::SplineIntervals domain = Splider::SplineIntervals(u);
+  Splider::Partition domain = Splider::Partition(u);
   std::vector<double> x {1.1, 2.5, 3.9};
   std::vector<double> v {10, 20, 30, 40};
   std::vector<double> y {11, 25, 39};
@@ -35,7 +35,7 @@ struct RealLinSplineFixture {
 
 struct ComplexLinSplineFixture {
   std::vector<double> u {1, 2, 3, 4};
-  Splider::SplineIntervals domain = Splider::SplineIntervals(u);
+  Splider::Partition domain = Splider::Partition(u);
   std::vector<double> x {1.1, 2.5, 3.9};
   std::vector<std::complex<double>> v {{10, -1}, {20, -2}, {30, -3}, {40, -4}};
   std::vector<std::complex<double>> y {{11, -1.1}, {25, -2.5}, {39, -3.9}};

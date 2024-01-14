@@ -42,7 +42,7 @@ enum class SplineCache {
  * 
  * This class stores both the abscissae of the knots and precomputes some spline coefficients to speed-up spline evaluation.
  */
-class SplineIntervals {
+class Partition {
 
   template <typename, SplineCache>
   friend class Spline;
@@ -52,7 +52,7 @@ public:
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit SplineIntervals(TIt begin, TIt end) : m_u(std::move(begin), std::move(end)), m_h(m_u.size() - 1) {
+  explicit Partition(TIt begin, TIt end) : m_u(std::move(begin), std::move(end)), m_h(m_u.size() - 1) {
     const auto size = m_h.size();
     if (size < 2) {
       throw std::runtime_error("Not enough knots (<3).");
@@ -71,12 +71,12 @@ public:
    * @brief Range-based constructor.
    */
   template <typename TRange>
-  explicit SplineIntervals(const TRange& u) : SplineIntervals(u.begin(), u.end()) {}
+  explicit Partition(const TRange& u) : Partition(u.begin(), u.end()) {}
 
   /**
    * @brief List-based constructor.
    */
-  SplineIntervals(std::initializer_list<double> u) : SplineIntervals(u.begin(), u.end()) {}
+  Partition(std::initializer_list<double> u) : Partition(u.begin(), u.end()) {}
 
   /**
    * @brief Get the number of knots.
@@ -149,7 +149,7 @@ public:
   /**
    * @brief Constructor.
    */
-  explicit SplineArg(const SplineIntervals& domain, double x) {
+  explicit SplineArg(const Partition& domain, double x) {
     m_index = domain.index(x);
     const auto h = domain.length(m_index);
     const auto left = x - domain[m_index];
@@ -183,7 +183,7 @@ public:
   /**
    * @brief Null knots constructor.
    */
-  explicit Spline(const SplineIntervals& u) : m_domain(u), m_v(m_domain.size()), m_s(m_domain.size()), m_cache() {
+  explicit Spline(const Partition& u) : m_domain(u), m_v(m_domain.size()), m_s(m_domain.size()), m_cache() {
     if constexpr (Cache != SplineCache::Early) {
       m_cache.insert({0, m_s.size() - 1}); // Natural cubic splines
     }
@@ -193,7 +193,7 @@ public:
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit Spline(const SplineIntervals& u, TIt begin, TIt end) :
+  explicit Spline(const Partition& u, TIt begin, TIt end) :
       m_domain(u), m_v(std::move(begin), std::move(end)), m_s(m_v.size()), m_cache() {
     if constexpr (Cache == SplineCache::Early) {
       update();
@@ -206,12 +206,12 @@ public:
    * @brief Range-based constructor.
    */
   template <typename TRange>
-  explicit Spline(const SplineIntervals& u, const TRange& v) : Spline(u, v.begin(), v.end()) {}
+  explicit Spline(const Partition& u, const TRange& v) : Spline(u, v.begin(), v.end()) {}
 
   /**
    * @brief List-based constructor.
    */
-  explicit Spline(const SplineIntervals& u, std::initializer_list<T> v) : Spline(u, v.begin(), v.end()) {}
+  explicit Spline(const Partition& u, std::initializer_list<T> v) : Spline(u, v.begin(), v.end()) {}
 
   /**
    * @brief Assign knot values from an iterator.
@@ -378,7 +378,7 @@ public:
   }
 
 private:
-  const SplineIntervals& m_domain; ///< The knots domain
+  const Partition& m_domain; ///< The knots domain
   std::vector<T> m_v; ///< The knot values
   std::vector<T> m_s; ///< The knot second derivatives
   std::set<std::size_t> m_cache; ///< Cached indices of m_s
@@ -397,7 +397,7 @@ public:
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit Cospline(const SplineIntervals& domain, TIt begin, TIt end) : m_domain(domain), m_args(end - begin) {
+  explicit Cospline(const Partition& domain, TIt begin, TIt end) : m_domain(domain), m_args(end - begin) {
     std::transform(std::move(begin), std::move(end), m_args.begin(), [&](const auto& e) {
       return SplineArg(m_domain, e);
     });
@@ -407,13 +407,13 @@ public:
    * @brief Range-based constructor.
    */
   template <typename TRange>
-  explicit Cospline(const SplineIntervals& u, const TRange& x) : Cospline(u, x.begin(), x.end()) {}
+  explicit Cospline(const Partition& u, const TRange& x) : Cospline(u, x.begin(), x.end()) {}
 
   /**
    * @brief List-based constructor.
    */
   template <typename T>
-  explicit Cospline(const SplineIntervals& u, std::initializer_list<T> x) : Cospline(u, x.begin(), x.end()) {}
+  explicit Cospline(const Partition& u, std::initializer_list<T> x) : Cospline(u, x.begin(), x.end()) {}
 
   /**
    * @brief Assign arguments from an iterator.
@@ -467,7 +467,7 @@ public:
   }
 
 private:
-  const SplineIntervals& m_domain; ///< The knot abscissae
+  const Partition& m_domain; ///< The knot abscissae
   std::vector<SplineArg> m_args; ///< The resampling abscissae
 };
 

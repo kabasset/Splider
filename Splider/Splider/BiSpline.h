@@ -27,7 +27,7 @@ using BiSplineTrajectory = Linx::Sequence<Linx::Vector<double, 2>>;
  * The transform maps an input 2D rectilinear grid `u` to an output trajectory, i.e. collection of coordinates `x`.
  * The resampler is called on a 2D map of knot values `v` to output the interpolated values `y` at abscissae `x`.
  * 
- * The grid is specified as a pair of `SplineIntervals` parameters.
+ * The grid is specified as a pair of `Partition` parameters.
  * 
  * The trajectory is made of objects on which `operator[]()` is called to get the first and second components.
  * Typical classes which fulfill this requirement are raw arrays, `std::array<double, 2>` or `Linx::Vector<double, 2>`,
@@ -49,7 +49,7 @@ public:
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  BiCospline(const SplineIntervals& domain0, const SplineIntervals& domain1, TIt begin, TIt end) :
+  BiCospline(const Partition& domain0, const Partition& domain1, TIt begin, TIt end) :
       m_domain0(domain0), m_domain1(domain1), // FIXME useful?
       m_splines0(m_domain1.size(), Spline<T, Cache>(m_domain0)), m_spline1(m_domain1), m_x(std::distance(begin, end)),
       m_mask(Linx::Position<2>::zero(), {m_domain0.size() - 1, m_domain1.size() - 1}, false) {
@@ -74,13 +74,13 @@ public:
    * @brief Range-based constructor.
    */
   template <typename TRange>
-  BiCospline(const SplineIntervals& domain0, const SplineIntervals& domain1, const TRange& x) :
+  BiCospline(const Partition& domain0, const Partition& domain1, const TRange& x) :
       BiCospline(domain0, domain1, x.begin(), x.end()) {}
 
   /**
    * @brief List-based constructor.
    */
-  BiCospline(const SplineIntervals& domain0, const SplineIntervals& domain1, std::initializer_list<T> x) :
+  BiCospline(const Partition& domain0, const Partition& domain1, std::initializer_list<T> x) :
       BiCospline(domain0, domain1, x.begin(), x.end()) {}
 
   /**
@@ -106,8 +106,8 @@ public:
   }
 
 private:
-  const SplineIntervals& m_domain0; ///< The intervals along axis 0
-  const SplineIntervals& m_domain1; ///< The intervals along axis 1
+  const Partition& m_domain0; ///< The intervals along axis 0
+  const Partition& m_domain1; ///< The intervals along axis 1
   std::vector<Spline<T, Cache>> m_splines0; ///< Splines along axis 0
   Spline<T, Cache> m_spline1; ///< Spline along axis 1
   std::vector<std::array<SplineArg, 2>> m_x; ///< The arguments

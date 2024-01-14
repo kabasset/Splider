@@ -34,8 +34,8 @@ std::vector<double> resample_with_gsl(const U& u0, const U& u1, const V& v, cons
 template <typename TDuration, typename U, typename V, typename X, typename Y>
 TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup) {
   Linx::Chronometer<TDuration> chrono;
-  Splider::SplineIntervals domain0(u);
-  Splider::SplineIntervals domain1(u);
+  Splider::Partition domain0(u);
+  Splider::Partition domain1(u);
   chrono.start();
   switch (setup) {
     case 'e':

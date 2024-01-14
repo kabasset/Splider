@@ -38,8 +38,8 @@ struct RealLinExpSplineFixture {
   Linx::Raster<double> v {
       {u0.size(), u1.size()},
       {1, 2, 3, 4, 10, 20, 30, 40, 100, 200, 300, 400, 1000, 2000, 3000, 4000}};
-  Splider::SplineIntervals domain0 = Splider::SplineIntervals(u0);
-  Splider::SplineIntervals domain1 = Splider::SplineIntervals(u1);
+  Splider::Partition domain0 = Splider::Partition(u0);
+  Splider::Partition domain1 = Splider::Partition(u1);
   Splider::BiCospline<double, Cache> resampler {domain0, domain1, x};
 };
 

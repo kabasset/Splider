@@ -25,13 +25,13 @@ In this case, many spline coefficients remain valid while changing `v`.
 ## Approach
 
 Splider separates the spline classes in components (intervals, knots and arguments), which each hold their cache.
-For example `Splider::SplineIntervals` holds not only the knot positions but also associated byproducts like the spacing between positions.
+For example `Splider::Partition` holds not only the knot positions but also associated byproducts like the spacing between positions.
 This allows recomputing only what has changed.
 
 With Splider, the above example writes:
 
 ```cpp
-Splider::SplineIntervals domain(u); // Compute domain-related coefficients
+Splider::Partition domain(u); // Compute domain-related coefficients
 Splider::Spline<double> spline(domain, v); // Compute knot-related coefficients
 std::vector<double> y = spline(x); // Compute argument-related coefficients
 ```
@@ -39,7 +39,7 @@ std::vector<double> y = spline(x); // Compute argument-related coefficients
 For resampling a function using spline interpolation, `x` is provided to Splider prior to `v`:
 
 ```cpp
-Splider::SplineIntervals domain(u); // Compute domain-related coefficients
+Splider::Partition domain(u); // Compute domain-related coefficients
 Splider::Cospline resampler(domain, x); // Compute arguments-related coefficients
 std::vector<double> y = resampler(v); // Compute knots-related coefficients
 ```
@@ -47,7 +47,7 @@ std::vector<double> y = resampler(v); // Compute knots-related coefficients
 This is especially efficient when several functions must be resampled:
 
 ```cpp
-Splider::SplineIntervals domain(u);
+Splider::Partition domain(u);
 Splider::Cospline resampler(domain, x);
 std::vector<double> y0 = resampler(v0);
 std::vector<double> y1 = resampler(v1);
