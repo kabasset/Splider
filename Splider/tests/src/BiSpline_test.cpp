@@ -40,7 +40,7 @@ struct RealLinExpSplineFixture {
       {1, 2, 3, 4, 10, 20, 30, 40, 100, 200, 300, 400, 1000, 2000, 3000, 4000}};
   Splider::SplineIntervals domain0 = Splider::SplineIntervals(u0);
   Splider::SplineIntervals domain1 = Splider::SplineIntervals(u1);
-  Splider::BiSplineResampler<double, Cache> resampler {domain0, domain1, x};
+  Splider::BiCospline<double, Cache> resampler {domain0, domain1, x};
 };
 
 using EarlyRealLinExpSplineFixture = RealLinExpSplineFixture<Splider::SplineCache::Early>;

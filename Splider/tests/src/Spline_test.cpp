@@ -81,7 +81,7 @@ BOOST_FIXTURE_TEST_CASE(real_interpolant_test, RealLinSplineFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(real_resampler_test, RealLinSplineFixture) {
-  Splider::SplineResampler resampler(domain, x);
+  Splider::Cospline resampler(domain, x);
   const auto out = resampler(v);
   BOOST_TEST(out.size() == x.size());
   for (std::size_t i = 0; i < out.size(); ++i) {
@@ -91,7 +91,7 @@ BOOST_FIXTURE_TEST_CASE(real_resampler_test, RealLinSplineFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(complex_interpolant_test, ComplexLinSplineFixture) {
-  Splider::SplineResampler resampler(domain, x);
+  Splider::Cospline resampler(domain, x);
   const auto out = resampler(v);
   BOOST_TEST(out.size() == x.size());
   for (std::size_t i = 0; i < out.size(); ++i) {

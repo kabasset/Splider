@@ -136,7 +136,7 @@ class SplineArg {
   friend class Spline;
 
   template <typename, SplineCache>
-  friend class BiSplineResampler;
+  friend class BiCospline;
 
 public:
   /**
@@ -174,7 +174,7 @@ private:
  * A spline is parametrized with the list of knot abscissae and values,
  * and is evaluated on a scalar or vector argument.
  * 
- * For repeated use of a spline over a constant set of arguments and varying values, see `SplineResampler`.
+ * For repeated use of a spline over a constant set of arguments and varying values, see `Cospline`.
  */
 template <typename T, SplineCache Cache = SplineCache::Early>
 class Spline {
@@ -390,14 +390,14 @@ private:
  * A resampler is parametrized with the list of knot and resampling abscissae,
  * and is evaluated on a vector of knot values.
  */
-class SplineResampler {
+class Cospline {
 
 public:
   /**
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit SplineResampler(const SplineIntervals& domain, TIt begin, TIt end) : m_domain(domain), m_args(end - begin) {
+  explicit Cospline(const SplineIntervals& domain, TIt begin, TIt end) : m_domain(domain), m_args(end - begin) {
     std::transform(std::move(begin), std::move(end), m_args.begin(), [&](const auto& e) {
       return SplineArg(m_domain, e);
     });
@@ -407,14 +407,13 @@ public:
    * @brief Range-based constructor.
    */
   template <typename TRange>
-  explicit SplineResampler(const SplineIntervals& u, const TRange& x) : SplineResampler(u, x.begin(), x.end()) {}
+  explicit Cospline(const SplineIntervals& u, const TRange& x) : Cospline(u, x.begin(), x.end()) {}
 
   /**
    * @brief List-based constructor.
    */
   template <typename T>
-  explicit SplineResampler(const SplineIntervals& u, std::initializer_list<T> x) :
-      SplineResampler(u, x.begin(), x.end()) {}
+  explicit Cospline(const SplineIntervals& u, std::initializer_list<T> x) : Cospline(u, x.begin(), x.end()) {}
 
   /**
    * @brief Assign arguments from an iterator.

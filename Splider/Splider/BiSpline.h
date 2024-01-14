@@ -17,7 +17,7 @@ namespace Splider {
 
 /**
  * @brief Alias for a sequence of 2D position.
- * @see `BiSplineResampler`
+ * @see `BiCospline`
  */
 using BiSplineTrajectory = Linx::Sequence<Linx::Vector<double, 2>>;
 
@@ -36,20 +36,20 @@ using BiSplineTrajectory = Linx::Sequence<Linx::Vector<double, 2>>;
  * 
  * The values are given as a 2D `Linx::Raster`.
  * 
- * For optimization purpose, as opposed to the 1D `SplineResampler`, this class is templated by the value type.
+ * For optimization purpose, as opposed to the 1D `Cospline`, this class is templated by the value type.
  * 
  * Similarly to `Spline`, the resampler can rely on various caching strategies:
  * see `SplineCache` documentation for selecting the most appropriate one.
  */
 template <typename T, SplineCache Cache = SplineCache::Early> // FIXME possible to rm T?
-class BiSplineResampler {
+class BiCospline {
 
 public:
   /**
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  BiSplineResampler(const SplineIntervals& domain0, const SplineIntervals& domain1, TIt begin, TIt end) :
+  BiCospline(const SplineIntervals& domain0, const SplineIntervals& domain1, TIt begin, TIt end) :
       m_domain0(domain0), m_domain1(domain1), // FIXME useful?
       m_splines0(m_domain1.size(), Spline<T, Cache>(m_domain0)), m_spline1(m_domain1), m_x(std::distance(begin, end)),
       m_mask(Linx::Position<2>::zero(), {m_domain0.size() - 1, m_domain1.size() - 1}, false) {
@@ -74,14 +74,14 @@ public:
    * @brief Range-based constructor.
    */
   template <typename TRange>
-  BiSplineResampler(const SplineIntervals& domain0, const SplineIntervals& domain1, const TRange& x) :
-      BiSplineResampler(domain0, domain1, x.begin(), x.end()) {}
+  BiCospline(const SplineIntervals& domain0, const SplineIntervals& domain1, const TRange& x) :
+      BiCospline(domain0, domain1, x.begin(), x.end()) {}
 
   /**
    * @brief List-based constructor.
    */
-  BiSplineResampler(const SplineIntervals& domain0, const SplineIntervals& domain1, std::initializer_list<T> x) :
-      BiSplineResampler(domain0, domain1, x.begin(), x.end()) {}
+  BiCospline(const SplineIntervals& domain0, const SplineIntervals& domain1, std::initializer_list<T> x) :
+      BiCospline(domain0, domain1, x.begin(), x.end()) {}
 
   /**
    * @brief Resample an input raster of knot values.

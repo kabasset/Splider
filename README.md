@@ -40,7 +40,7 @@ For resampling a function using spline interpolation, `x` is provided to Splider
 
 ```cpp
 Splider::SplineIntervals domain(u); // Compute domain-related coefficients
-Splider::SplineResampler resampler(domain, x); // Compute arguments-related coefficients
+Splider::Cospline resampler(domain, x); // Compute arguments-related coefficients
 std::vector<double> y = resampler(v); // Compute knots-related coefficients
 ```
 
@@ -48,7 +48,7 @@ This is especially efficient when several functions must be resampled:
 
 ```cpp
 Splider::SplineIntervals domain(u);
-Splider::SplineResampler resampler(domain, x);
+Splider::Cospline resampler(domain, x);
 std::vector<double> y0 = resampler(v0);
 std::vector<double> y1 = resampler(v1);
 std::vector<double> y2 = resampler(v2);
@@ -56,7 +56,7 @@ std::vector<double> y2 = resampler(v2);
 
 Moreover, Splider is compatible with any value type of a ring (i.e. with `+` and `*` operators), e.g. `std::complex`.
 
-2D interpolation is also provided as `Splider::BiSplineResampler`.
+2D interpolation is also provided as `Splider::BiCospline`.
 It relies on [Linx](https://github.com/kabasset/Linx) for the data structures.
 
 ## Status
