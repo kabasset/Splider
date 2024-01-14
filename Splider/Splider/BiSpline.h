@@ -19,7 +19,8 @@ namespace Splider {
  * @brief Alias for a sequence of 2D position.
  * @see `BiCospline`
  */
-using BiSplineTrajectory = Linx::Sequence<Linx::Vector<double, 2>>;
+template <Linx::Index N>
+using Trajectory = Linx::Sequence<Linx::Vector<double, N>>;
 
 /**
  * @brief Bivariate natural cubic spline resampler.
@@ -32,7 +33,7 @@ using BiSplineTrajectory = Linx::Sequence<Linx::Vector<double, 2>>;
  * The trajectory is made of objects on which `operator[]()` is called to get the first and second components.
  * Typical classes which fulfill this requirement are raw arrays, `std::array<double, 2>` or `Linx::Vector<double, 2>`,
  * but `std::pair<double, double>` is not compatible.
- * Alias `BiSplineTrajectory` is defined for conciseness as a `Linx::Sequence` (see [Linx](https://github.com/kabasset/Linx) documentation).
+ * Alias `Trajectory<2>` is defined for conciseness as a `Linx::Sequence` (see [Linx](https://github.com/kabasset/Linx) documentation).
  * 
  * The values are given as a 2D `Linx::Raster`.
  * 

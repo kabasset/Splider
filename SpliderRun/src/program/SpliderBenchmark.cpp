@@ -74,7 +74,7 @@ public:
     logger.info("Generating knots...");
     auto u = Linx::Sequence<double>(v_size).range();
     auto v = Linx::Raster<double>({v_size, v_size}).generate(Linx::GaussianNoise<double>(0, 1, seed));
-    Linx::Sequence<Linx::Vector<double>> x(x_size);
+    Splider::Trajectory<2> x(x_size);
     for (auto& xi : x) {
       xi.generate(Linx::UniformNoise<double>(0, v_size - 1, seed));
     }
