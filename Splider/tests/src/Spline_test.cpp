@@ -55,7 +55,7 @@ BOOST_FIXTURE_TEST_CASE(real_spline_test, RealLinSplineFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(real_lazy_spline_test, RealLinSplineFixture) {
-  Splider::Spline<double, Splider::SplineCache::Lazy> spline(domain, v);
+  Splider::Spline<double, Splider::Caching::Lazy> spline(domain, v);
   std::vector<double> out;
   for (const auto& e : x) {
     out.push_back(spline(e));

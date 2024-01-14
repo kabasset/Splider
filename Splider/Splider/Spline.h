@@ -31,7 +31,7 @@ namespace Splider {
  * 
  * In general, early and lazy options are preferrable, and should be compared through representative tests to select the fastest way.
  */
-enum class SplineCache {
+enum class Caching {
   Early, ///< Cache at assignment
   Lazy, ///< Cache at usage
   User ///< Do not cache automatically
@@ -44,7 +44,7 @@ enum class SplineCache {
  */
 class Partition {
 
-  template <typename, SplineCache>
+  template <typename, Caching>
   friend class Spline;
 
 public:
@@ -132,10 +132,10 @@ private:
  */
 class SplineArg {
 
-  template <typename, SplineCache>
+  template <typename, Caching>
   friend class Spline;
 
-  template <typename, SplineCache>
+  template <typename, Caching>
   friend class BiCospline;
 
 public:
@@ -176,7 +176,7 @@ private:
  * 
  * For repeated use of a spline over a constant set of arguments and varying values, see `Cospline`.
  */
-template <typename T, SplineCache Cache = SplineCache::Early>
+template <typename T, Caching Cache = Caching::Early>
 class Spline {
 
 public:
@@ -184,7 +184,7 @@ public:
    * @brief Null knots constructor.
    */
   explicit Spline(const Partition& u) : m_domain(u), m_v(m_domain.size()), m_s(m_domain.size()), m_cache() {
-    if constexpr (Cache != SplineCache::Early) {
+    if constexpr (Cache != Caching::Early) {
       m_cache.insert({0, m_s.size() - 1}); // Natural cubic splines
     }
   }
@@ -195,7 +195,7 @@ public:
   template <typename TIt>
   explicit Spline(const Partition& u, TIt begin, TIt end) :
       m_domain(u), m_v(std::move(begin), std::move(end)), m_s(m_v.size()), m_cache() {
-    if constexpr (Cache == SplineCache::Early) {
+    if constexpr (Cache == Caching::Early) {
       update();
     } else {
       m_cache.insert({0, m_s.size() - 1}); // Natural cubic splines
@@ -220,7 +220,7 @@ public:
   void assign(TIt begin, TIt end) {
     m_v.assign(begin, end);
     // FIXME check size
-    if constexpr (Cache == SplineCache::Early) {
+    if constexpr (Cache == Caching::Early) {
       update();
     } else {
       m_cache = {0, m_s.size() - 1};
@@ -257,7 +257,7 @@ public:
     const auto min = i > 1 ? i - 1 : 1;
     const auto max = std::min(i + 1, m_v.size() - 2);
     for (auto j = min; j <= max; ++j) { // Natural cubic spline
-      if constexpr (Cache == SplineCache::Early) {
+      if constexpr (Cache == Caching::Early) {
         update(j);
       } else {
         m_cache.erase(j);
@@ -269,7 +269,7 @@ public:
    * @brief Get the i-th second derivative.
    */
   inline const T& dv2(std::size_t i) {
-    if constexpr (Cache == SplineCache::Lazy) {
+    if constexpr (Cache == Caching::Lazy) {
       if (not valid(i)) {
         update(i);
       }
@@ -283,7 +283,7 @@ public:
    * This is always true for early caching and is the method is mostly useful for user-triggered caching.
    */
   bool valid(std::size_t i) const {
-    if constexpr (Cache == SplineCache::Early) {
+    if constexpr (Cache == Caching::Early) {
       return true;
     } else {
       return m_cache.find(i) != m_cache.end();
@@ -308,7 +308,7 @@ public:
       d0 = d1;
     }
     // m_s[0] and m_s[size - 1] are left at 0 for natural splines
-    if constexpr (Cache != SplineCache::Early) {
+    if constexpr (Cache != Caching::Early) {
       const auto max = m_s.size() - 2;
       for (std::size_t i = 1; i <= max; ++i) {
         m_cache.insert(i);
@@ -320,7 +320,7 @@ public:
    * @brief Update the internal coefficients associated to the i-th knot.
   */
   inline void update(std::size_t i) {
-    if constexpr (Cache != SplineCache::Early) {
+    if constexpr (Cache != Caching::Early) {
       m_s[i] = (m_v[i + 1] - m_v[i]) / m_domain.m_h[i] - (m_v[i] - m_v[i - 1]) / m_domain.m_h[i - 1];
       m_cache.insert(i);
     }

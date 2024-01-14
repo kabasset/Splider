@@ -30,7 +30,7 @@ std::vector<double> resample_with_gsl(const U& u0, const U& u1, const V& v, cons
   return y;
 }
 
-template <Splider::SplineCache Cache>
+template <Splider::Caching Cache>
 struct RealLinExpSplineFixture {
   std::vector<double> u0 {1, 2, 3, 4};
   std::vector<double> u1 {1, 10, 100, 1000};
@@ -43,8 +43,8 @@ struct RealLinExpSplineFixture {
   Splider::BiCospline<double, Cache> resampler {domain0, domain1, x};
 };
 
-using EarlyRealLinExpSplineFixture = RealLinExpSplineFixture<Splider::SplineCache::Early>;
-using LazyRealLinExpSplineFixture = RealLinExpSplineFixture<Splider::SplineCache::Lazy>;
+using EarlyRealLinExpSplineFixture = RealLinExpSplineFixture<Splider::Caching::Early>;
+using LazyRealLinExpSplineFixture = RealLinExpSplineFixture<Splider::Caching::Lazy>;
 
 BOOST_FIXTURE_TEST_CASE(real_resampler_test, EarlyRealLinExpSplineFixture) {
   const auto y = resampler(v);

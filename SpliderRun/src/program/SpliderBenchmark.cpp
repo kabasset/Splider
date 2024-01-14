@@ -39,10 +39,10 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup) {
   chrono.start();
   switch (setup) {
     case 'e':
-      y = Splider::BiCospline<double, Splider::SplineCache::Early>(domain0, domain1, x)(v);
+      y = Splider::BiCospline<double, Splider::Caching::Early>(domain0, domain1, x)(v);
       break;
     case 'l':
-      y = Splider::BiCospline<double, Splider::SplineCache::Lazy>(domain0, domain1, x)(v);
+      y = Splider::BiCospline<double, Splider::Caching::Lazy>(domain0, domain1, x)(v);
       break;
     case 'g':
       y = resample_with_gsl(u, u, v, x);

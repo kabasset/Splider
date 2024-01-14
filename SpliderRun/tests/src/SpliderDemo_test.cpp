@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(lazy_interpolant_test) {
 
   Splider::Partition u {1, 2, 3, 4};
   std::vector<double> v {10, 20, 30, 40};
-  Splider::Spline<double, Splider::SplineCache::Lazy> spline(u, v);
+  Splider::Spline<double, Splider::Caching::Lazy> spline(u, v);
 
   std::vector<double> x {1.1, 2.5, 3.9};
   auto y = spline(x);
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(lazy_bivariate_resampler_test) {
   Splider::Partition u0 {1, 2, 3, 4};
   Splider::Partition u1 {1, 10, 100};
   Splider::Trajectory<2> x {{1.1, 2.}, {2.5, 10.}, {2.5, 20.}, {2.5, 50.}, {3.9, 50.}};
-  Splider::BiCospline<double, Splider::SplineCache::Lazy> resampler(u0, u1, x);
+  Splider::BiCospline<double, Splider::Caching::Lazy> resampler(u0, u1, x);
 
   Linx::Raster<double> v({u0.size(), u1.size()}, {1, 2, 3, 4, 10, 20, 30, 40, 100, 200, 300, 400});
   auto y = resampler(v);

@@ -40,9 +40,9 @@ using Trajectory = Linx::Sequence<Linx::Vector<double, N>>;
  * For optimization purpose, as opposed to the 1D `Cospline`, this class is templated by the value type.
  * 
  * Similarly to `Spline`, the resampler can rely on various caching strategies:
- * see `SplineCache` documentation for selecting the most appropriate one.
+ * see `Caching` documentation for selecting the most appropriate one.
  */
-template <typename T, SplineCache Cache = SplineCache::Early> // FIXME possible to rm T?
+template <typename T, Caching Cache = Caching::Early> // FIXME possible to rm T?
 class BiCospline {
 
 public:
