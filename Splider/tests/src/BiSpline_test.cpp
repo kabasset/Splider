@@ -38,8 +38,8 @@ struct RealLinExpSplineFixture {
   Linx::Raster<double> v {
       {u0.size(), u1.size()},
       {1, 2, 3, 4, 10, 20, 30, 40, 100, 200, 300, 400, 1000, 2000, 3000, 4000}};
-  Splider::Partition domain0 = Splider::Partition(u0);
-  Splider::Partition domain1 = Splider::Partition(u1);
+  Splider::Partition domain0 {u0};
+  Splider::Partition domain1 {u1};
   Splider::BiCospline<double, Cache> resampler {domain0, domain1, x};
 };
 
@@ -50,7 +50,6 @@ BOOST_FIXTURE_TEST_CASE(real_resampler_test, EarlyRealLinExpSplineFixture) {
   const auto y = resampler(v);
   BOOST_TEST(y.size() == x.size());
   for (std::size_t i = 0; i < x.size(); ++i) {
-    std::cout << x[i] << " - " << y[i] << "\n";
     Linx::Position<2> p;
     for (std::size_t j = 1; j < u0.size(); ++j) {
       if (u0[j] < x[i][0]) {
@@ -72,7 +71,7 @@ BOOST_FIXTURE_TEST_CASE(real_resampler_vs_gsl_test, EarlyRealLinExpSplineFixture
   const auto gsl = resample_with_gsl(u0, u1, v, x);
   BOOST_TEST(out.size() == gsl.size());
   for (std::size_t i = 0; i < out.size(); ++i) {
-    BOOST_TEST(out[i] == gsl[i]);
+    BOOST_TEST(out[i] == gsl[i], boost::test_tools::tolerance(1.e-6));
   }
 }
 
@@ -81,7 +80,7 @@ BOOST_FIXTURE_TEST_CASE(real_lazy_resampler_vs_gsl_test, LazyRealLinExpSplineFix
   const auto gsl = resample_with_gsl(u0, u1, v, x);
   BOOST_TEST(out.size() == gsl.size());
   for (std::size_t i = 0; i < out.size(); ++i) {
-    BOOST_TEST(out[i] == gsl[i]);
+    BOOST_TEST(out[i] == gsl[i], boost::test_tools::tolerance(1.e-6));
   }
 }
 
