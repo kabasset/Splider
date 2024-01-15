@@ -445,16 +445,16 @@ public:
    * @brief Resample a spline defined by an iterator over knot values.
    */
   template <typename TIt>
-  std::vector<typename std::iterator_traits<TIt>::value_type> operator()(TIt begin, TIt end) const {
+  auto operator()(TIt begin, TIt end) const {
     using T = typename std::iterator_traits<TIt>::value_type;
-    return Spline<T>(m_domain, std::move(begin), std::move(end))(m_args);
+    return Spline<std::decay_t<T>>(m_domain, std::move(begin), std::move(end))(m_args);
   }
 
   /**
    * @brief Resample a spline defined by a range of knot values.
    */
   template <typename TRange>
-  std::vector<typename TRange::value_type> operator()(const TRange& v) const {
+  auto operator()(const TRange& v) const {
     return operator()(v.begin(), v.end());
   }
 
@@ -462,7 +462,7 @@ public:
    * @brief Resample a spline defined by a list of knot values.
    */
   template <typename T>
-  std::vector<T> operator()(std::initializer_list<T> v) const {
+  auto operator()(std::initializer_list<T> v) const {
     return operator()(v.begin(), v.end());
   }
 

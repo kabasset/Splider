@@ -20,7 +20,7 @@ namespace Splider {
  * @see `BiCospline`
  */
 template <Linx::Index N>
-using Trajectory = Linx::Sequence<Linx::Vector<double, N>>;
+using Trajectory = Linx::Sequence<Linx::Vector<double, N>>; // FIXME Raster?
 
 /**
  * @brief Bivariate natural cubic spline resampler.
@@ -88,11 +88,11 @@ public:
    * @brief Resample an input raster of knot values.
    */
   template <typename TRaster>
-  std::vector<typename TRaster::value_type> operator()(const TRaster& v) {
+  auto operator()(const TRaster& v) {
     for (const auto& p : m_mask) {
       m_splines0[p[1]].v(p[0], v[p]);
     }
-    std::vector<typename TRaster::value_type> y;
+    std::vector<std::decay_t<typename TRaster::value_type>> y;
     y.reserve(m_x.size());
     for (const auto& x : m_x) {
       const auto i1 = x[1].m_index;
