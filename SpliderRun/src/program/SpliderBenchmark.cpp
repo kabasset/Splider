@@ -77,21 +77,22 @@ public:
 
   ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
     const auto setup = args["case"].as<char>();
-    const auto v_size = args["knots"].as<Linx::Index>();
+    const auto u_size = args["knots"].as<Linx::Index>();
     const auto x_size = args["args"].as<Linx::Index>();
     const auto v_iters = args["iters"].as<Linx::Index>();
     const auto seed = args["seed"].as<Linx::Index>();
 
     logger.info("Generating knots...");
-    auto u = Linx::Sequence<double>(v_size).range();
-    auto v = Linx::Raster<double, 3>({v_size, v_size, v_iters}).generate(Linx::GaussianNoise<double>(0, 1, seed));
+    auto u = Linx::Sequence<double>(u_size).range();
+    auto v = Linx::Raster<double, 3>({u_size, u_size, v_iters}).range();
+    // FIXME generate(Linx::UniformNoise<double>(0, 100, seed));
     Splider::Trajectory<2> x(x_size);
     auto si = seed;
     for (auto& xi : x) {
       if (seed != -1) {
         ++si;
       }
-      xi.generate(Linx::UniformNoise<double>(0, v_size - 1, si));
+      xi.generate(Linx::UniformNoise<double>(0, u_size - 1, si));
     }
     std::vector<double> y;
     logger.info() << "  u: " << u;
