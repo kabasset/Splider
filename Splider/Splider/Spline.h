@@ -81,7 +81,7 @@ public:
   /**
    * @brief Get the number of knots.
    */
-  std::size_t size() const {
+  inline std::size_t size() const {
     return m_u.size();
   }
 
@@ -156,8 +156,8 @@ public:
     const auto right = h - left;
     m_cv0 = right / h;
     m_cv1 = left / h;
-    m_cs0 = right * right * right / (6. * h) - h * right / 6.;
-    m_cs1 = left * left * left / (6. * h) - h * left / 6.;
+    m_cs0 = right / 6. * (right * m_cv0 - h);
+    m_cs1 = left / 6. * (left * m_cv1 - h);
   }
 
 private:
