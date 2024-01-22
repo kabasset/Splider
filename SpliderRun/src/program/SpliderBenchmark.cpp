@@ -83,15 +83,24 @@ public:
     const auto seed = args["seed"].as<Linx::Index>();
 
     logger.info("Generating knots...");
-    auto u = Linx::Sequence<double>(u_size).range();
-    auto v = Linx::Raster<double, 3>({u_size, u_size, v_iters}).generate(Linx::UniformNoise<double>(10, 100, seed));
+    const auto u = Linx::Sequence<double>(u_size).linspace(0, Linx::pi<double>() * 4);
+    auto v = Linx::Raster<double, 3>({u_size, u_size, v_iters});
+    v.generate(
+        [&](const auto& p) {
+          auto s = std::sin(u[p[0]]);
+          auto c = std::cos(u[p[1]]);
+          return s * c * (p[2] + 1);
+        },
+        v.domain());
+
+    logger.info("Generating trajectory...");
     Splider::Trajectory<2> x(x_size);
     auto si = seed;
     for (auto& xi : x) {
       if (seed != -1) {
         ++si;
       }
-      xi.generate(Linx::UniformNoise<double>(2, u_size - 3, si));
+      xi.generate(Linx::UniformNoise<double>(u[1], u[u_size - 2], si));
     }
     std::vector<double> y;
     logger.info() << "  u: " << u;
