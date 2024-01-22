@@ -12,7 +12,7 @@
 #include <gsl/gsl_interp2d.h>
 #include <gsl/gsl_spline2d.h>
 
-static Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkConvolution");
+static Elements::Logging logger = Elements::Logging::getLogger("SpliderBenchmark");
 
 using Duration = std::chrono::milliseconds;
 

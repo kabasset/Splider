@@ -280,7 +280,7 @@ public:
   /**
    * @brief Check whether the internal coefficients of the i-th knot are valid in cache.
    * 
-   * This is always true for early caching and is the method is mostly useful for user-triggered caching.
+   * This is always true for early caching and the method is mostly useful for user-triggered caching.
    */
   bool valid(std::size_t i) const {
     if constexpr (Cache == Caching::Early) {
@@ -295,7 +295,7 @@ public:
    */
   void update() {
     const auto size = m_v.size();
-    // FIXME check size == doman.m_u.size()
+    // FIXME check size == domain.m_u.size()
     T d0 = (m_v[1] - m_v[0]) / m_domain.m_h[0]; // Because next loop starts at 1
     T d1;
     const auto* vIt = m_v.data() + 1;
