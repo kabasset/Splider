@@ -321,7 +321,8 @@ public:
   */
   inline void update(std::size_t i) {
     if constexpr (Cache != Caching::Early) {
-      m_s[i] = (m_v[i + 1] - m_v[i]) / m_domain.m_h[i] - (m_v[i] - m_v[i - 1]) / m_domain.m_h[i - 1];
+      auto d = (m_v[i + 1] - m_v[i]) / m_domain.m_h[i] - (m_v[i] - m_v[i - 1]) / m_domain.m_h[i - 1];
+      m_s[i] = d * 2. / (m_domain.m_h[i] + m_domain.m_h[i - 1]);
       m_cache.insert(i);
     }
   }
