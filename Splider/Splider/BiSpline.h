@@ -54,14 +54,13 @@ public:
       m_domain0(domain0), m_domain1(domain1), // FIXME useful?
       m_splines0(m_domain1.size(), Spline<T, Cache>(m_domain0)), m_spline1(m_domain1), m_x(std::distance(begin, end)),
       m_mask(Linx::Position<2>::zero(), {m_domain0.size() - 1, m_domain1.size() - 1}, false) {
-    auto it = m_x.begin();
-    for (; begin < end; ++begin, ++it) {
+    for (auto it = m_x.begin(); begin != end; ++begin, ++it) {
       *it = {SplineArg(m_domain0, (*begin)[0]), SplineArg(m_domain1, (*begin)[1])};
       const auto i0 = (*it)[0].m_index;
       const auto i1 = (*it)[1].m_index;
-      const auto min0 = i0 > 0 ? i0 - 1 : 0;
+      const auto min0 = std::max(i0 - 1, std::size_t(0));
       const auto max0 = std::min(i0 + 2, m_domain0.size() - 1);
-      const auto min1 = i1 > 0 ? i1 - 1 : 0;
+      const auto min1 = std::max(i1 - 1, std::size_t(0));
       const auto max1 = std::min(i1 + 2, m_domain1.size() - 1);
       for (auto j1 = min1; j1 <= max1; ++j1) {
         for (auto j0 = min0; j0 <= max0; ++j0) {
