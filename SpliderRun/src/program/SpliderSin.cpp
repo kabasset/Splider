@@ -53,9 +53,9 @@ public:
     const auto y = cospline(v);
     const auto gsl = resample_with_gsl(u, v, x);
 
-    std::cout << "i\tx\tsin(x)\tSplider\tGSL" << std::endl;
+    logger.info("i\tx\tsin(x)\tSplider\tGSL");
     for (Linx::Index i = 0; i < x.size(); ++i) {
-      std::cout << i << '\t' << x[i] << '\t' << gt[i] << '\t' << y[i] << '\t' << gsl[i] << std::endl;
+      logger.info() << i << '\t' << x[i] << '\t' << gt[i] << '\t' << y[i] << '\t' << gsl[i];
     }
 
     return ExitCode::OK;

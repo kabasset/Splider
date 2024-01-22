@@ -111,6 +111,13 @@ public:
     const auto duration = resample<Duration>(u, v, x, y, setup);
     logger.info() << "  y: " << Linx::Sequence<double>(y);
 
+    logger.debug("i\t\tx0\tx1\tf(x0, x1)\ty");
+    for (std::size_t i = 0; i < x_size; ++i) {
+      const auto x0 = x[i][0];
+      const auto x1 = x[i][1];
+      logger.debug() << i << '\t' << x0 << '\t' << x1 << '\t' << std::sin(x0) * std::cos(x1) * v_iters << '\t' << y[i];
+    }
+
     logger.info() << "  Done in " << duration.count() << "ms";
 
     return ExitCode::OK;
