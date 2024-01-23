@@ -30,13 +30,14 @@ public:
   /**
    * @brief Null knots constructor.
    */
-  explicit Spline(const Partition& u) : m_domain(u), m_v(m_domain.size()), m_s(m_domain.size()) {}
+  explicit Spline(const Partition& u) : m_domain(u), m_v(m_domain.size()), m_s(m_domain.size()), m_valid(true) {}
 
   /**
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit Spline(const Partition& u, TIt begin, TIt end) : m_domain(u), m_v(begin, end), m_s(m_v.size()) {
+  explicit Spline(const Partition& u, TIt begin, TIt end) :
+      m_domain(u), m_v(begin, end), m_s(m_v.size()), m_valid(false) {
     solve();
   }
 
@@ -87,13 +88,16 @@ public:
    */
   inline void v(std::size_t i, const T& value) { // FIXME keep?
     m_v[i] = value;
-    solve(); // FIXME lazily?
+    m_valid = false;
   }
 
   /**
    * @brief Get the i-th second derivative.
    */
   inline const T& dv2(std::size_t i) {
+    if (not m_valid) {
+      solve();
+    }
     return m_s[i];
   }
 
@@ -108,6 +112,9 @@ public:
    * @brief Evaluate the spline.
    */
   T operator()(const SplineArg& x) {
+    if (not m_valid) {
+      solve();
+    }
     const auto i = x.m_index;
     return m_v[i] * x.m_cv0 + m_v[i + 1] * x.m_cv1 + m_s[i] * x.m_cs0 + m_s[i + 1] * x.m_cs1;
   }
@@ -148,9 +155,8 @@ public:
     return operator()(x.begin(), x.end());
   }
 
-private:
   /**
-   * @brief Solve the tridiagonal system for m_s, using Thomas algorithm.
+   * @brief Solve the tridiagonal system.
    */
   void solve() {
     Linx::Index n = m_s.size();
@@ -179,12 +185,15 @@ private:
     // Natutal spline
     m_s[0] = 0;
     m_s[n - 1] = 0;
+
+    m_valid = true;
   }
 
 private:
   const Partition& m_domain; ///< The knots domain
   std::vector<T> m_v; ///< The knot values
   std::vector<T> m_s; ///< The knot second derivatives
+  bool m_valid;
 };
 
 } // namespace Splider

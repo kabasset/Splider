@@ -95,7 +95,7 @@ public:
     y.reserve(m_x.size());
     for (const auto& x : m_x) {
       const auto i1 = x[1].m_index;
-      const auto min = i1 > 0 ? i1 - 1 : 0;
+      const auto min = std::max(i1 - 1, 0L);
       const auto max = std::min(i1 + 2, static_cast<Linx::Index>(m_domain1.size()) - 1);
       for (auto i = min; i <= max; ++i) {
         m_spline1.v(i, m_splines0[i](x[0]));
