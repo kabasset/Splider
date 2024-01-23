@@ -30,7 +30,6 @@ std::vector<double> resample_with_gsl(const U& u0, const U& u1, const V& v, cons
   return y;
 }
 
-template <Splider::Caching Cache>
 struct RealLinExpSplineFixture {
   std::vector<double> u0 {1, 2, 3, 4};
   std::vector<double> u1 {1, 10, 100, 1000};
@@ -40,13 +39,10 @@ struct RealLinExpSplineFixture {
       {1, 2, 3, 4, 10, 20, 30, 40, 100, 200, 300, 400, 1000, 2000, 3000, 4000}};
   Splider::Partition domain0 {u0};
   Splider::Partition domain1 {u1};
-  Splider::BiCospline<double, Cache> resampler {domain0, domain1, x};
+  Splider::BiCospline<double> resampler {domain0, domain1, x};
 };
 
-using EarlyRealLinExpSplineFixture = RealLinExpSplineFixture<Splider::Caching::Early>;
-using LazyRealLinExpSplineFixture = RealLinExpSplineFixture<Splider::Caching::Lazy>;
-
-BOOST_FIXTURE_TEST_CASE(real_resampler_test, EarlyRealLinExpSplineFixture) {
+BOOST_FIXTURE_TEST_CASE(real_resampler_test, RealLinExpSplineFixture) {
   const auto y = resampler(v);
   BOOST_TEST(y.size() == x.size());
   for (std::size_t i = 0; i < x.size(); ++i) {
@@ -66,16 +62,7 @@ BOOST_FIXTURE_TEST_CASE(real_resampler_test, EarlyRealLinExpSplineFixture) {
   }
 }
 
-BOOST_FIXTURE_TEST_CASE(real_resampler_vs_gsl_test, EarlyRealLinExpSplineFixture) {
-  const auto out = resampler(v);
-  const auto gsl = resample_with_gsl(u0, u1, v, x);
-  BOOST_TEST(out.size() == gsl.size());
-  for (std::size_t i = 0; i < out.size(); ++i) {
-    BOOST_TEST(out[i] == gsl[i], boost::test_tools::tolerance(1.e-6));
-  }
-}
-
-BOOST_FIXTURE_TEST_CASE(real_lazy_resampler_vs_gsl_test, LazyRealLinExpSplineFixture) {
+BOOST_FIXTURE_TEST_CASE(real_resampler_vs_gsl_test, RealLinExpSplineFixture) {
   const auto out = resampler(v);
   const auto gsl = resample_with_gsl(u0, u1, v, x);
   BOOST_TEST(out.size() == gsl.size());

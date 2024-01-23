@@ -42,7 +42,7 @@ using Trajectory = Linx::Sequence<Linx::Vector<double, N>>; // FIXME Raster?
  * Similarly to `Spline`, the resampler can rely on various caching strategies:
  * see `Caching` documentation for selecting the most appropriate one.
  */
-template <typename T, Caching Cache = Caching::Early> // FIXME possible to rm T?
+template <typename T> // FIXME possible to rm T?
 class BiCospline {
 
 public:
@@ -52,16 +52,16 @@ public:
   template <typename TIt>
   BiCospline(const Partition& domain0, const Partition& domain1, TIt begin, TIt end) :
       m_domain0(domain0), m_domain1(domain1), // FIXME useful?
-      m_splines0(m_domain1.size(), Spline<T, Cache>(m_domain0)), m_spline1(m_domain1), m_x(std::distance(begin, end)),
+      m_splines0(m_domain1.size(), Spline<T>(m_domain0)), m_spline1(m_domain1), m_x(std::distance(begin, end)),
       m_mask(Linx::Position<2>::zero(), {m_domain0.size() - 1, m_domain1.size() - 1}, false) {
     for (auto it = m_x.begin(); begin != end; ++begin, ++it) {
       *it = {SplineArg(m_domain0, (*begin)[0]), SplineArg(m_domain1, (*begin)[1])};
       const auto i0 = (*it)[0].m_index;
       const auto i1 = (*it)[1].m_index;
-      const auto min0 = std::max(i0 - 1, std::size_t(0));
-      const auto max0 = std::min(i0 + 2, m_domain0.size() - 1);
-      const auto min1 = std::max(i1 - 1, std::size_t(0));
-      const auto max1 = std::min(i1 + 2, m_domain1.size() - 1);
+      const auto min0 = std::max(i0 - 1, 0L);
+      const auto max0 = std::min(i0 + 2, static_cast<Linx::Index>(m_domain0.size()) - 1);
+      const auto min1 = std::max(i1 - 1, 0L);
+      const auto max1 = std::min(i1 + 2, static_cast<Linx::Index>(m_domain1.size()) - 1);
       for (auto j1 = min1; j1 <= max1; ++j1) {
         for (auto j0 = min0; j0 <= max0; ++j0) {
           m_mask[{j0, j1}] = true;
@@ -96,7 +96,7 @@ public:
     for (const auto& x : m_x) {
       const auto i1 = x[1].m_index;
       const auto min = i1 > 0 ? i1 - 1 : 0;
-      const auto max = std::min(i1 + 2, m_domain1.size() - 1);
+      const auto max = std::min(i1 + 2, static_cast<Linx::Index>(m_domain1.size()) - 1);
       for (auto i = min; i <= max; ++i) {
         m_spline1.v(i, m_splines0[i](x[0]));
       }
@@ -108,8 +108,8 @@ public:
 private:
   const Partition& m_domain0; ///< The intervals along axis 0
   const Partition& m_domain1; ///< The intervals along axis 1
-  std::vector<Spline<T, Cache>> m_splines0; ///< Splines along axis 0
-  Spline<T, Cache> m_spline1; ///< Spline along axis 1
+  std::vector<Spline<T>> m_splines0; ///< Splines along axis 0
+  Spline<T> m_spline1; ///< Spline along axis 1
   std::vector<std::array<SplineArg, 2>> m_x; ///< The arguments
   Linx::Mask<2> m_mask; ///< The neighboring knot abscissae
 };

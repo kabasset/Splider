@@ -5,6 +5,7 @@
 #define _SPLIDERRUN_DEMO_H
 
 #include "Splider/BiSpline.h"
+#include "Splider/Cospline.h"
 #include "Splider/Spline.h"
 
 namespace Splider {} // namespace Splider

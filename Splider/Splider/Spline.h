@@ -4,7 +4,9 @@
 #ifndef _SPLIDER_SPLINE_H
 #define _SPLIDER_SPLINE_H
 
-#include <algorithm>
+#include "Splider/Argument.h"
+#include "Splider/Partition.h"
+
 #include <stdexcept>
 #include <vector>
 
@@ -14,160 +16,6 @@
 namespace Splider {
 
 /**
- * @brief Caching strategy.
- * 
- * Splines rely on knot-wise coefficients which need to be evaluated from the knot positions and values.
- * This evaluation is expensive wrt. other operations.
- * The coefficients can therefore be cached to speed-up computation.
- * Several strategies are available:
- * 
- * - When the spline is to be evaluated over many arguments, i.e. most knots are effectively used, it is best to rely on early evaluation.
- * - When knots are used sparsely, i.e. arguments lie in few of the known intervals only, lazy evaluation is faster.
- * 
- * In both of these cases, spline evaluation is guaranteed to be well-defined.
- * However, for more advanced usage, cache can be user-managed.
- * In this case, the user is responsible for updating the spline state before evaluating it... Use at your own risks.
- * 
- * In general, early and lazy options are preferrable, and should be compared through representative tests to select the fastest way.
- */
-enum class Caching {
-  Early, ///< Cache at assignment
-  Lazy, ///< Cache at usage
-  User ///< Do not cache automatically
-};
-
-/**
- * @brief The knot abscissae.
- * 
- * This class stores both the abscissae of the knots and precomputes some spline coefficients to speed-up spline evaluation.
- */
-class Partition {
-
-  template <typename, Caching>
-  friend class Spline;
-
-public:
-  /**
-   * @brief Iterator-based constructor.
-   */
-  template <typename TIt>
-  explicit Partition(TIt begin, TIt end) : m_u(std::move(begin), std::move(end)), m_h(m_u.size() - 1) {
-    const auto size = m_h.size();
-    if (size < 2) {
-      throw std::runtime_error("Not enough knots (<3).");
-    }
-    double h;
-    for (std::size_t i = 0; i < size; ++i) {
-      h = m_u[i + 1] - m_u[i];
-      if (h <= 0) {
-        throw std::runtime_error("Interval bounds are not strictly increasing.");
-      }
-      m_h[i] = h;
-    }
-  }
-
-  /**
-   * @brief Range-based constructor.
-   */
-  template <typename TRange>
-  explicit Partition(const TRange& u) : Partition(u.begin(), u.end()) {}
-
-  /**
-   * @brief List-based constructor.
-   */
-  Partition(std::initializer_list<double> u) : Partition(u.begin(), u.end()) {}
-
-  /**
-   * @brief Get the number of knots.
-   */
-  inline std::size_t size() const {
-    return m_u.size();
-  }
-
-  /**
-   * @brief Get the length of the i-th interval.
-   */
-  inline double length(std::size_t i) const {
-    return m_h[i];
-  }
-
-  /**
-   * @brief Get the abscissa of the i-th knot.
-   */
-  inline double operator[](std::size_t i) const {
-    return m_u[i];
-  }
-
-  /**
-   * @brief Get the index of the interval which contains a given abscissa.
-   */
-  std::size_t index(double x) const {
-    if (x < m_u[0]) {
-      throw std::runtime_error("x is too small!");
-    }
-    if (x > m_u[m_u.size() - 1]) {
-      throw std::runtime_error("x is too large!");
-    }
-    auto i = m_u.size() - 2;
-    while (x < m_u[i]) {
-      --i;
-    }
-    return i;
-  }
-
-private:
-  std::vector<double> m_u; ///< The knot positions
-  std::vector<double> m_h; ///< The knot spacings
-};
-
-/**
- * @brief A spline argument.
- * 
- * A spline argument is an absissa value for which a spline should be evaluated.
- * It is bound to spline intervals in order to precompute a few spline coefficients.
- * 
- * Manually instantiating a spline argument is useful when it should be reused.
- * It is not necessary for single-use: in this case, simply call the spline on a mere real value.
- */
-class SplineArg {
-
-  template <typename, Caching>
-  friend class Spline;
-
-  template <typename, Caching>
-  friend class BiCospline;
-
-public:
-  /**
-   * @brief Null constructor.
-   * 
-   * The such-constructed object is ill-formed and should only be used for compatibility, e.g. with `std::vector`.
-   */
-  SplineArg() = default;
-
-  /**
-   * @brief Constructor.
-   */
-  explicit SplineArg(const Partition& domain, double x) {
-    m_index = domain.index(x);
-    const auto h = domain.length(m_index);
-    const auto left = x - domain[m_index];
-    const auto right = h - left;
-    m_cv0 = right / h;
-    m_cv1 = left / h;
-    m_cs0 = right / 6. * (right * m_cv0 - h);
-    m_cs1 = left / 6. * (left * m_cv1 - h);
-  }
-
-private:
-  std::size_t m_index; ///< The interval index
-  double m_cv0; ///< The v[i] coefficient
-  double m_cv1; ///< The v[i + 1] coefficient
-  double m_cs0; ///< The s[i] coefficient
-  double m_cs1; ///< The s[i + 1] coefficient
-};
-
-/**
  * @brief Natural cubic spline interpolant.
  * 
  * A spline is parametrized with the list of knot abscissae and values,
@@ -175,7 +23,7 @@ private:
  * 
  * For repeated use of a spline over a constant set of arguments and varying values, see `Cospline`.
  */
-template <typename T, Caching Cache = Caching::Early>
+template <typename T>
 class Spline {
 
 public:
@@ -305,18 +153,18 @@ private:
    * @brief Solve the tridiagonal system for m_s, using Thomas algorithm.
    */
   void solve() {
-    long n = m_s.size(); // FIXME Linx::Index
+    Linx::Index n = m_s.size();
     std::vector<double> b(n);
     const auto& c = m_domain.m_h;
     std::vector<T> d(n);
 
-    for (std::size_t i = 1; i < n - 1; ++i) {
+    for (Linx::Index i = 1; i < n - 1; ++i) {
       b[i] = 2. * (c[i - 1] + c[i]);
       d[i] = 6. * ((m_v[i + 1] - m_v[i]) / c[i] - (m_v[i] - m_v[i - 1]) / c[i - 1]);
     }
 
     // Forward
-    for (std::size_t i = 2; i < n - 1; ++i) {
+    for (Linx::Index i = 2; i < n - 1; ++i) {
       auto w = c[i - 1] / b[i - 1];
       b[i] -= w * c[i - 1];
       d[i] -= w * d[i - 1];
@@ -337,93 +185,6 @@ private:
   const Partition& m_domain; ///< The knots domain
   std::vector<T> m_v; ///< The knot values
   std::vector<T> m_s; ///< The knot second derivatives
-};
-
-/**
- * @brief Natural cubic spline resampler.
- * 
- * A resampler is parametrized with the list of knot and resampling abscissae,
- * and is evaluated on a vector of knot values.
- */
-class Cospline {
-
-public:
-  /**
-   * @brief Iterator-based constructor.
-   */
-  template <typename TIt>
-  explicit Cospline(const Partition& domain, TIt begin, TIt end) : m_domain(domain), m_args(end - begin) {
-    std::transform(std::move(begin), std::move(end), m_args.begin(), [&](const auto& e) {
-      return SplineArg(m_domain, e);
-    });
-  }
-
-  /**
-   * @brief Range-based constructor.
-   */
-  template <typename TRange>
-  explicit Cospline(const Partition& u, const TRange& x) : Cospline(u, x.begin(), x.end()) {}
-
-  /**
-   * @brief List-based constructor.
-   */
-  template <typename T>
-  explicit Cospline(const Partition& u, std::initializer_list<T> x) : Cospline(u, x.begin(), x.end()) {}
-
-  /**
-   * @brief Assign arguments from an iterator.
-   */
-  template <typename TIt>
-  void assign(TIt begin, TIt end) {
-    m_args.resize(std::distance(begin, end));
-    std::transform(std::move(begin), std::move(end), m_args.begin(), [&](const auto& x) {
-      return SplineArg(m_domain, x);
-    });
-  }
-
-  /**
-   * @brief Assign arguments from a range.
-   */
-  template <typename TRange>
-  void assign(const TRange& x) {
-    assign(x.begin(), x.end());
-  }
-
-  /**
-   * @brief Assign arguments from a list.
-   */
-  void assign(const std::initializer_list<double>& x) {
-    assign(x.begin(), x.end());
-  }
-
-  /**
-   * @brief Resample a spline defined by an iterator over knot values.
-   */
-  template <typename TIt>
-  auto operator()(TIt begin, TIt end) const {
-    using T = typename std::iterator_traits<TIt>::value_type;
-    return Spline<std::decay_t<T>>(m_domain, begin, end)(m_args);
-  }
-
-  /**
-   * @brief Resample a spline defined by a range of knot values.
-   */
-  template <typename TRange>
-  auto operator()(const TRange& v) const {
-    return operator()(v.begin(), v.end());
-  }
-
-  /**
-   * @brief Resample a spline defined by a list of knot values.
-   */
-  template <typename T>
-  auto operator()(std::initializer_list<T> v) const {
-    return operator()(v.begin(), v.end());
-  }
-
-private:
-  const Partition& m_domain; ///< The knot abscissae
-  std::vector<SplineArg> m_args; ///< The resampling abscissae
 };
 
 } // namespace Splider

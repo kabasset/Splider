@@ -4,7 +4,7 @@
 #include "ElementsKernel/ProgramHeaders.h"
 #include "Linx/Data/Sequence.h"
 #include "Linx/Run/ProgramOptions.h"
-#include "Splider/Spline.h"
+#include "Splider/Cospline.h"
 
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>

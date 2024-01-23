@@ -44,13 +44,8 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup) {
   chrono.start();
   Splider::Partition domain0(u);
   Splider::Partition domain1(u);
-  if (setup == 'e') {
-    Splider::BiCospline<double, Splider::Caching::Early> cospline(domain0, domain1, x);
-    for (const auto& plane : sections(v)) {
-      y = cospline(plane);
-    }
-  } else if (setup == 'l') {
-    Splider::BiCospline<double, Splider::Caching::Lazy> cospline(domain0, domain1, x);
+  if (setup == 's') {
+    Splider::BiCospline<double> cospline(domain0, domain1, x);
     for (const auto& plane : sections(v)) {
       y = cospline(plane);
     }
@@ -67,7 +62,7 @@ class SpliderBenchmark : public Elements::Program {
 public:
   std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
     Linx::ProgramOptions options;
-    options.named("case", "Test case: e (early), l (lazy), g (GSL)", 'e');
+    options.named("case", "Test case: s (Splider), g (GSL)", 's');
     options.named("knots", "Number of knots along each axis", 100L);
     options.named("args", "Number of arguments", 100L);
     options.named("iters", "Numper of iterations", 1L);
