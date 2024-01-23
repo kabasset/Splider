@@ -189,6 +189,14 @@ public:
     m_valid = true;
   }
 
+  void approximate() {
+    for (Linx::Index i = 1; i < m_s.size() - 1; ++i) {
+      auto d = (m_v[i + 1] - m_v[i]) / m_domain.m_h[i] - (m_v[i] - m_v[i - 1]) / m_domain.m_h[i - 1];
+      m_s[i] = d * 2. / (m_domain.m_h[i] + m_domain.m_h[i - 1]);
+    }
+    m_valid = true;
+  }
+
 private:
   const Partition& m_domain; ///< The knots domain
   std::vector<T> m_v; ///< The knot values
