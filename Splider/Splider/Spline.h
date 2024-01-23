@@ -5,7 +5,6 @@
 #define _SPLIDER_SPLINE_H
 
 #include <algorithm>
-#include <set>
 #include <stdexcept>
 #include <vector>
 
@@ -183,23 +182,14 @@ public:
   /**
    * @brief Null knots constructor.
    */
-  explicit Spline(const Partition& u) : m_domain(u), m_v(m_domain.size()), m_s(m_domain.size()), m_cache() {
-    if constexpr (Cache != Caching::Early) {
-      m_cache.insert({0, m_s.size() - 1}); // Natural cubic splines
-    }
-  }
+  explicit Spline(const Partition& u) : m_domain(u), m_v(m_domain.size()), m_s(m_domain.size()) {}
 
   /**
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit Spline(const Partition& u, TIt begin, TIt end) :
-      m_domain(u), m_v(std::move(begin), std::move(end)), m_s(m_v.size()), m_cache() {
-    if constexpr (Cache == Caching::Early) {
-      update();
-    } else {
-      m_cache.insert({0, m_s.size() - 1}); // Natural cubic splines
-    }
+  explicit Spline(const Partition& u, TIt begin, TIt end) : m_domain(u), m_v(begin, end), m_s(m_v.size()) {
+    solve();
   }
 
   /**
@@ -219,12 +209,7 @@ public:
   template <typename TIt>
   void assign(TIt begin, TIt end) {
     m_v.assign(begin, end);
-    // FIXME check size
-    if constexpr (Cache == Caching::Early) {
-      update();
-    } else {
-      m_cache = {0, m_s.size() - 1};
-    }
+    solve();
   }
 
   /**
@@ -252,79 +237,16 @@ public:
   /**
    * @brief Set the i-th knot value.
    */
-  inline void v(std::size_t i, const T& value) {
+  inline void v(std::size_t i, const T& value) { // FIXME keep?
     m_v[i] = value;
-    const auto min = i > 1 ? i - 1 : 1;
-    const auto max = std::min(i + 1, m_v.size() - 2);
-    for (auto j = min; j <= max; ++j) { // Natural cubic spline
-      if constexpr (Cache == Caching::Early) {
-        update(j);
-      } else {
-        m_cache.erase(j);
-      }
-    }
+    solve(); // FIXME lazily?
   }
 
   /**
    * @brief Get the i-th second derivative.
    */
   inline const T& dv2(std::size_t i) {
-    if constexpr (Cache == Caching::Lazy) {
-      if (not valid(i)) {
-        update(i);
-      }
-    }
     return m_s[i];
-  }
-
-  /**
-   * @brief Check whether the internal coefficients of the i-th knot are valid in cache.
-   * 
-   * This is always true for early caching and the method is mostly useful for user-triggered caching.
-   */
-  bool valid(std::size_t i) const {
-    if constexpr (Cache == Caching::Early) {
-      return true;
-    } else {
-      return m_cache.find(i) != m_cache.end();
-    }
-  }
-
-  /**
-   * @brief Update all the internal coefficients.
-   */
-  void update() {
-    const auto size = m_v.size();
-    // FIXME check size == domain.m_u.size()
-    T d0 = (m_v[1] - m_v[0]) / m_domain.m_h[0]; // Because next loop starts at 1
-    T d1;
-    const auto* vIt = m_v.data() + 1;
-    const auto* hIt = m_domain.m_h.data() + 1;
-    for (auto sIt = &m_s[1]; sIt != &m_s[size - 1]; ++sIt, ++vIt, ++hIt) {
-      // d[i] = (m_v[i + 1] - m_v[i]) / m_h[i];
-      d1 = (*(vIt + 1) - *vIt) / *hIt;
-      // m_s[i] = (m_v[i + 1] - m_v[i]) / m_h[i] - (m_v[i] - m_v[i - 1]) / m_h[i - 1];
-      *sIt = d1 - d0;
-      d0 = d1;
-    }
-    // m_s[0] and m_s[size - 1] are left at 0 for natural splines
-    if constexpr (Cache != Caching::Early) {
-      const auto max = m_s.size() - 2;
-      for (std::size_t i = 1; i <= max; ++i) {
-        m_cache.insert(i);
-      }
-    }
-  }
-
-  /**
-   * @brief Update the internal coefficients associated to the i-th knot.
-  */
-  inline void update(std::size_t i) {
-    if constexpr (Cache != Caching::Early) {
-      auto d = (m_v[i + 1] - m_v[i]) / m_domain.m_h[i] - (m_v[i] - m_v[i - 1]) / m_domain.m_h[i - 1];
-      m_s[i] = d * 2. / (m_domain.m_h[i] + m_domain.m_h[i - 1]);
-      m_cache.insert(i);
-    }
   }
 
   /**
@@ -339,7 +261,7 @@ public:
    */
   T operator()(const SplineArg& x) {
     const auto i = x.m_index;
-    return m_v[i] * x.m_cv0 + m_v[i + 1] * x.m_cv1 + dv2(i) * x.m_cs0 + dv2(i + 1) * x.m_cs1;
+    return m_v[i] * x.m_cv0 + m_v[i + 1] * x.m_cv1 + m_s[i] * x.m_cs0 + m_s[i + 1] * x.m_cs1;
   }
 
   /**
@@ -379,10 +301,42 @@ public:
   }
 
 private:
+  /**
+   * @brief Solve the tridiagonal system for m_s, using Thomas algorithm.
+   */
+  void solve() {
+    long n = m_s.size(); // FIXME Linx::Index
+    std::vector<double> b(n);
+    const auto& c = m_domain.m_h;
+    std::vector<T> d(n);
+
+    for (std::size_t i = 1; i < n - 1; ++i) {
+      b[i] = 2. * (c[i - 1] + c[i]);
+      d[i] = 6. * ((m_v[i + 1] - m_v[i]) / c[i] - (m_v[i] - m_v[i - 1]) / c[i - 1]);
+    }
+
+    // Forward
+    for (std::size_t i = 2; i < n - 1; ++i) {
+      auto w = c[i - 1] / b[i - 1];
+      b[i] -= w * c[i - 1];
+      d[i] -= w * d[i - 1];
+    }
+
+    // Backward
+    m_s[n - 2] = d[n - 2] / b[n - 2];
+    for (auto i = n - 3; i > 0; --i) {
+      m_s[i] = (d[i] - c[i] * m_s[i + 1]) / b[i];
+    }
+
+    // Natutal spline
+    m_s[0] = 0;
+    m_s[n - 1] = 0;
+  }
+
+private:
   const Partition& m_domain; ///< The knots domain
   std::vector<T> m_v; ///< The knot values
   std::vector<T> m_s; ///< The knot second derivatives
-  std::set<std::size_t> m_cache; ///< Cached indices of m_s
 };
 
 /**
@@ -448,7 +402,7 @@ public:
   template <typename TIt>
   auto operator()(TIt begin, TIt end) const {
     using T = typename std::iterator_traits<TIt>::value_type;
-    return Spline<std::decay_t<T>>(m_domain, std::move(begin), std::move(end))(m_args);
+    return Spline<std::decay_t<T>>(m_domain, begin, end)(m_args);
   }
 
   /**
