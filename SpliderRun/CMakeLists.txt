@@ -14,6 +14,9 @@ elements_add_library(SpliderRun src/lib/*.cpp
 elements_add_executable(SpliderBenchmark src/program/SpliderBenchmark.cpp
                      INCLUDE_DIRS SpliderRun
                      LINK_LIBRARIES SpliderRun)
+elements_add_executable(SpliderBiBenchmark src/program/SpliderBiBenchmark.cpp
+                     INCLUDE_DIRS SpliderRun
+                     LINK_LIBRARIES SpliderRun)
 elements_add_executable(SpliderSin src/program/SpliderSin.cpp
                      INCLUDE_DIRS SpliderRun
                      LINK_LIBRARIES SpliderRun)
