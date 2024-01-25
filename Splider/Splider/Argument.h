@@ -4,12 +4,10 @@
 #ifndef _SPLIDER_ARGUMENT_H
 #define _SPLIDER_ARGUMENT_H
 
-#include "Linx/Data/Vector.h"
+#include "Linx/Data/Vector.h" // Index
+#include "Splider/Mode.h"
 #include "Splider/Partition.h"
 
-/**
- * @brief Spline builder.
- */
 namespace Splider {
 
 /**
@@ -23,7 +21,7 @@ namespace Splider {
  */
 class SplineArg {
 
-  template <typename>
+  template <typename, Mode>
   friend class Spline;
 
   template <typename>

@@ -4,12 +4,11 @@
 #ifndef _SPLIDER_PARTITION_H
 #define _SPLIDER_PARTITION_H
 
+#include "Splider/Mode.h"
+
 #include <stdexcept>
 #include <vector>
 
-/**
- * @brief Spline builder.
- */
 namespace Splider {
 
 /**
@@ -19,7 +18,7 @@ namespace Splider {
  */
 class Partition {
 
-  template <typename>
+  template <typename, Mode>
   friend class Spline;
 
 public:

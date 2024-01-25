@@ -17,13 +17,15 @@ namespace Splider {
 
 /**
  * @brief Natural cubic spline interpolant.
+ * @tparam T The knot value type, which can be any arithmetic type
+ * @tparam M The evaluation mode
  * 
  * A spline is parametrized with the list of knot abscissae and values,
  * and is evaluated on a scalar or vector argument.
  * 
  * For repeated use of a spline over a constant set of arguments and varying values, see `Cospline`.
  */
-template <typename T>
+template <typename T, Mode M = Mode::Solve | Mode::Early>
 class Spline {
 
 public:
@@ -38,7 +40,7 @@ public:
   template <typename TIt>
   explicit Spline(const Partition& u, TIt begin, TIt end) :
       m_domain(u), m_v(begin, end), m_s(m_v.size()), m_valid(false) {
-    solve();
+    early_update();
   }
 
   /**
@@ -58,7 +60,7 @@ public:
   template <typename TIt>
   void assign(TIt begin, TIt end) {
     m_v.assign(begin, end);
-    solve();
+    early_update();
   }
 
   /**
@@ -77,6 +79,25 @@ public:
   }
 
   /**
+   * @brief Check whether the evaluation mode matches a given mode.
+   */
+  static constexpr bool mode_matches(Mode mode) {
+    if constexpr (M == Mode::Manual && mode == Mode::Manual) {
+      return true;
+    } else {
+      return static_cast<bool>(M & mode);
+    }
+  }
+
+  /**
+   * @brief Check whether the coefficients have been evaluated already.
+   */
+  bool is_valid(Linx::Index i) const {
+    // FIXME check around i
+    return m_valid;
+  }
+
+  /**
    * @brief Get the i-th knot value.
   */
   inline const T& v(std::size_t i) const {
@@ -86,36 +107,33 @@ public:
   /**
    * @brief Set the i-th knot value.
    */
-  inline void v(std::size_t i, const T& value) { // FIXME keep?
+  inline void v(std::size_t i, const T& value) {
     m_v[i] = value;
     m_valid = false;
+    early_update();
   }
 
   /**
    * @brief Get the i-th second derivative.
    */
   inline const T& dv2(std::size_t i) {
-    if (not m_valid) {
-      solve();
-    }
+    lazy_update(i);
     return m_s[i];
   }
 
   /**
    * @brief Evaluate the spline.
    */
-  T operator()(double x) {
+  inline T operator()(double x) {
     return operator()(SplineArg(m_domain, x));
   }
 
   /**
    * @brief Evaluate the spline.
    */
-  T operator()(const SplineArg& x) {
-    if (not m_valid) {
-      solve();
-    }
+  inline T operator()(const SplineArg& x) {
     const auto i = x.m_index;
+    lazy_update(i);
     return m_v[i] * x.m_cv0 + m_v[i + 1] * x.m_cv1 + m_s[i] * x.m_cs0 + m_s[i + 1] * x.m_cs1;
   }
 
@@ -128,6 +146,7 @@ public:
   template <typename TIt>
   std::vector<T> operator()(TIt begin, TIt end) {
     std::vector<T> out;
+    out.reserve(std::distance(begin, end));
     for (; begin != end; ++begin) {
       out.push_back(operator()(*begin));
     }
@@ -182,7 +201,7 @@ public:
       m_s[i] = (d[i] - c[i] * m_s[i + 1]) / b[i];
     }
 
-    // Natutal spline
+    // Natutal spline // FIXME useful?
     m_s[0] = 0;
     m_s[n - 1] = 0;
 
@@ -192,7 +211,7 @@ public:
   /**
    * @brief Approximate the second derivatives with finite differences.
    */
-  void approximate() {
+  void approximate() { // FIXME take i as input
     for (Linx::Index i = 1; i < m_s.size() - 1; ++i) {
       auto d = (m_v[i + 1] - m_v[i]) / m_domain.m_h[i] - (m_v[i] - m_v[i - 1]) / m_domain.m_h[i - 1];
       m_s[i] = d * 2. / (m_domain.m_h[i] + m_domain.m_h[i - 1]);
@@ -201,10 +220,49 @@ public:
   }
 
 private:
+  /**
+   * @brief Update if early.
+   */
+  inline void early_update() {
+    if constexpr (mode_matches(Mode::Early)) {
+      update();
+    }
+  }
+
+  /**
+   * @brief Update if lazy.
+   */
+  inline void lazy_update(Linx::Index i) {
+    if constexpr (mode_matches(Mode::Lazy)) {
+      // FIXME update around i only
+      update();
+    }
+  }
+
+  /**
+   * @brief Evaluate the internal coefficients.
+   */
+  inline void update() {
+    if constexpr (mode_matches(Mode::Manual)) {
+      return;
+    } else {
+      if (m_valid) {
+        return;
+      }
+      if constexpr (mode_matches(Mode::Solve)) {
+        solve();
+      } else if constexpr (mode_matches(Mode::Approximate)) {
+        approximate();
+      }
+    }
+  }
+
+private:
   const Partition& m_domain; ///< The knots domain
   std::vector<T> m_v; ///< The knot values
   std::vector<T> m_s; ///< The knot second derivatives
-  bool m_valid;
+  bool m_valid; ///< Validity flags
+  // FIXME local validity
 };
 
 } // namespace Splider

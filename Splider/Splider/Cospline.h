@@ -9,9 +9,6 @@
 #include <algorithm>
 #include <vector>
 
-/**
- * @brief Spline builder.
- */
 namespace Splider {
 
 /**
