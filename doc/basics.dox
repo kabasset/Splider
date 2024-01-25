@@ -1,0 +1,59 @@
+namespace Splider {
+/**
+
+\addtogroup basics
+
+\section basics-intro Introduction and notations
+
+
+Splider provides many classes for interpolating discrete signals in 1 or N dimensions.
+As opposed to classical spline libraries, it splits a spline into different components,
+which can be arranged according to various use cases, and modified individually.
+A caching mechanism is associated with each component in order to accelerate repeated evaluations
+while varying only a subset of the parameters.
+
+Let \f$f\f$ be a discrete function defined from a rectilinear grid \f$u\f$ of dimension \f$N\f$ to the set of reals or complexes \f$\mathbb{K}\f$.
+The points of \f$u\f$ are denoted as \f$\{u_i\}\f$ where \f$i\f$ is an \f$N\f$-dimensional index, and the list of values of \f$f\f$ is denoted as \f$v = \{v_i\}\f$:
+
+\f[
+\forall i ,\, v_i = f(u_i) \,.
+\f]
+
+The couples \f$(u_i, v_i)\f$ are named the knots.
+
+A spline \f$S_{u,v}\f$ is a continuous piecewise polynomial function which passes by the knots and verifies some smoothness properties.
+Its result at \f$x \in \mathbb{R}^N\f$ will be denoted as \f$y\f$:
+
+\f[
+y = S_{u,v}(x) \,.
+\f]
+
+In Splider, basic splines are modeled as objects of class `Spline`,
+while `Cospline` technically performs the same operations but in a different order, and with a different caching strategy.
+Both are built up from the same components.
+
+
+\section basics-spline Splines
+
+
+TODO
+
+
+\section basics-cospline Cosplines
+
+
+Splider defines cosplines as a dual concept of splines, which can be very handy for parametric splines.
+Specifically, for a set of knots \f$(u,v)\f$, the spline \f$S_{u,v}\f$ is a function
+which can be called on any set of arguments \f$x\f$,
+while a cospline \f$C_{u,x}\f$ is parametrized by \f$u\f$ and \f$x\f$ and is called on \f$v\f$:
+
+\f[
+y = S_{u,v}(x) \\
+y = C_{u,x}(v)
+\f]
+
+When the spline has to be evaluated repeatedly over the same \f$x\f$'s with varying \f$v\f$'s,
+the cospline is much more efficient.
+
+*/
+}
