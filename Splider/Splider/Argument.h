@@ -46,11 +46,12 @@ public:
    */
   explicit SplineArg(const Partition<Value>& domain, Value x) {
     m_index = domain.index(x);
-    const auto h = domain.length(m_index);
+    const auto h = domain.m_h[m_index];
+    const auto g = domain.m_g[m_index];
     const auto left = x - domain[m_index];
     const auto right = h - left;
-    m_cv0 = right / h;
-    m_cv1 = left / h;
+    m_cv0 = right * g;
+    m_cv1 = left * g;
     m_cs0 = right / 6. * (right * m_cv0 - h);
     m_cs1 = left / 6. * (left * m_cv1 - h);
   }

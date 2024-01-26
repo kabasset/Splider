@@ -21,6 +21,9 @@ namespace Splider {
 template <typename T = double>
 class Partition {
 
+  template <typename>
+  friend class SplineArg;
+
   template <typename, typename, Mode>
   friend class Spline;
 
@@ -34,7 +37,7 @@ public:
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit Partition(TIt begin, TIt end) : m_u(begin, end), m_h(m_u.size() - 1) {
+  explicit Partition(TIt begin, TIt end) : m_u(begin, end), m_h(m_u.size() - 1), m_g(m_h.size()) {
     const auto size = m_h.size();
     if (size < 2) {
       throw std::runtime_error("Not enough knots (<3).");
@@ -46,6 +49,7 @@ public:
         throw std::runtime_error("Interval bounds are not strictly increasing.");
       }
       m_h[i] = h;
+      m_g[i] = 1. / h;
     }
   }
 
@@ -108,6 +112,7 @@ public:
 private:
   std::vector<Value> m_u; ///< The knot positions
   std::vector<Value> m_h; ///< The knot spacings
+  std::vector<Value> m_g; ///< The inverse of `m_h`
 };
 
 } // namespace Splider

@@ -200,25 +200,26 @@ public:
   void solve() {
     Linx::Index n = m_s.size();
     std::vector<Real> b(n);
-    const auto& c = m_domain.m_h;
+    const auto& h = m_domain.m_h;
+    const auto& g = m_domain.m_g;
     std::vector<Value> d(n);
 
     for (Linx::Index i = 1; i < n - 1; ++i) {
-      b[i] = 2. * (c[i - 1] + c[i]);
-      d[i] = 6. * ((m_v[i + 1] - m_v[i]) / c[i] - (m_v[i] - m_v[i - 1]) / c[i - 1]);
+      b[i] = 2. * (h[i - 1] + h[i]);
+      d[i] = 6. * ((m_v[i + 1] - m_v[i]) * g[i] - (m_v[i] - m_v[i - 1]) * g[i - 1]);
     }
 
     // Forward
     for (Linx::Index i = 2; i < n - 1; ++i) {
-      auto w = c[i - 1] / b[i - 1];
-      b[i] -= w * c[i - 1];
+      auto w = h[i - 1] / b[i - 1];
+      b[i] -= w * h[i - 1];
       d[i] -= w * d[i - 1];
     }
 
     // Backward
     m_s[n - 2] = d[n - 2] / b[n - 2];
     for (auto i = n - 3; i > 0; --i) {
-      m_s[i] = (d[i] - c[i] * m_s[i + 1]) / b[i];
+      m_s[i] = (d[i] - h[i] * m_s[i + 1]) / b[i];
     }
 
     // Natutal spline // FIXME useful?
@@ -233,7 +234,7 @@ public:
    */
   void approximate() { // FIXME take i as input
     for (Linx::Index i = 1; i < m_s.size() - 1; ++i) {
-      auto d = (m_v[i + 1] - m_v[i]) / m_domain.m_h[i] - (m_v[i] - m_v[i - 1]) / m_domain.m_h[i - 1];
+      auto d = (m_v[i + 1] - m_v[i]) * m_domain.m_g[i] - (m_v[i] - m_v[i - 1]) * m_domain.m_g[i - 1];
       m_s[i] = d * 2. / (m_domain.m_h[i] + m_domain.m_h[i - 1]);
     }
     m_valid = true;
