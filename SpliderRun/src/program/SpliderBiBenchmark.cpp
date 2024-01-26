@@ -42,9 +42,9 @@ template <typename TDuration, typename U, typename V, typename X, typename Y>
 TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup) {
   Linx::Chronometer<TDuration> chrono;
   chrono.start();
-  Splider::Partition domain0(u);
-  Splider::Partition domain1(u);
   if (setup == 's') {
+    Splider::Partition<> domain0(u);
+    Splider::Partition<> domain1(u);
     Splider::BiCospline<double> cospline(domain0, domain1, x);
     for (const auto& plane : sections(v)) {
       y = cospline(plane);

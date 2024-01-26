@@ -39,9 +39,17 @@ template <typename TDuration, typename U, typename V, typename X, typename Y>
 TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup) {
   Linx::Chronometer<TDuration> chrono;
   chrono.start();
-  Splider::Partition domain(u);
-  if (setup == 's') {
-    Splider::Cospline cospline(domain, x);
+  if (setup == 'f') {
+    using Domain = Splider::Partition<float>;
+    Domain domain(u);
+    Splider::Cospline<Domain> cospline(domain, x);
+    for (const auto& row : sections(v)) {
+      y = cospline(row);
+    }
+  } else if (setup == 'd') {
+    using Domain = Splider::Partition<double>;
+    Domain domain(u);
+    Splider::Cospline<Domain> cospline(domain, x);
     for (const auto& row : sections(v)) {
       y = cospline(row);
     }
@@ -58,7 +66,7 @@ class SpliderBenchmark : public Elements::Program {
 public:
   std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
     Linx::ProgramOptions options;
-    options.named("case", "Test case: s (Splider), g (GSL)", 's');
+    options.named("case", "Test case: f (float), d (double), g (GSL)", 'd');
     options.named("knots", "Number of knots", 100L);
     options.named("args", "Number of arguments", 100L);
     options.named("iters", "Numper of iterations", 1L);
