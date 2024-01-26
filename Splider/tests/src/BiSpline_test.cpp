@@ -32,13 +32,13 @@ std::vector<double> resample_with_gsl(const U& u0, const U& u1, const V& v, cons
 
 struct RealLinExpSplineFixture {
   std::vector<double> u0 {1, 2, 3, 4};
+  Splider::Partition<> domain0 {u0};
   std::vector<double> u1 {1, 10, 100, 1000};
+  Splider::Partition<> domain1 {u1};
   Splider::Trajectory<2> x {{1.1, 2.}, {2.5, 10.}, {3.9, 50.}, {2.5, 20.}, {2.5, 50.}};
   Linx::Raster<double> v {
-      {u0.size(), u1.size()},
+      {domain0.ssize(), domain1.ssize()},
       {1, 2, 3, 4, 10, 20, 30, 40, 100, 200, 300, 400, 1000, 2000, 3000, 4000}};
-  Splider::Partition<> domain0 {u0};
-  Splider::Partition<> domain1 {u1};
   Splider::BiCospline<double> resampler {domain0, domain1, x};
 };
 

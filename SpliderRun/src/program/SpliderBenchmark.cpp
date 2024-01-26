@@ -103,7 +103,7 @@ public:
     logger.info() << "  y: " << Linx::Sequence<double>(y);
 
     logger.debug("i\t\tx\tf(x)\ty");
-    for (std::size_t i = 0; i < x_size; ++i) {
+    for (Linx::Index i = 0; i < x_size; ++i) {
       logger.debug() << i << '\t' << x[i] << '\t' << std::sin(x[i]) * v_iters << '\t' << y[i];
     }
 

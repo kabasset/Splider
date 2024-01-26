@@ -54,7 +54,7 @@ public:
     const auto gsl = resample_with_gsl(u, v, x);
 
     logger.info("i\tx\tsin(x)\tSplider\tGSL");
-    for (Linx::Index i = 0; i < x.size(); ++i) {
+    for (std::size_t i = 0; i < x.size(); ++i) {
       logger.info() << i << '\t' << x[i] << '\t' << gt[i] << '\t' << y[i] << '\t' << gsl[i];
     }
 
