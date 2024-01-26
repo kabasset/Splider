@@ -40,11 +40,7 @@ public:
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit Cospline(const Domain& domain, TIt begin, TIt end) : m_domain(domain), m_args(end - begin) {
-    std::transform(begin, end, m_args.begin(), [&](const auto& e) {
-      return Arg(m_domain, e);
-    });
-  }
+  explicit Cospline(const Domain& domain, TIt begin, TIt end) : m_domain(domain), m_args(m_domain, begin, end) {}
 
   /**
    * @brief Range-based constructor.
@@ -63,10 +59,7 @@ public:
    */
   template <typename TIt>
   void assign(TIt begin, TIt end) {
-    m_args.resize(std::distance(begin, end));
-    std::transform(begin, end, m_args.begin(), [&](const auto& x) {
-      return Arg(m_domain, x);
-    });
+    m_args = Args<Real>(m_domain, begin, end);
   }
 
   /**
@@ -112,7 +105,7 @@ public:
 
 private:
   const Domain& m_domain; ///< The knot abscissae
-  std::vector<Arg> m_args; ///< The resampling abscissae
+  Args<Real> m_args; ///< The resampling abscissae
 };
 
 } // namespace Splider

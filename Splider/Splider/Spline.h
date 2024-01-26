@@ -157,6 +157,16 @@ public:
     return m_v[i] * x.m_cv0 + m_v[i + 1] * x.m_cv1 + m_s[i] * x.m_cs0 + m_s[i + 1] * x.m_cs1;
   }
 
+  std::vector<Value> operator()(const Args<Real>& x) {
+    const auto size = x.size();
+    std::vector<Value> out(size);
+    for (std::size_t i = 0; i < size; ++i) {
+      const auto j = x.m_indices[i];
+      out[i] = m_v[j] * x.m_cv0s[i] + m_v[j + 1] * x.m_cv1s[i] + m_s[j] * x.m_cs0s[i] + m_s[j + 1] * x.m_cs1s[i];
+    }
+    return out;
+  }
+
   /**
    * @brief Evaluate the spline over an iterator.
    * @return The vector of interpolated values
@@ -164,13 +174,8 @@ public:
    * The iterator can either point to `Real`s or `Arg`s.
    */
   template <typename TIt>
-  std::vector<Value> operator()(TIt begin, TIt end) {
-    std::vector<Value> out;
-    out.reserve(std::distance(begin, end));
-    for (; begin != end; ++begin) {
-      out.push_back(operator()(*begin));
-    }
-    return out;
+  inline std::vector<Value> operator()(TIt begin, TIt end) {
+    return operator()(Args<Real>(m_domain, begin, end));
   }
 
   /**

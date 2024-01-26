@@ -24,6 +24,9 @@ class Partition {
   template <typename>
   friend class SplineArg;
 
+  template <typename>
+  friend class Args;
+
   template <typename, typename, Mode>
   friend class Spline;
 

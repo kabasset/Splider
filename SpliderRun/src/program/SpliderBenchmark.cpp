@@ -41,17 +41,24 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup) {
   chrono.start();
   if (setup == 'f') {
     using Domain = Splider::Partition<float>;
-    Domain domain(u);
+    const Domain domain(u);
     Splider::Cospline<Domain> cospline(domain, x);
     for (const auto& row : sections(v)) {
       y = cospline(row);
     }
   } else if (setup == 'd') {
     using Domain = Splider::Partition<double>;
-    Domain domain(u);
+    const Domain domain(u);
     Splider::Cospline<Domain> cospline(domain, x);
     for (const auto& row : sections(v)) {
       y = cospline(row);
+    }
+  } else if (setup = 's') {
+    using Domain = Splider::Partition<double>;
+    const Domain domain(u);
+    const Splider::Args<double> args(domain, x);
+    for (const auto& row : sections(v)) {
+      y = Splider::Spline<double, Domain>(domain, row)(args);
     }
   } else if (setup == 'g') {
     y = resample_with_gsl(u, v, x);
@@ -66,7 +73,7 @@ class SpliderBenchmark : public Elements::Program {
 public:
   std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
     Linx::ProgramOptions options;
-    options.named("case", "Test case: f (float), d (double), g (GSL)", 'd');
+    options.named("case", "Test case: d (double), f (float), s (Spline), g (GSL)", 'd');
     options.named("knots", "Number of knots", 100L);
     options.named("args", "Number of arguments", 100L);
     options.named("iters", "Numper of iterations", 1L);
