@@ -158,11 +158,12 @@ public:
   }
 
   std::vector<Value> operator()(const Args<Real>& x) {
-    const auto size = x.size();
-    std::vector<Value> out(size);
-    for (std::size_t i = 0; i < size; ++i) {
-      const auto j = x.m_indices[i];
-      out[i] = m_v[j] * x.m_cv0s[i] + m_v[j + 1] * x.m_cv1s[i] + m_s[j] * x.m_cs0s[i] + m_s[j + 1] * x.m_cs1s[i];
+    lazy_update(0); // FIXME i
+    std::vector<Value> out;
+    out.reserve(x.size());
+    for (const auto& arg : x.m_args) {
+      const auto i = arg.m_index;
+      out.push_back(m_v[i] * arg.m_cv0 + m_v[i + 1] * arg.m_cv1 + m_s[i] * arg.m_cs0 + m_s[i + 1] * arg.m_cs1);
     }
     return out;
   }

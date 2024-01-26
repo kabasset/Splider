@@ -86,26 +86,10 @@ public:
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit Args(const Partition<Value>& domain, TIt begin, TIt end) :
-      m_indices(std::distance(begin, end)), m_cv0s(m_indices.size()), m_cv1s(m_indices.size()),
-      m_cs0s(m_indices.size()), m_cs1s(m_indices.size()) {
-    auto iit = m_indices.begin();
-    auto v0it = m_cv0s.begin();
-    auto v1it = m_cv1s.begin();
-    auto s0it = m_cs0s.begin();
-    auto s1it = m_cs1s.begin();
-
-    for (; begin != end; ++begin, ++iit, ++v0it, ++v1it, ++s0it, ++s1it) {
-      const auto i = domain.index(*begin);
-      *iit = i;
-      const auto h = domain.m_h[i];
-      const auto g = domain.m_g[i];
-      const auto left = *begin - domain[i];
-      const auto right = h - left;
-      *v0it = right * g;
-      *v1it = left * g;
-      *s0it = right / 6. * (right * *v0it - h);
-      *s1it = left / 6. * (left * *v1it - h);
+  explicit Args(const Partition<Value>& domain, TIt begin, TIt end) : m_args() {
+    m_args.reserve(std::distance(begin, end));
+    for (; begin != end; ++begin) {
+      m_args.emplace_back(domain, *begin);
     }
   }
 
@@ -124,7 +108,7 @@ public:
    * @brief Get the number of arguments.
    */
   std::size_t size() const {
-    return m_indices.size();
+    return m_args.size();
   }
 
   /**
@@ -135,11 +119,7 @@ public:
   }
 
 private:
-  std::vector<Linx::Index> m_indices; ///< The interval indices
-  std::vector<Value> m_cv0s; ///< The v[i] coefficients
-  std::vector<Value> m_cv1s; ///< The v[i + 1] coefficients
-  std::vector<Value> m_cs0s; ///< The s[i] coefficients
-  std::vector<Value> m_cs1s; ///< The s[i + 1] coefficients
+  std::vector<SplineArg<Value>> m_args; ///< The arguments
 };
 
 } // namespace Splider
