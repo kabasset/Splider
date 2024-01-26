@@ -31,7 +31,7 @@ std::vector<double> resample_with_gsl(const U& u, const V& v, const X& x) {
 
 struct RealLinFixture {
   std::vector<double> u {1, 2, 3, 4};
-  Splider::Partition domain = Splider::Partition(u);
+  Splider::Partition<> domain = Splider::Partition<>(u);
   std::vector<double> x {1.1, 2.5, 3.9};
   std::vector<double> v {10, 20, 30, 40};
   std::vector<double> y {11, 25, 39};
@@ -39,7 +39,7 @@ struct RealLinFixture {
 
 struct ComplexLinFixture {
   std::vector<double> u {1, 2, 3, 4};
-  Splider::Partition domain = Splider::Partition(u);
+  Splider::Partition<> domain = Splider::Partition<>(u);
   std::vector<double> x {1.1, 2.5, 3.9};
   std::vector<std::complex<double>> v {{10, -1}, {20, -2}, {30, -3}, {40, -4}};
   std::vector<std::complex<double>> y {{11, -1.1}, {25, -2.5}, {39, -3.9}};
@@ -47,7 +47,7 @@ struct ComplexLinFixture {
 
 struct RealRandomFixture {
   std::vector<double> u {1, 2, 3, 4};
-  Splider::Partition domain = Splider::Partition(u);
+  Splider::Partition<> domain = Splider::Partition<>(u);
   std::vector<double> x {1.1, 2.5, 3.9};
   Linx::Sequence<double> v = Linx::Sequence<double>(u.size()).generate(Linx::UniformNoise<double>(0, 1));
 };

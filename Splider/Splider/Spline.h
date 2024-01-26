@@ -18,6 +18,7 @@ namespace Splider {
 /**
  * @brief Natural cubic spline interpolant.
  * @tparam T The knot value type, which can be any arithmetic type
+ * @tparam TDomain The knot domain type
  * @tparam M The evaluation mode
  * 
  * A spline is parametrized with the list of knot abscissae and values,
@@ -25,21 +26,40 @@ namespace Splider {
  * 
  * For repeated use of a spline over a constant set of arguments and varying values, see `Cospline`.
  */
-template <typename T, Mode M = Mode::Solve | Mode::Early>
+template <typename T, typename TDomain = Partition<double>, Mode M = Mode::Solve | Mode::Early>
 class Spline {
 
 public:
   /**
+   * @brief The knot value type.
+   */
+  using Value = T;
+
+  /**
+   * @brief The knot domain type.
+   */
+  using Domain = TDomain;
+
+  /**
+   * @brief The real number type.
+   */
+  using Real = typename Domain::Value;
+
+  /**
+   * @brief The argument type.
+   */
+  using Arg = SplineArg<Real>;
+
+  /**
    * @brief Null knots constructor.
    */
-  explicit Spline(const Partition& u) : m_domain(u), m_v(m_domain.size()), m_s(m_domain.size()), m_valid(true) {}
+  explicit Spline(const Domain& u) : m_domain(u), m_v(m_domain.size()), m_s(m_domain.size()), m_valid(true) {}
 
   /**
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit Spline(const Partition& u, TIt begin, TIt end) :
-      m_domain(u), m_v(begin, end), m_s(m_v.size()), m_valid(false) {
+  explicit Spline(const Domain& u, TIt begin, TIt end) : m_domain(u), m_v(begin, end), m_s(m_v.size()), m_valid(false) {
     early_update();
   }
 
@@ -47,12 +67,12 @@ public:
    * @brief Range-based constructor.
    */
   template <typename TRange>
-  explicit Spline(const Partition& u, const TRange& v) : Spline(u, v.begin(), v.end()) {}
+  explicit Spline(const Domain& u, const TRange& v) : Spline(u, v.begin(), v.end()) {}
 
   /**
    * @brief List-based constructor.
    */
-  explicit Spline(const Partition& u, std::initializer_list<T> v) : Spline(u, v.begin(), v.end()) {}
+  explicit Spline(const Domain& u, std::initializer_list<Value> v) : Spline(u, v.begin(), v.end()) {}
 
   /**
    * @brief Assign knot values from an iterator.
@@ -100,14 +120,14 @@ public:
   /**
    * @brief Get the i-th knot value.
   */
-  inline const T& v(std::size_t i) const {
+  inline const Value& v(Linx::Index i) const {
     return m_v[i];
   }
 
   /**
    * @brief Set the i-th knot value.
    */
-  inline void v(std::size_t i, const T& value) {
+  inline void v(Linx::Index i, const Value& value) {
     m_v[i] = value;
     m_valid = false;
     early_update();
@@ -116,7 +136,7 @@ public:
   /**
    * @brief Get the i-th second derivative.
    */
-  inline const T& dv2(std::size_t i) {
+  inline const Value& dv2(Linx::Index i) {
     lazy_update(i);
     return m_s[i];
   }
@@ -124,14 +144,14 @@ public:
   /**
    * @brief Evaluate the spline.
    */
-  inline T operator()(double x) {
-    return operator()(SplineArg(m_domain, x));
+  inline Value operator()(Real x) {
+    return operator()(Arg(m_domain, x));
   }
 
   /**
    * @brief Evaluate the spline.
    */
-  inline T operator()(const SplineArg& x) {
+  inline Value operator()(const Arg& x) {
     const auto i = x.m_index;
     lazy_update(i);
     return m_v[i] * x.m_cv0 + m_v[i + 1] * x.m_cv1 + m_s[i] * x.m_cs0 + m_s[i + 1] * x.m_cs1;
@@ -141,11 +161,11 @@ public:
    * @brief Evaluate the spline over an iterator.
    * @return The vector of interpolated values
    * 
-   * The iterator can either point to `double`s or `SplineArg`s.
+   * The iterator can either point to `Real`s or `Arg`s.
    */
   template <typename TIt>
-  std::vector<T> operator()(TIt begin, TIt end) {
-    std::vector<T> out;
+  std::vector<Value> operator()(TIt begin, TIt end) {
+    std::vector<Value> out;
     out.reserve(std::distance(begin, end));
     for (; begin != end; ++begin) {
       out.push_back(operator()(*begin));
@@ -157,10 +177,10 @@ public:
    * @brief Evaluate the spline over a range.
    * @return The vector of interpolated values
    * 
-   * The range can either contain `double`s or `SplineArg`s.
+   * The range can either contain `Real`s or `Arg`s.
    */
   template <typename TRange>
-  std::vector<T> operator()(const TRange& x) {
+  std::vector<Value> operator()(const TRange& x) {
     return operator()(x.begin(), x.end());
   }
 
@@ -168,9 +188,9 @@ public:
    * @brief Evaluate the spline over a list.
    * @return The vector of interpolated values
    * 
-   * The list can either contain `double`s or `SplineArg`s.
+   * The list can either contain `Real`s or `Arg`s.
    */
-  std::vector<T> operator()(std::initializer_list<T> x) {
+  std::vector<Value> operator()(std::initializer_list<Value> x) {
     return operator()(x.begin(), x.end());
   }
 
@@ -179,9 +199,9 @@ public:
    */
   void solve() {
     Linx::Index n = m_s.size();
-    std::vector<double> b(n);
+    std::vector<Real> b(n);
     const auto& c = m_domain.m_h;
-    std::vector<T> d(n);
+    std::vector<Value> d(n);
 
     for (Linx::Index i = 1; i < n - 1; ++i) {
       b[i] = 2. * (c[i - 1] + c[i]);
@@ -258,9 +278,9 @@ private:
   }
 
 private:
-  const Partition& m_domain; ///< The knots domain
-  std::vector<T> m_v; ///< The knot values
-  std::vector<T> m_s; ///< The knot second derivatives
+  const Domain& m_domain; ///< The knots domain
+  std::vector<Value> m_v; ///< The knot values
+  std::vector<Value> m_s; ///< The knot second derivatives
   bool m_valid; ///< Validity flags
   // FIXME local validity
 };

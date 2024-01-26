@@ -13,15 +13,22 @@ namespace Splider {
 
 /**
  * @brief The knot abscissae.
+ * @tparam T The real number type
  * 
  * This class stores both the abscissae of the knots and precomputes some spline coefficients to speed-up spline evaluation.
  */
+template <typename T = double>
 class Partition {
 
-  template <typename, Mode>
+  template <typename, typename, Mode>
   friend class Spline;
 
 public:
+  /**
+   * @brief The real number type
+   */
+  using Value = T;
+
   /**
    * @brief Iterator-based constructor.
    */
@@ -31,7 +38,7 @@ public:
     if (size < 2) {
       throw std::runtime_error("Not enough knots (<3).");
     }
-    double h;
+    Value h;
     for (std::size_t i = 0; i < size; ++i) {
       h = m_u[i + 1] - m_u[i];
       if (h <= 0) {
@@ -50,7 +57,7 @@ public:
   /**
    * @brief List-based constructor.
    */
-  Partition(std::initializer_list<double> u) : Partition(u.begin(), u.end()) {}
+  Partition(std::initializer_list<Value> u) : Partition(u.begin(), u.end()) {}
 
   /**
    * @brief Get the number of knots.
@@ -62,21 +69,21 @@ public:
   /**
    * @brief Get the length of the i-th interval.
    */
-  inline double length(std::size_t i) const {
+  inline Value length(std::size_t i) const {
     return m_h[i];
   }
 
   /**
    * @brief Get the abscissa of the i-th knot.
    */
-  inline double operator[](std::size_t i) const {
+  inline Value operator[](std::size_t i) const {
     return m_u[i];
   }
 
   /**
    * @brief Get the index of the interval which contains a given abscissa.
    */
-  std::size_t index(double x) const {
+  std::size_t index(Value x) const {
     if (x < m_u[0]) {
       throw std::runtime_error("x is too small!");
     }
@@ -91,8 +98,8 @@ public:
   }
 
 private:
-  std::vector<double> m_u; ///< The knot positions
-  std::vector<double> m_h; ///< The knot spacings
+  std::vector<Value> m_u; ///< The knot positions
+  std::vector<Value> m_h; ///< The knot spacings
 };
 
 } // namespace Splider

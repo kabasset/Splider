@@ -19,15 +19,21 @@ namespace Splider {
  * Manually instantiating a spline argument is useful when it should be reused.
  * It is not necessary for single-use: in this case, simply call the spline on a mere real value.
  */
+template <typename T = double>
 class SplineArg {
 
-  template <typename, Mode>
+  template <typename, typename, Mode>
   friend class Spline;
 
-  template <typename>
+  template <typename, typename>
   friend class BiCospline;
 
 public:
+  /**
+   * @brief The real number type.
+   */
+  using Value = T;
+
   /**
    * @brief Null constructor.
    * 
@@ -38,7 +44,7 @@ public:
   /**
    * @brief Constructor.
    */
-  explicit SplineArg(const Partition& domain, double x) {
+  explicit SplineArg(const Partition<Value>& domain, Value x) {
     m_index = domain.index(x);
     const auto h = domain.length(m_index);
     const auto left = x - domain[m_index];
@@ -51,10 +57,10 @@ public:
 
 private:
   Linx::Index m_index; ///< The interval index
-  double m_cv0; ///< The v[i] coefficient
-  double m_cv1; ///< The v[i + 1] coefficient
-  double m_cs0; ///< The s[i] coefficient
-  double m_cs1; ///< The s[i + 1] coefficient
+  Value m_cv0; ///< The v[i] coefficient
+  Value m_cv1; ///< The v[i + 1] coefficient
+  Value m_cs0; ///< The s[i] coefficient
+  Value m_cs1; ///< The s[i + 1] coefficient
 };
 
 } // namespace Splider

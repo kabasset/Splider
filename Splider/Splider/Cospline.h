@@ -17,16 +17,32 @@ namespace Splider {
  * A resampler is parametrized with the list of knot and resampling abscissae,
  * and is evaluated on a vector of knot values.
  */
+template <typename TDomain>
 class Cospline {
 
 public:
   /**
+   * @brief The knot domain type.
+   */
+  using Domain = TDomain;
+
+  /**
+   * @brief The real number type.
+   */
+  using Real = typename Domain::Value;
+
+  /**
+   * @brief The argument type.
+   */
+  using Arg = SplineArg<Real>;
+
+  /**
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit Cospline(const Partition& domain, TIt begin, TIt end) : m_domain(domain), m_args(end - begin) {
+  explicit Cospline(const Domain& domain, TIt begin, TIt end) : m_domain(domain), m_args(end - begin) {
     std::transform(begin, end, m_args.begin(), [&](const auto& e) {
-      return SplineArg(m_domain, e);
+      return Arg(m_domain, e);
     });
   }
 
@@ -34,13 +50,13 @@ public:
    * @brief Range-based constructor.
    */
   template <typename TRange>
-  explicit Cospline(const Partition& u, const TRange& x) : Cospline(u, x.begin(), x.end()) {}
+  explicit Cospline(const Domain& u, const TRange& x) : Cospline(u, x.begin(), x.end()) {}
 
   /**
    * @brief List-based constructor.
    */
   template <typename T>
-  explicit Cospline(const Partition& u, std::initializer_list<T> x) : Cospline(u, x.begin(), x.end()) {}
+  explicit Cospline(const Domain& u, std::initializer_list<T> x) : Cospline(u, x.begin(), x.end()) {}
 
   /**
    * @brief Assign arguments from an iterator.
@@ -49,7 +65,7 @@ public:
   void assign(TIt begin, TIt end) {
     m_args.resize(std::distance(begin, end));
     std::transform(begin, end, m_args.begin(), [&](const auto& x) {
-      return SplineArg(m_domain, x);
+      return Arg(m_domain, x);
     });
   }
 
@@ -64,7 +80,7 @@ public:
   /**
    * @brief Assign arguments from a list.
    */
-  void assign(const std::initializer_list<double>& x) {
+  void assign(const std::initializer_list<Real>& x) {
     assign(x.begin(), x.end());
   }
 
@@ -74,7 +90,8 @@ public:
   template <typename TIt>
   auto operator()(TIt begin, TIt end) const {
     using T = typename std::iterator_traits<TIt>::value_type;
-    return Spline<std::decay_t<T>>(m_domain, begin, end)(m_args);
+    using Value = typename std::decay_t<T>;
+    return Spline<Value, Domain>(m_domain, begin, end)(m_args);
   }
 
   /**
@@ -94,8 +111,8 @@ public:
   }
 
 private:
-  const Partition& m_domain; ///< The knot abscissae
-  std::vector<SplineArg> m_args; ///< The resampling abscissae
+  const Domain& m_domain; ///< The knot abscissae
+  std::vector<Arg> m_args; ///< The resampling abscissae
 };
 
 } // namespace Splider
