@@ -120,8 +120,18 @@ public:
    */
   Args(const Partition<Value>& domain, std::initializer_list<Value> u) : Args(domain, u.begin(), u.end()) {}
 
-  inline std::size_t size() const {
+  /**
+   * @brief Get the number of arguments.
+   */
+  std::size_t size() const {
     return m_indices.size();
+  }
+
+  /**
+   * @copybrief size()
+   */
+  Linx::Index ssize() const {
+    return static_cast<Linx::Index>(size());
   }
 
 private:

@@ -53,12 +53,14 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup) {
     for (const auto& row : sections(v)) {
       y = cospline(row);
     }
-  } else if (setup = 's') {
+  } else if (setup == 's') {
     using Domain = Splider::Partition<double>;
     const Domain domain(u);
     const Splider::Args<double> args(domain, x);
+    Splider::Spline<double, Domain> spline(domain);
     for (const auto& row : sections(v)) {
-      y = Splider::Spline<double, Domain>(domain, row)(args);
+      spline.assign(row);
+      y = spline(args);
     }
   } else if (setup == 'g') {
     y = resample_with_gsl(u, v, x);
