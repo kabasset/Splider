@@ -88,6 +88,7 @@ public:
    */
   template <typename TIt>
   void assign(TIt begin, TIt end) {
+    m_valid = false;
     m_v.assign(begin, end);
     early_update();
   }
