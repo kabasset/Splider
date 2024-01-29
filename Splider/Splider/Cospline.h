@@ -65,6 +65,13 @@ public:
   explicit Cospline(const Domain& u, std::initializer_list<TX> x) : Cospline(u, x.begin(), x.end()) {}
 
   /**
+   * @brief Get the knots abscissae.
+   */
+  const Domain& domain() const {
+    return m_spline.domain();
+  }
+
+  /**
    * @brief Assign arguments from an iterator.
    */
   template <typename TIt>
