@@ -6,7 +6,6 @@
 
 #include "Linx/Data/Vector.h" // Index
 #include "Splider/Mode.h"
-#include "Splider/Partition.h"
 
 namespace Splider {
 
@@ -44,16 +43,31 @@ public:
   /**
    * @brief Constructor.
    */
-  explicit SplineArg(const Partition<Value>& domain, Value x) {
+  template <typename TDomain>
+  explicit SplineArg(const TDomain& domain, Value x) {
     m_index = domain.index(x);
-    const auto h = domain.m_h[m_index];
-    const auto g = domain.m_g[m_index];
+    const auto h = domain.length(m_index);
     const auto left = x - domain[m_index];
     const auto right = h - left;
-    m_cv0 = right * g;
-    m_cv1 = left * g;
+    m_cv0 = right / h;
+    m_cv1 = left / h;
     m_cs0 = right / 6. * (right * m_cv0 - h);
     m_cs1 = left / 6. * (left * m_cv1 - h);
+  }
+
+  /**
+   * @brief Subinterval-based constructor.
+   * @param index The subinterval index
+   * @param index The subinterval length
+   * @param left The distance between the subinterval min and the argument
+   */
+  explicit SplineArg(Linx::Index index, Value length, Value left) {
+    m_index = index;
+    const auto right = length - left;
+    m_cv0 = right / length;
+    m_cv1 = left / length;
+    m_cs0 = right / 6. * (right * m_cv0 - length);
+    m_cs1 = left / 6. * (left * m_cv1 - length);
   }
 
 private:
@@ -85,8 +99,8 @@ public:
   /**
    * @brief Iterator-based constructor.
    */
-  template <typename TIt>
-  explicit Args(const Partition<Value>& domain, TIt begin, TIt end) : m_args() {
+  template <typename TDomain, typename TIt>
+  explicit Args(const TDomain& domain, TIt begin, TIt end) : m_args() {
     m_args.reserve(std::distance(begin, end));
     for (; begin != end; ++begin) {
       m_args.emplace_back(domain, *begin);
@@ -96,13 +110,14 @@ public:
   /**
    * @brief Range-based constructor.
    */
-  template <typename TRange>
-  explicit Args(const Partition<Value>& domain, const TRange& u) : Args(domain, u.begin(), u.end()) {}
+  template <typename TDomain, typename TRange>
+  explicit Args(const TDomain& domain, const TRange& u) : Args(domain, u.begin(), u.end()) {}
 
   /**
    * @brief List-based constructor.
    */
-  Args(const Partition<Value>& domain, std::initializer_list<Value> u) : Args(domain, u.begin(), u.end()) {}
+  template <typename TDomain>
+  Args(const TDomain& domain, std::initializer_list<Value> u) : Args(domain, u.begin(), u.end()) {}
 
   /**
    * @brief Get the number of arguments.

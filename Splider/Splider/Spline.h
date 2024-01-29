@@ -5,6 +5,7 @@
 #define _SPLIDER_SPLINE_H
 
 #include "Splider/Argument.h"
+#include "Splider/Linspace.h"
 #include "Splider/Partition.h"
 
 #include <stdexcept>
@@ -204,35 +205,11 @@ public:
    * @brief Solve the tridiagonal system.
    */
   void solve() {
-    Linx::Index n = m_s.size();
-    std::vector<Real> b(n);
-    const auto& h = m_domain.m_h;
-    const auto& g = m_domain.m_g;
-    std::vector<Value> d(n);
-
-    for (Linx::Index i = 1; i < n - 1; ++i) {
-      b[i] = 2. * (h[i - 1] + h[i]);
-      d[i] = 6. * ((m_v[i + 1] - m_v[i]) * g[i] - (m_v[i] - m_v[i - 1]) * g[i - 1]);
+    if constexpr (Domain::IsEven) {
+      solve_even();
+    } else {
+      solve_uneven();
     }
-
-    // Forward
-    for (Linx::Index i = 2; i < n - 1; ++i) {
-      auto w = h[i - 1] / b[i - 1];
-      b[i] -= w * h[i - 1];
-      d[i] -= w * d[i - 1];
-    }
-
-    // Backward
-    m_s[n - 2] = d[n - 2] / b[n - 2];
-    for (auto i = n - 3; i > 0; --i) {
-      m_s[i] = (d[i] - h[i] * m_s[i + 1]) / b[i];
-    }
-
-    // Natutal spline // FIXME useful?
-    m_s[0] = 0;
-    m_s[n - 1] = 0;
-
-    m_valid = true;
   }
 
   /**
@@ -247,6 +224,70 @@ public:
   }
 
 private:
+  void solve_even() {
+    const Linx::Index n = m_s.size();
+    const auto h = m_domain.length(0);
+    const auto g = 1. / h;
+    std::vector<Real> b(n, 4. * h);
+    std::vector<Value> d(n);
+
+    for (Linx::Index i = 1; i < n - 1; ++i) {
+      d[i] = 6. * (m_v[i + 1] - 2 * m_v[i] + m_v[i - 1]) * g;
+    }
+
+    // Forward
+    for (Linx::Index i = 2; i < n - 1; ++i) {
+      const auto w = h / b[i - 1];
+      b[i] -= w * h;
+      d[i] -= w * d[i - 1];
+    }
+
+    // Backward
+    m_s[n - 2] = d[n - 2] / b[n - 2];
+    for (auto i = n - 3; i > 0; --i) {
+      m_s[i] = (d[i] - h * m_s[i + 1]) / b[i];
+    }
+
+    // Natutal spline // FIXME useful?
+    m_s[0] = 0;
+    m_s[n - 1] = 0;
+
+    m_valid = true;
+  }
+
+  void solve_uneven() {
+    const Linx::Index n = m_s.size();
+    std::vector<Real> b(n);
+    std::vector<Value> d(n);
+
+    for (Linx::Index i = 1; i < n - 1; ++i) {
+      const auto h0 = m_domain.length(i - 1);
+      const auto h1 = m_domain.length(i);
+      b[i] = 2. * (h0 + h1);
+      d[i] = 6. * ((m_v[i + 1] - m_v[i]) / h1 - (m_v[i] - m_v[i - 1]) / h0);
+    }
+
+    // Forward
+    for (Linx::Index i = 2; i < n - 1; ++i) {
+      const auto h = m_domain.length(i);
+      const auto w = h / b[i - 1];
+      b[i] -= w * h;
+      d[i] -= w * d[i - 1];
+    }
+
+    // Backward
+    m_s[n - 2] = d[n - 2] / b[n - 2];
+    for (auto i = n - 3; i > 0; --i) {
+      m_s[i] = (d[i] - m_domain.length(i) * m_s[i + 1]) / b[i];
+    }
+
+    // Natutal spline // FIXME useful?
+    m_s[0] = 0;
+    m_s[n - 1] = 0;
+
+    m_valid = true;
+  }
+
   /**
    * @brief Update if early.
    */
