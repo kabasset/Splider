@@ -42,14 +42,14 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup) {
   if (setup == 'f') {
     using Domain = Splider::Partition<float>;
     const Domain domain(u);
-    Splider::Cospline<Domain> cospline(domain, x);
+    Splider::Cospline<double, Domain> cospline(domain, x); // FIXME float
     for (const auto& row : sections(v)) {
       y = cospline(row);
     }
   } else if (setup == 'd') {
     using Domain = Splider::Partition<double>;
     const Domain domain(u);
-    Splider::Cospline<Domain> cospline(domain, x);
+    Splider::Cospline<double, Domain> cospline(domain, x);
     for (const auto& row : sections(v)) {
       y = cospline(row);
     }

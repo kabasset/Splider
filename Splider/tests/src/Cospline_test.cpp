@@ -53,7 +53,7 @@ struct RealRandomFixture {
 };
 
 BOOST_FIXTURE_TEST_CASE(real_lin_cospline_test, RealLinFixture) {
-  Splider::Cospline cospline(domain, x);
+  Splider::Cospline<double> cospline(domain, x);
   const auto out = cospline(v);
   BOOST_TEST(out.size() == x.size());
   for (std::size_t i = 0; i < out.size(); ++i) {
@@ -65,7 +65,7 @@ BOOST_FIXTURE_TEST_CASE(real_lin_cospline_test, RealLinFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(real_random_cospline_test, RealRandomFixture) {
-  Splider::Cospline cospline(domain, x);
+  Splider::Cospline<double> cospline(domain, x);
   const auto out = cospline(v);
   BOOST_TEST(out.size() == x.size());
   auto expected = resample_with_gsl(u, v, x);
@@ -73,7 +73,7 @@ BOOST_FIXTURE_TEST_CASE(real_random_cospline_test, RealRandomFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(complex_lin_cospline_test, ComplexLinFixture) {
-  Splider::Cospline cospline(domain, x);
+  Splider::Cospline<std::complex<double>> cospline(domain, x);
   const auto out = cospline(v);
   BOOST_TEST(out.size() == x.size());
   for (std::size_t i = 0; i < out.size(); ++i) {

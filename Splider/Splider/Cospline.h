@@ -11,16 +11,26 @@
 
 namespace Splider {
 
+/// @cond
+template <typename>
+class Partition;
+/// @endcond
+
 /**
  * @brief Natural cubic spline resampler.
  * 
  * A resampler is parametrized with the list of knot and resampling abscissae,
  * and is evaluated on a vector of knot values.
  */
-template <typename TDomain>
+template <typename T, typename TDomain = Partition<double>>
 class Cospline {
 
 public:
+  /**
+   * @brief The knot value type.
+   */
+  using Value = T;
+
   /**
    * @brief The knot domain type.
    */
@@ -40,7 +50,7 @@ public:
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit Cospline(const Domain& domain, TIt begin, TIt end) : m_domain(domain), m_args(m_domain, begin, end) {}
+  explicit Cospline(const Domain& domain, TIt begin, TIt end) : m_spline(domain), m_args(domain, begin, end) {}
 
   /**
    * @brief Range-based constructor.
@@ -51,15 +61,15 @@ public:
   /**
    * @brief List-based constructor.
    */
-  template <typename T>
-  explicit Cospline(const Domain& u, std::initializer_list<T> x) : Cospline(u, x.begin(), x.end()) {}
+  template <typename TX>
+  explicit Cospline(const Domain& u, std::initializer_list<TX> x) : Cospline(u, x.begin(), x.end()) {}
 
   /**
    * @brief Assign arguments from an iterator.
    */
   template <typename TIt>
   void assign(TIt begin, TIt end) {
-    m_args = Args<Real>(m_domain, begin, end);
+    m_args = Args<Real>(m_spline.domain(), begin, end);
   }
 
   /**
@@ -73,7 +83,8 @@ public:
   /**
    * @brief Assign arguments from a list.
    */
-  void assign(const std::initializer_list<Real>& x) {
+  template <typename TX>
+  void assign(const std::initializer_list<TX>& x) {
     assign(x.begin(), x.end());
   }
 
@@ -81,30 +92,29 @@ public:
    * @brief Resample a spline defined by an iterator over knot values.
    */
   template <typename TIt>
-  auto operator()(TIt begin, TIt end) const {
-    using T = typename std::iterator_traits<TIt>::value_type;
-    using Value = typename std::decay_t<T>;
-    return Spline<Value, Domain>(m_domain, begin, end)(m_args);
+  std::vector<Value> operator()(TIt begin, TIt end) {
+    m_spline.assign(begin, end);
+    return m_spline(m_args);
   }
 
   /**
    * @brief Resample a spline defined by a range of knot values.
    */
   template <typename TRange>
-  auto operator()(const TRange& v) const {
+  std::vector<Value> operator()(const TRange& v) {
     return operator()(v.begin(), v.end());
   }
 
   /**
    * @brief Resample a spline defined by a list of knot values.
    */
-  template <typename T>
-  auto operator()(std::initializer_list<T> v) const {
+  template <typename TV>
+  std::vector<Value> operator()(std::initializer_list<TV> v) {
     return operator()(v.begin(), v.end());
   }
 
 private:
-  const Domain& m_domain; ///< The knot abscissae
+  Spline<Value, Domain> m_spline; ///< The cached `Spline`
   Args<Real> m_args; ///< The resampling abscissae
 };
 

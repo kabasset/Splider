@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(default_resampler_test) {
 
   Splider::Partition<> u {1, 2, 3, 4};
   std::vector<double> x {1.1, 2.5, 3.9};
-  Splider::Cospline resampler(u, x);
+  Splider::Cospline<double> resampler(u, x);
 
   std::vector<double> v {10, 20, 30, 40};
   auto y = resampler(v);

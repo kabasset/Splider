@@ -48,8 +48,8 @@ public:
     const auto gt = sin(x);
 
     logger.info("Interpolating...");
-    Splider::Partition domain(u);
-    Splider::Cospline cospline(domain, x);
+    Splider::Partition<double> domain(u);
+    Splider::Cospline<double> cospline(domain, x);
     const auto y = cospline(v);
     const auto gsl = resample_with_gsl(u, v, x);
 

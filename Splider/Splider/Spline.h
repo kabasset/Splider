@@ -73,7 +73,15 @@ public:
   /**
    * @brief List-based constructor.
    */
-  explicit Spline(const Domain& u, std::initializer_list<Value> v) : Spline(u, v.begin(), v.end()) {}
+  template <typename TV>
+  explicit Spline(const Domain& u, std::initializer_list<TV> v) : Spline(u, v.begin(), v.end()) {}
+
+  /**
+   * @brief Get the knots abscissae.
+   */
+  const Domain& domain() const {
+    return m_domain;
+  }
 
   /**
    * @brief Assign knot values from an iterator.
@@ -95,7 +103,8 @@ public:
   /**
    * @brief Assign knot values from a list.
    */
-  void assign(std::initializer_list<T> v) {
+  template <typename TV>
+  void assign(std::initializer_list<TV> v) {
     assign(v.begin(), v.end());
   }
 
@@ -197,7 +206,8 @@ public:
    * 
    * The list can either contain `Real`s or `Arg`s.
    */
-  std::vector<Value> operator()(std::initializer_list<Value> x) {
+  template <typename TX>
+  std::vector<Value> operator()(std::initializer_list<TX> x) {
     return operator()(x.begin(), x.end());
   }
 

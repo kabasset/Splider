@@ -31,7 +31,7 @@ This allows recomputing only what has changed.
 With Splider, the above example writes:
 
 ```cpp
-Splider::Partition domain(u); // Compute domain-related coefficients
+Splider::Partition<double> domain(u); // Compute domain-related coefficients
 Splider::Spline<double> spline(domain, v); // Compute knot-related coefficients
 std::vector<double> y = spline(x); // Compute argument-related coefficients
 ```
@@ -41,16 +41,16 @@ Yet, sometimes, one wish to initialize them with `u` and `x` and apply them to `
 This is known as a `Cospline` in Splider:
 
 ```cpp
-Splider::Partition domain(u); // Compute domain-related coefficients
-Splider::Cospline cospline(domain, x); // Compute arguments-related coefficients
+Splider::Partition<double> domain(u); // Compute domain-related coefficients
+Splider::Cospline<double> cospline(domain, x); // Compute arguments-related coefficients
 std::vector<double> y = cospline(v); // Compute knots-related coefficients
 ```
 
 This is especially efficient when several functions must be interpolated with the same `x`:
 
 ```cpp
-Splider::Partition domain(u);
-Splider::Cospline cospline(domain, x);
+Splider::Partition<double> domain(u);
+Splider::Cospline<double> cospline(domain, x);
 std::vector<double> y0 = cospline(v0);
 std::vector<double> y1 = cospline(v1);
 std::vector<double> y2 = cospline(v2);
