@@ -174,6 +174,22 @@ public:
       return out;
     }
 
+    /**
+     * @brief Evaluate the spline for multiple arguments.
+     */
+    template <typename TX>
+    std::vector<Value> operator()(const TX& x) {
+      return operator()(std::begin(x), std::end(x));
+    }
+
+    /**
+     * @brief Evaluate the spline for multiple arguments.
+     */
+    template <typename TX>
+    std::vector<Value> operator()(std::initializer_list<TX> x) {
+      return operator()(x.begin(), x.end());
+    }
+
   private:
     const Domain& m_domain; ///< The knots domain
     std::vector<Value> m_v; ///< The knot values
