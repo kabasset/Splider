@@ -61,7 +61,11 @@ public:
    * @brief An argument.
    */
   template <typename TDomain>
-  struct Arg {
+  class Arg {
+    template <typename, typename>
+    friend class TDerived::Spline;
+
+  public:
     /**
      * @brief The domain type.
      */
@@ -76,31 +80,40 @@ public:
      * @brief Constructor.
      */
     explicit Arg(const Domain& domain, Real x) {
-      i = domain.index(x);
-      const auto h = domain.length(i);
-      const auto left = x - domain[i];
+      m_i = domain.index(x);
+      const auto h = domain.length(m_i);
+      const auto left = x - domain[m_i];
       const auto right = h - left;
-      cv0 = right / h;
-      cv1 = 1 - cv0;
-      cs0 = right / 6. * (right * cv0 - h);
-      cs1 = left / 6. * (left * cv1 - h);
+      m_cv0 = right / h;
+      m_cv1 = 1 - m_cv0;
+      m_cs0 = right / 6. * (right * m_cv0 - h);
+      m_cs1 = left / 6. * (left * m_cv1 - h);
     }
 
-    Linx::Index i; ///< The subinterval index
-    Real cs1; ///< The `d[i + 1]` coefficient
-    Real cs0; ///< The `d[i]` coefficient
-    Real cv1; ///< The `v[i + 1]` coefficient
-    Real cv0; ///< The `v[i]` coefficient
+  private:
+    Linx::Index m_i; ///< The subinterval index
+    Real m_cs1; ///< The `d[i + 1]` coefficient
+    Real m_cs0; ///< The `d[i]` coefficient
+    Real m_cv1; ///< The `v[i + 1]` coefficient
+    Real m_cv0; ///< The `v[i]` coefficient
   };
 
   /**
    * @brief The parameters.
    */
   template <typename TDomain, typename T>
-  struct Spline { // FIXME Mixin for operator()
+  class Spline { // FIXME Mixin for operator()?
+    friend class TDerived::Method;
 
+  public:
+    /**
+     * @brief The knots domain.
+     */
     using Domain = TDomain;
 
+    /**
+   * @brief The abscissae floating point type.
+     */
     using Real = typename Domain::Value;
 
     /**
@@ -143,9 +156,9 @@ public:
      * @brief Evaluate the spline for a given argument.
      */
     Value operator()(const Arg<Domain>& arg) {
-      const auto i = arg.i;
-      update(*this, i);
-      return m_s[i + 1] * arg.cs1 + m_s[i] * arg.cs0 + m_v[i + 1] * arg.cv1 + m_v[i] * arg.cv0;
+      const auto i = arg.m_i;
+      TDerived::update(*this, i);
+      return m_s[i + 1] * arg.m_cs1 + m_s[i] * arg.m_cs0 + m_v[i + 1] * arg.m_cv1 + m_v[i] * arg.m_cv0;
     }
 
     /**
@@ -161,11 +174,11 @@ public:
       return out;
     }
 
-    // private: // FIXME grant access to update()
+  private:
     const Domain& m_domain; ///< The knots domain
     std::vector<Value> m_v; ///< The knot values
     std::vector<Value> m_s; ///< The knot second derivatives
-    bool m_valid;
+    bool m_valid; ///< Validity flag // FIXME as std::set
   };
 };
 
