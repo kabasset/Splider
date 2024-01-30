@@ -50,7 +50,7 @@ public:
     const auto left = x - domain[m_index];
     const auto right = h - left;
     m_cv0 = right / h;
-    m_cv1 = left / h;
+    m_cv1 = 1 - m_cv0;
     m_cs0 = right / 6. * (right * m_cv0 - h);
     m_cs1 = left / 6. * (left * m_cv1 - h);
   }
