@@ -11,9 +11,6 @@
 #include <stdexcept>
 #include <vector>
 
-/**
- * @brief Spline builder.
- */
 namespace Splider {
 
 /**
