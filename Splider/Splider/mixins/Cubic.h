@@ -92,10 +92,10 @@ public:
 
   private:
     Linx::Index m_i; ///< The subinterval index
-    Real m_cs1; ///< The `d[i + 1]` coefficient
-    Real m_cs0; ///< The `d[i]` coefficient
-    Real m_cv1; ///< The `v[i + 1]` coefficient
     Real m_cv0; ///< The `v[i]` coefficient
+    Real m_cv1; ///< The `v[i + 1]` coefficient
+    Real m_cs0; ///< The `d[i]` coefficient
+    Real m_cs1; ///< The `d[i + 1]` coefficient
   };
 
   /**
@@ -150,21 +150,33 @@ public:
     template <typename TV>
     explicit Spline(const Domain& u, std::initializer_list<TV> v) : Spline(u, v.begin(), v.end()) {}
 
-    const Domain& domain() const {
+    /**
+     * @brief Get the knots domain.
+     */
+    inline const Domain& domain() const {
       return m_domain;
     }
 
+    /**
+     * @brief Assign the knot values.
+     */
     template <typename TIt>
     void assign(TIt begin, TIt end) {
       m_v.assign(begin, end);
       m_valid = false;
     }
 
+    /**
+     * @brief Assign the knot values.
+     */
     template <typename TV>
     void assign(const TV& v) {
       assign(std::begin(v), std::end(v));
     }
 
+    /**
+     * @brief Assign the knot values.
+     */
     template <typename TV>
     void assign(std::initializer_list<TV> v) {
       assign(v.begin(), v.end());
@@ -173,7 +185,7 @@ public:
     /**
      * @brief Evaluate the spline for a given argument.
      */
-    Value operator()(Real x) {
+    inline Value operator()(Real x) {
       return operator()(Arg(m_domain, x));
     }
 
@@ -183,7 +195,7 @@ public:
     Value operator()(const Arg& arg) {
       const auto i = arg.m_i;
       TDerived::update(*this, i);
-      return m_s[i + 1] * arg.m_cs1 + m_s[i] * arg.m_cs0 + m_v[i + 1] * arg.m_cv1 + m_v[i] * arg.m_cv0;
+      return m_v[i] * arg.m_cv0 + m_v[i + 1] * arg.m_cv1 + m_s[i] * arg.m_cs0 + m_s[i + 1] * arg.m_cs1;
     }
 
     /**

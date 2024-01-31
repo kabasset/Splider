@@ -50,14 +50,14 @@ public:
   /**
    * @brief Get the knots domain.
    */
-  const Domain& domain() const {
+  inline const Domain& domain() const {
     return m_domain;
   }
 
   /**
    * @brief Create an argument at given abscissa.
    */
-  Arg arg(Real x) const {
+  inline Arg arg(Real x) const {
     return Method::Arg(m_domain, x);
   }
 

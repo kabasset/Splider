@@ -28,15 +28,16 @@ public:
     std::vector<Real> b(n);
     std::vector<Value> d(n);
 
+    auto h0 = params.m_domain.length(0);
     for (Linx::Index i = 1; i < n - 1; ++i) {
-      const auto h0 = params.m_domain.length(i - 1);
       const auto h1 = params.m_domain.length(i);
       b[i] = 2. * (h0 + h1);
       d[i] = 6. * ((params.m_v[i + 1] - params.m_v[i]) / h1 - (params.m_v[i] - params.m_v[i - 1]) / h0);
+      h0 = h1;
     }
 
     // Forward
-    for (Linx::Index i = 2; i < n - 1; ++i) {
+    for (Linx::Index i = 2; i < n - 1; ++i) { // FIXME merge with previous loop
       const auto h = params.m_domain.length(i);
       const auto w = h / b[i - 1];
       b[i] -= w * h;
