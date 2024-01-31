@@ -271,18 +271,20 @@ private:
     // Initialize i = 1 for merging initialization and forward pass
     auto h0 = m_domain.length(0);
     auto h1 = m_domain.length(1);
-    auto dv0 = 6. * (m_v[1] - m_v[0]) / h0;
-    auto dv1 = 6. * (m_v[2] - m_v[1]) / h1;
+    auto dv0 = (m_v[1] - m_v[0]) / h0;
+    auto dv1 = (m_v[2] - m_v[1]) / h1;
     b[1] = 2. * (h0 + h1);
-    d[1] = dv1 - dv0;
+    d[1] = 6. * (dv1 - dv0);
 
     // Initialization and forward pass
-    for (Linx::Index i = 2; i < n - 1; ++i, h0 = h1, dv0 = dv1) {
+    for (Linx::Index i = 2; i < n - 1; ++i) {
+      h0 = h1;
       h1 = m_domain.length(i);
-      dv1 = 6. * (m_v[i + 1] - m_v[i]) / h1;
+      dv0 = dv1;
+      dv1 = (m_v[i + 1] - m_v[i]) / h1;
       const auto w = h1 / b[i - 1];
       b[i] = 2. * (h0 + h1) - w * h1;
-      d[i] = dv1 - dv0 - w * d[i - 1];
+      d[i] = 6. * (dv1 - dv0) - w * d[i - 1];
     }
 
     // Backward pass
