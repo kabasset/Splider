@@ -80,8 +80,9 @@ public:
   void assign(TIt begin, TIt end) {
     m_args.clear();
     m_args.reserve(std::distance(begin, end));
+    const auto& d = domain();
     for (; begin != end; ++begin) {
-      m_args.emplace_back(m_spline.domain(), *begin);
+      m_args.emplace_back(d, *begin);
     }
   }
 
