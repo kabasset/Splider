@@ -268,22 +268,24 @@ private:
     std::vector<Real> b(n);
     std::vector<Value> d(n);
 
-    for (Linx::Index i = 1; i < n - 1; ++i) {
-      const auto h0 = m_domain.length(i - 1);
-      const auto h1 = m_domain.length(i);
-      b[i] = 2. * (h0 + h1);
-      d[i] = 6. * ((m_v[i + 1] - m_v[i]) / h1 - (m_v[i] - m_v[i - 1]) / h0);
+    // Initialize i = 1 for merging initialization and forward pass
+    auto h0 = m_domain.length(0);
+    auto h1 = m_domain.length(1);
+    auto dv0 = 6. * (m_v[1] - m_v[0]) / h0;
+    auto dv1 = 6. * (m_v[2] - m_v[1]) / h1;
+    b[1] = 2. * (h0 + h1);
+    d[1] = dv1 - dv0;
+
+    // Initialization and forward pass
+    for (Linx::Index i = 2; i < n - 1; ++i, h0 = h1, dv0 = dv1) {
+      h1 = m_domain.length(i);
+      dv1 = 6. * (m_v[i + 1] - m_v[i]) / h1;
+      const auto w = h1 / b[i - 1];
+      b[i] = 2. * (h0 + h1) - w * h1;
+      d[i] = dv1 - dv0 - w * d[i - 1];
     }
 
-    // Forward
-    for (Linx::Index i = 2; i < n - 1; ++i) {
-      const auto h = m_domain.length(i);
-      const auto w = h / b[i - 1];
-      b[i] -= w * h;
-      d[i] -= w * d[i - 1];
-    }
-
-    // Backward
+    // Backward pass
     m_s[n - 2] = d[n - 2] / b[n - 2];
     for (auto i = n - 3; i > 0; --i) {
       m_s[i] = (d[i] - m_domain.length(i) * m_s[i + 1]) / b[i];
