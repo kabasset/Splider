@@ -27,38 +27,41 @@ public:
 
     using Real = typename TSpline::Real;
     using Value = typename TSpline::Value;
-    const Linx::Index n = params.m_s.size();
+    const auto& domain = params.m_domain;
+    const auto& v = params.m_v;
+    auto& s = params.m_s;
+    const Linx::Index n = s.size();
     std::vector<Real> b(n);
     std::vector<Value> d(n);
 
     // Initialize i = 1 for merging initialization and forward pass
-    auto h0 = params.m_domain.length(0);
-    auto h1 = params.m_domain.length(1);
-    auto dv0 = (params.m_v[1] - params.m_v[0]) / h0;
-    auto dv1 = (params.m_v[2] - params.m_v[1]) / h1;
+    auto h0 = domain.length(0);
+    auto h1 = domain.length(1);
+    auto dv0 = (v[1] - v[0]) / h0;
+    auto dv1 = (v[2] - v[1]) / h1;
     b[1] = 2. * (h0 + h1);
     d[1] = 6. * (dv1 - dv0);
 
     // Initialization and forward pass
     for (Linx::Index i = 2; i < n - 1; ++i) {
       h0 = h1;
-      h1 = params.m_domain.length(i);
+      h1 = domain.length(i);
       dv0 = dv1;
-      dv1 = (params.m_v[i + 1] - params.m_v[i]) / h1;
+      dv1 = (v[i + 1] - v[i]) / h1;
       const auto w = h1 / b[i - 1];
       b[i] = 2. * (h0 + h1) - w * h1;
       d[i] = 6. * (dv1 - dv0) - w * d[i - 1];
     }
 
     // Backward pass
-    params.m_s[n - 2] = d[n - 2] / b[n - 2];
+    s[n - 2] = d[n - 2] / b[n - 2];
     for (auto i = n - 3; i > 0; --i) {
-      params.m_s[i] = (d[i] - params.m_domain.length(i) * params.m_s[i + 1]) / b[i];
+      s[i] = (d[i] - domain.length(i) * s[i + 1]) / b[i];
     }
 
     // Natutal spline // FIXME useful?
-    params.m_s[0] = 0;
-    params.m_s[n - 1] = 0;
+    s[0] = 0;
+    s[n - 1] = 0;
 
     params.m_valid = true;
   }
