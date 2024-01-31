@@ -4,6 +4,11 @@
 #ifndef _SPLIDER_BUILDER_H
 #define _SPLIDER_BUILDER_H
 
+#include "Splider/Co.h"
+
+#include <initializer_list>
+#include <iterator>
+
 /**
  * @brief Spline builder.
  */
@@ -118,7 +123,7 @@ public:
   auto cospline(TIt begin, TIt end) const {
     using T = typename std::iterator_traits<TIt>::value_type;
     using Value = std::decay_t<T>;
-    return typename Method::Cospline<Value>(m_domain, begin, end);
+    return Co<typename Method::Spline<Domain, Value>>(m_domain, begin, end);
   }
 
   /**

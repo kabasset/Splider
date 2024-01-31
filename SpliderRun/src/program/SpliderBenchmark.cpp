@@ -23,7 +23,6 @@ std::vector<double> resample_with_gsl(const U& u, const V& v, const X& x) {
   std::vector<double> y;
   for (const auto& row : sections(v)) {
     y.clear();
-    y.reserve(x.size()); // FIXME needed after clear()?
     gsl_spline_init(spline, u.data(), row.data(), u.size());
     for (const auto& e : x) {
       y.push_back(gsl_spline_eval(spline, e, acc));

@@ -117,6 +117,11 @@ public:
     using Real = typename Domain::Value;
 
     /**
+     * @brief The argument type.
+     */
+    using Arg = typename TDerived::Arg<Domain>;
+
+    /**
      * @brief The knot value type.
      */
     using Value = T;
@@ -145,6 +150,26 @@ public:
     template <typename TV>
     explicit Spline(const Domain& u, std::initializer_list<TV> v) : Spline(u, v.begin(), v.end()) {}
 
+    const Domain& domain() const {
+      return m_domain;
+    }
+
+    template <typename TIt>
+    void assign(TIt begin, TIt end) {
+      m_v.assign(begin, end);
+      m_valid = false;
+    }
+
+    template <typename TV>
+    void assign(const TV& v) {
+      assign(std::begin(v), std::end(v));
+    }
+
+    template <typename TV>
+    void assign(std::initializer_list<TV> v) {
+      assign(v.begin(), v.end());
+    }
+
     /**
      * @brief Evaluate the spline for a given argument.
      */
@@ -155,7 +180,7 @@ public:
     /**
      * @brief Evaluate the spline for a given argument.
      */
-    Value operator()(const Arg<Domain>& arg) {
+    Value operator()(const Arg& arg) {
       const auto i = arg.m_i;
       TDerived::update(*this, i);
       return m_s[i + 1] * arg.m_cs1 + m_s[i] * arg.m_cs0 + m_v[i + 1] * arg.m_cv1 + m_v[i] * arg.m_cv0;

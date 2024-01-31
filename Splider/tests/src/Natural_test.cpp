@@ -64,6 +64,19 @@ BOOST_FIXTURE_TEST_CASE(real_lin_spline_test, RealLinFixture) {
   BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
 }
 
+BOOST_FIXTURE_TEST_CASE(real_lin_cospline_test, RealLinFixture) {
+  const auto b = Spline::builder(u);
+  auto cospline = b.cospline(x);
+  auto out = cospline(v);
+  BOOST_TEST(out.size() == x.size());
+  for (std::size_t i = 0; i < out.size(); ++i) {
+    BOOST_TEST(out[i] > v[i]);
+    BOOST_TEST(out[i] < v[i + 1]);
+  }
+  auto expected = resample_with_gsl(u, v, x);
+  BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
+}
+
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE_END()

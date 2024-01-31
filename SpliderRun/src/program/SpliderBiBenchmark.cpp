@@ -24,7 +24,6 @@ std::vector<double> resample_with_gsl(const U& u0, const U& u1, const V& v, cons
   std::vector<double> y;
   for (const auto& plane : sections(v)) {
     y.clear();
-    y.reserve(x.size()); // FIXME needed after clear()?
     gsl_spline2d_init(spline, u0.data(), u1.data(), plane.data(), u0.size(), u1.size());
     for (const auto& e : x) {
       y.push_back(gsl_spline2d_eval(spline, e[0], e[1], xacc, yacc));
