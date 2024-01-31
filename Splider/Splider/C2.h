@@ -16,6 +16,9 @@ namespace Splider {
 class Natural : public C2Mixin<Natural> {
 
 public:
+  /**
+   * @brief Solve the tridiagonal system using Thomas algorithm.
+   */
   template <typename TSpline>
   static void update(TSpline& params, Linx::Index) {
     if (params.m_valid) {
@@ -28,19 +31,21 @@ public:
     std::vector<Real> b(n);
     std::vector<Value> d(n);
 
+    // Initialize i = 1 for merging initialization and forward pass
     auto h0 = params.m_domain.length(0);
-    for (Linx::Index i = 1; i < n - 1; ++i) {
-      const auto h1 = params.m_domain.length(i);
+    auto h1 = params.m_domain.length(1);
+    b[1] = 2. * (h0 + h1);
+    d[1] = 6. * ((params.m_v[2] - params.m_v[1]) / h1 - (params.m_v[1] - params.m_v[0]) / h0);
+
+    for (Linx::Index i = 2; i < n - 1; ++i, h0 = h1) {
+      // Initialize
+      h1 = params.m_domain.length(i);
       b[i] = 2. * (h0 + h1);
       d[i] = 6. * ((params.m_v[i + 1] - params.m_v[i]) / h1 - (params.m_v[i] - params.m_v[i - 1]) / h0);
-      h0 = h1;
-    }
 
-    // Forward
-    for (Linx::Index i = 2; i < n - 1; ++i) { // FIXME merge with previous loop
-      const auto h = params.m_domain.length(i);
-      const auto w = h / b[i - 1];
-      b[i] -= w * h;
+      // Forward
+      const auto w = h1 / b[i - 1];
+      b[i] -= w * h1;
       d[i] -= w * d[i - 1];
     }
 
