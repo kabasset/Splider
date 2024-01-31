@@ -39,14 +39,7 @@ template <typename TDuration, typename U, typename V, typename X, typename Y>
 TDuration resample(const U& u, const V& v, const X& x, Y& y, const std::string& setup) {
   Linx::Chronometer<TDuration> chrono;
   chrono.start();
-  if (setup == "f") {
-    using Domain = Splider::Partition<float>;
-    const Domain domain(u);
-    Splider::Cospline<double, Domain> cospline(domain, x); // FIXME float
-    for (const auto& row : sections(v)) {
-      y = cospline(row);
-    }
-  } else if (setup == "d") {
+  if (setup == "d") {
     using Domain = Splider::Partition<double>;
     const Domain domain(u);
     Splider::Cospline<double, Domain> cospline(domain, x);
@@ -62,11 +55,11 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, const std::string& 
       spline.assign(row);
       y = spline(args);
     }
-  } else if (setup == "s2") {
-    using Spline = Splider::Natural;
-    const auto b = Spline::builder(u);
-    auto spline = b.template spline<double>();
-    const auto args = b.args(x);
+  } else if (setup == "l") {
+    using Domain = Splider::Linspace<double>;
+    const Domain domain(u[0], u[1], u.size()); // FIXME add ssize() to Linx
+    const Splider::Args<double> args(domain, x);
+    Splider::Spline<double, Domain> spline(domain);
     for (const auto& row : sections(v)) {
       spline.assign(row);
       y = spline(args);
@@ -78,11 +71,11 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, const std::string& 
     for (const auto& row : sections(v)) {
       y = cospline(row);
     }
-  } else if (setup == "l") {
-    using Domain = Splider::Linspace<double>;
-    const Domain domain(u[0], u[1], u.size()); // FIXME add ssize() to Linx
-    const Splider::Args<double> args(domain, x);
-    Splider::Spline<double, Domain> spline(domain);
+  } else if (setup == "s2") {
+    using Spline = Splider::Natural;
+    const auto b = Spline::builder(u);
+    const auto args = b.args(x);
+    auto spline = b.template spline<double>();
     for (const auto& row : sections(v)) {
       spline.assign(row);
       y = spline(args);
