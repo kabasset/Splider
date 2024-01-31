@@ -36,24 +36,24 @@ std::vector<double> resample_with_gsl(const U& u, const V& v, const X& x) {
 }
 
 template <typename TDuration, typename U, typename V, typename X, typename Y>
-TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup) {
+TDuration resample(const U& u, const V& v, const X& x, Y& y, const std::string& setup) {
   Linx::Chronometer<TDuration> chrono;
   chrono.start();
-  if (setup == 'f') {
+  if (setup == "f") {
     using Domain = Splider::Partition<float>;
     const Domain domain(u);
     Splider::Cospline<double, Domain> cospline(domain, x); // FIXME float
     for (const auto& row : sections(v)) {
       y = cospline(row);
     }
-  } else if (setup == 'd') {
+  } else if (setup == "d") {
     using Domain = Splider::Partition<double>;
     const Domain domain(u);
     Splider::Cospline<double, Domain> cospline(domain, x);
     for (const auto& row : sections(v)) {
       y = cospline(row);
     }
-  } else if (setup == 's') {
+  } else if (setup == "s") {
     using Domain = Splider::Partition<double>;
     const Domain domain(u);
     const Splider::Args<double> args(domain, x);
@@ -62,14 +62,23 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup) {
       spline.assign(row);
       y = spline(args);
     }
-  } else if (setup == '2') {
+  } else if (setup == "s2") {
+    using Spline = Splider::Natural;
+    const auto b = Spline::builder(u);
+    auto spline = b.template spline<double>();
+    const auto args = b.args(x);
+    for (const auto& row : sections(v)) {
+      spline.assign(row);
+      y = spline(args);
+    }
+  } else if (setup == "c2") {
     using Spline = Splider::Natural;
     const auto b = Spline::builder(u);
     auto cospline = b.cospline(x);
     for (const auto& row : sections(v)) {
       y = cospline(row);
     }
-  } else if (setup == 'l') {
+  } else if (setup == "l") {
     using Domain = Splider::Linspace<double>;
     const Domain domain(u[0], u[1], u.size()); // FIXME add ssize() to Linx
     const Splider::Args<double> args(domain, x);
@@ -78,7 +87,7 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup) {
       spline.assign(row);
       y = spline(args);
     }
-  } else if (setup == 'g') {
+  } else if (setup == "g") {
     y = resample_with_gsl(u, v, x);
   } else {
     throw std::runtime_error("Case not implemented");
@@ -91,7 +100,7 @@ class SpliderBenchmark : public Elements::Program {
 public:
   std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
     Linx::ProgramOptions options;
-    options.named("case", "Test case: d (double), f (float), s (Spline), g (GSL)", 'd');
+    options.named("case", "Test case: d (double), f (float), s (Spline), g (GSL)", std::string("d"));
     options.named("knots", "Number of knots", 100L);
     options.named("args", "Number of arguments", 100L);
     options.named("iters", "Numper of iterations", 1L);
@@ -100,7 +109,7 @@ public:
   }
 
   ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
-    const auto setup = args["case"].as<char>();
+    const auto setup = args["case"].as<std::string>();
     const auto u_size = args["knots"].as<Linx::Index>();
     const auto x_size = args["args"].as<Linx::Index>();
     const auto v_iters = args["iters"].as<Linx::Index>();

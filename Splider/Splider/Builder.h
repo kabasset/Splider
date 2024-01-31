@@ -65,7 +65,7 @@ public:
    * @brief Create multiple arguments at given abscissae.
    */
   template <typename TIt>
-  std::vector<Arg> args(TIt begin, TIt end) {
+  std::vector<Arg> args(TIt begin, TIt end) const {
     std::vector<Arg> out;
     out.reserve(std::distance(begin, end));
     for (; begin != end; ++begin) {
@@ -78,7 +78,7 @@ public:
    * @brief Create multiple arguments at given abscissae.
    */
   template <typename TX>
-  std::vector<Arg> args(const TX& x) {
+  std::vector<Arg> args(const TX& x) const {
     return args(std::begin(x), std::end(x));
   }
 
@@ -86,8 +86,16 @@ public:
    * @brief Create multiple arguments at given abscissae.
    */
   template <typename TX>
-  std::vector<Arg> args(std::initializer_list<TX> x) {
+  std::vector<Arg> args(std::initializer_list<TX> x) const {
     return args(x.begin(), x.end());
+  }
+
+  /**
+   * @brief Create a spline with null knots.
+   */
+  template <typename TV>
+  auto spline() const {
+    return typename Method::Spline<Domain, TV>(m_domain);
   }
 
   /**
