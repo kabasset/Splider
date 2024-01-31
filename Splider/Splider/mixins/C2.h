@@ -4,7 +4,7 @@
 #ifndef _SPLIDER_MIXINS_C2_H
 #define _SPLIDER_MIXINS_C2_H
 
-#include "Splider/mixins/Cubic.h"
+#include "Splider/mixins/Builder.h"
 
 #include <initializer_list>
 
@@ -14,7 +14,7 @@ namespace Splider {
  * @brief Mixin for C2 splines.
  */
 template <typename TDerived>
-class C2Mixin : public CubicMixin<TDerived> {
+class C2Mixin : public BuilderMixin<TDerived> {
 
 public:
   /**

@@ -4,7 +4,7 @@
 #ifndef _SPLIDER_MIXINS_HERMITE_H
 #define _SPLIDER_MIXINS_HERMITE_H
 
-#include "Splider/mixins/Cubic.h"
+#include "Splider/mixins/Builder.h"
 
 #include <initializer_list>
 
@@ -16,7 +16,7 @@ namespace Splider {
  * Hermite splines are C1.
  */
 template <typename TDerived>
-class HermiteMixin : public CubicMixin<TDerived> {
+class HermiteMixin : public BuilderMixin<TDerived> {
 
 protected:
   /**

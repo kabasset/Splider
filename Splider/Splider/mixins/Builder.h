@@ -1,8 +1,8 @@
 /// @copyright 2023, Antoine Basset
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef _SPLIDER_MIXINS_CUBIC_H
-#define _SPLIDER_MIXINS_CUBIC_H
+#ifndef _SPLIDER_MIXINS_BUILDER_H
+#define _SPLIDER_MIXINS_BUILDER_H
 
 #include "Splider/Builder.h"
 #include "Splider/Linspace.h"
@@ -16,7 +16,7 @@ namespace Splider {
  * @brief Mixin for cubic spline methods.
  */
 template <typename TDerived>
-class CubicMixin {
+class BuilderMixin {
 public:
   /**
    * @brief The underlying method.
