@@ -7,8 +7,8 @@
 #include "Linx/Data/Tiling.h"
 #include "Linx/Run/Chronometer.h"
 #include "Linx/Run/ProgramOptions.h"
-#include "Splider/C2.h"
 #include "Splider/Cospline.h"
+#include "Splider/Natural.h"
 
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>

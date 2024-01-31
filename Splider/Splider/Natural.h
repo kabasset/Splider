@@ -1,10 +1,10 @@
 /// @copyright 2023, Antoine Basset
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef _SPLIDER_C2_H
-#define _SPLIDER_C2_H
+#ifndef _SPLIDER_NATURAL_H
+#define _SPLIDER_NATURAL_H
 
-#include "Splider/mixins/Cubic.h"
+#include "Splider/mixins/C2.h"
 
 namespace Splider {
 

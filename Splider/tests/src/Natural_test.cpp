@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "Linx/Data/Sequence.h"
-#include "Splider/C2.h"
+#include "Splider/Natural.h"
 
 #include <boost/test/unit_test.hpp>
 #include <complex>
