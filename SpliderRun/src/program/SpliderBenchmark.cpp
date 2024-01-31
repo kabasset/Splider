@@ -7,6 +7,7 @@
 #include "Linx/Data/Tiling.h"
 #include "Linx/Run/Chronometer.h"
 #include "Linx/Run/ProgramOptions.h"
+#include "Splider/C2.h"
 #include "Splider/Cospline.h"
 
 #include <gsl/gsl_interp.h>
@@ -60,6 +61,13 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup) {
     for (const auto& row : sections(v)) {
       spline.assign(row);
       y = spline(args);
+    }
+  } else if (setup == '2') {
+    using Spline = Splider::Natural;
+    const auto b = Spline::builder(u);
+    auto cospline = b.cospline(x);
+    for (const auto& row : sections(v)) {
+      y = cospline(row);
     }
   } else if (setup == 'l') {
     using Domain = Splider::Linspace<double>;
