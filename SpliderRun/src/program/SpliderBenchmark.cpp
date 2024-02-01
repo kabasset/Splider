@@ -9,6 +9,7 @@
 #include "Linx/Run/ProgramOptions.h"
 #include "Splider/C2.h"
 #include "Splider/Cospline.h"
+#include "Splider/Lagrange.h"
 
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
@@ -81,6 +82,13 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, const std::string& 
     for (const auto& row : sections(v)) {
       spline.assign(row);
       y = spline(args);
+    }
+  } else if (setup == "lagrange") {
+    using Spline = Splider::Lagrange;
+    const auto b = Spline::builder(u);
+    auto cospline = b.cospline(x);
+    for (const auto& row : sections(v)) {
+      y = cospline(row);
     }
   } else if (setup == "g") {
     y = resample_with_gsl(u, v, x);
