@@ -22,8 +22,7 @@ public:
 
   LagrangeArg(const Domain& domain, Real x)
   {
-    // FIXME if i < 1
-    m_i = domain.index(x);
+    m_i = std::clamp(domain.index(x), 1L, domain.ssize() - 3);
     const auto u0 = domain[m_i - 1];
     const auto u1 = domain[m_i];
     const auto u2 = domain[m_i + 1];
@@ -83,13 +82,13 @@ public:
   /**
    * @brief Null knots constructor.
    */
-  explicit LagrangeSpline(const Domain& u) : m_domain(u), m_v(m_domain.size()), m_valid(true) {}
+  explicit LagrangeSpline(const Domain& u) : m_domain(u), m_v(m_domain.size()) {}
 
   /**
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit LagrangeSpline(const Domain& u, TIt begin, TIt end) : m_domain(u), m_v(begin, end), m_valid(false)
+  explicit LagrangeSpline(const Domain& u, TIt begin, TIt end) : m_domain(u), m_v(begin, end)
   {}
 
   /**
@@ -121,7 +120,6 @@ public:
   void assign(TIt begin, TIt end)
   {
     m_v.assign(begin, end);
-    m_valid = false;
   }
 
   /**
@@ -196,12 +194,16 @@ protected:
 
   const Domain& m_domain; ///< The knots domain
   std::vector<Value> m_v; ///< The knot values
-  std::vector<Value> m_6s; ///< The knot second derivatives times 6
-  bool m_valid; ///< Validity flag // FIXME to TDerived
 };
 
 /**
  * @brief Piecewise Lagrange cubic polynomials (\f$C^0\f$).
+ * 
+ * This spline is built by fitting a Lagrange cubic polynomial over a sliding 4-knot window.
+ * It is only guaranteed to be (\f$C^0\f$).
+ * 
+ * In the first and last subintervals, cubic polynomials cannot be fitted,
+ * and the next and previous ones are used, respectively.
  */
 class Lagrange : public BuilderMixin<Lagrange> {
 public:
@@ -212,6 +214,9 @@ public:
   template <typename TDomain>
   using Arg = LagrangeArg<TDomain>;
 
+  /**
+   * @brief The spline evaluator.
+   */
   template <typename TDomain, typename T>
   using Spline = LagrangeSpline<TDomain, T>;
 };

@@ -101,14 +101,6 @@ class Akima : public HermiteMixin<Akima> {
  */
 class Monotone : public HermiteMixin<Monotone> {};
 
-/**
- * @brief Lagrange cubic spline.
- * 
- * This spline is built by fitting a Lagrange cubic polynomial over a sliding 4-knot window.
- * It is only guaranteed to be C0.
- */
-class Lagrange;
-
 } // namespace Splider
 
 #endif

@@ -41,8 +41,9 @@ BOOST_FIXTURE_TEST_CASE(real_lin_spline_test, RealLinFixture)
 {
   const auto b = Spline::builder(u);
   auto spline = b.spline(v);
-  auto out = spline(2.5); // FIXME vector
-  BOOST_TEST(out == 25, boost::test_tools::tolerance(1.e-6));
+  auto out = spline(x);
+  BOOST_TEST(out.size() == x.size());
+  BOOST_TEST(out == y, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
 }
 
 //-----------------------------------------------------------------------------
