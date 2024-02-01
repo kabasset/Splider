@@ -18,48 +18,47 @@ for (const auto& xi : x) {
 }
 ```
 
-This is generally sufficient, but in some cases yields huge recomputation where caching could be used.
+This is generally adequate, but in some cases yields huge recomputation where caching could be used.
 For example, assume we need to call `spline` on the same `x` for many variations of `v`.
 In this case, many spline coefficients remain valid while changing `v`.
 
 ## Approach
 
-Splider separates the spline classes in components (intervals, knots and arguments), which each hold their cache.
-For example `Splider::Partition` holds not only the knot positions but also associated byproducts like the spacing between positions.
+Splider separates the spline classes in components (subintervals, knots and arguments), which each hold their cache.
+For example the subintervals hold not only their bounds but also associated byproducts like their lengths.
 This allows recomputing only what has changed.
 
 With Splider, the above example writes:
 
 ```cpp
-Splider::Partition<double> domain(u); // Compute domain-related coefficients
-Splider::Spline<double> spline(domain, v); // Compute knot-related coefficients
-std::vector<double> y = spline(x); // Compute argument-related coefficients
+const auto b = Spline::builder(u); // Compute domain-related coefficients
+auto spline = b.spline(v); // Compute knot-related coefficients
+auto y = spline(x); // Compute argument-related coefficients
 ```
 
 In general splines are initialized with `u` and `v` and applied to `x`.
 Yet, sometimes, one wish to initialize them with `u` and `x` and apply them to `v`.
-This is known as a `Cospline` in Splider:
+This is known as a "cospline" in Splider:
 
 ```cpp
-Splider::Partition<double> domain(u); // Compute domain-related coefficients
-Splider::Cospline<double> cospline(domain, x); // Compute arguments-related coefficients
-std::vector<double> y = cospline(v); // Compute knots-related coefficients
+const auto b = Spline::builder(u); // Compute domain-related coefficients
+auto cospline = b.cospline(x); // Compute arguments-related coefficients
+auto y = cospline(v); // Compute knots-related coefficients
 ```
 
 This is especially efficient when several functions must be interpolated with the same `x`:
 
 ```cpp
-Splider::Partition<double> domain(u);
-Splider::Cospline<double> cospline(domain, x);
-std::vector<double> y0 = cospline(v0);
-std::vector<double> y1 = cospline(v1);
-std::vector<double> y2 = cospline(v2);
+const auto b = Spline::builder(u); // Compute domain-related coefficients
+auto cospline = b.cospline(x);
+auto y0 = cospline(v0);
+auto y1 = cospline(v1);
+auto y2 = cospline(v2);
 ```
 
 Moreover, Splider is compatible with any value type of a ring (i.e. with `+` and `*` operators), e.g. `std::complex`.
 
-2D interpolation is also provided, e.g. as `Splider::BiCospline`.
-Extrapolation to ND is under development.
+Extrapolation to N-dimensional splines is under development.
 
 Splider relies on [Linx](https://github.com/kabasset/Linx) for the data structures and basic operations.
 
