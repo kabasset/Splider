@@ -1,6 +1,7 @@
 /// @copyright 2023, Antoine Basset
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "Splider/Natural.h"
 #include "SpliderRun/Demo.h"
 
 #include <boost/test/unit_test.hpp>
@@ -15,12 +16,10 @@ BOOST_AUTO_TEST_CASE(default_interpolant_test) {
 
   //! [Default interpolant]
 
-  Splider::Partition<> u {1, 2, 3, 4};
-  std::vector<double> v {10, 20, 30, 40};
-  Splider::Spline<double> spline(u, v);
-
-  std::vector<double> x {1.1, 2.5, 3.9};
-  auto y = spline(x);
+  using Spline = Splider::Natural;
+  const auto b = Spline::builder({1, 2, 3, 4});
+  auto spline = b.spline({10, 20, 30, 40});
+  auto y = spline({1.1, 2.5, 3.9});
 
   //! [Default interpolant]
 }
@@ -29,12 +28,10 @@ BOOST_AUTO_TEST_CASE(default_resampler_test) {
 
   //! [Default resampler]
 
-  Splider::Partition<> u {1, 2, 3, 4};
-  std::vector<double> x {1.1, 2.5, 3.9};
-  Splider::Cospline<double> resampler(u, x);
-
-  std::vector<double> v {10, 20, 30, 40};
-  auto y = resampler(v);
+  using Spline = Splider::Natural;
+  const auto b = Spline::builder({1, 2, 3, 4});
+  auto cospline = b.cospline({1.1, 2.5, 3.9});
+  auto y = cospline({10, 20, 30, 40});
 
   //! [Default resampler]
 }
