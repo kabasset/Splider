@@ -4,6 +4,8 @@
 #ifndef _SPLIDER_CO_H
 #define _SPLIDER_CO_H
 
+#include "Linx/Base/SeqUtils.h" // IsRange
+
 #include <initializer_list>
 #include <vector>
 
@@ -57,7 +59,7 @@ public:
   /**
    * @brief Range-based constructor.
    */
-  template <typename TX>
+  template <typename TX, typename std::enable_if_t<Linx::IsRange<TX>::value>* = nullptr>
   explicit Co(const Domain& u, const TX& x) : Co(u, std::begin(x), std::end(x)) {}
 
   /**
@@ -89,7 +91,7 @@ public:
   /**
    * @brief Assign arguments from a range.
    */
-  template <typename TX>
+  template <typename TX, typename std::enable_if_t<Linx::IsRange<TX>::value>* = nullptr>
   void assign(const TX& x) {
     assign(std::begin(x), std::end(x));
   }
@@ -114,7 +116,7 @@ public:
   /**
    * @brief Resample a spline defined by a range of knot values.
    */
-  template <typename TV>
+  template <typename TV, typename std::enable_if_t<Linx::IsRange<TV>::value>* = nullptr>
   std::vector<Value> operator()(const TV& v) {
     return operator()(std::begin(v), std::end(v));
   }

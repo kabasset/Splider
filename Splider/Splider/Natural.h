@@ -4,6 +4,7 @@
 #ifndef _SPLIDER_NATURAL_H
 #define _SPLIDER_NATURAL_H
 
+#include "Linx/Base/SeqUtils.h" // IsRange
 #include "Splider/mixins/C2.h"
 
 namespace Splider {

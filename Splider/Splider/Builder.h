@@ -4,6 +4,7 @@
 #ifndef _SPLIDER_BUILDER_H
 #define _SPLIDER_BUILDER_H
 
+#include "Linx/Base/SeqUtils.h" // IsRange
 #include "Splider/Co.h"
 
 #include <initializer_list>
@@ -77,7 +78,7 @@ public:
   /**
    * @brief Create multiple arguments at given abscissae.
    */
-  template <typename TX>
+  template <typename TX, typename std::enable_if_t<Linx::IsRange<TX>::value>* = nullptr>
   std::vector<Arg> args(const TX& x) const {
     return args(std::begin(x), std::end(x));
   }
@@ -111,7 +112,7 @@ public:
   /**
    * @brief Create a spline with given knot values.
    */
-  template <typename TV>
+  template <typename TV, typename std::enable_if_t<Linx::IsRange<TV>::value>* = nullptr>
   auto spline(const TV& v) const {
     return spline(std::begin(v), std::end(v));
   }
@@ -137,7 +138,7 @@ public:
   /**
    * @brief Create a cospline with given arguments.
    */
-  template <typename TX>
+  template <typename TX, typename std::enable_if_t<Linx::IsRange<TX>::value>* = nullptr>
   auto cospline(const TX& x) const {
     return cospline(std::begin(x), std::end(x));
   }

@@ -4,6 +4,7 @@
 #ifndef _SPLIDER_MIXINS_C2_H
 #define _SPLIDER_MIXINS_C2_H
 
+#include "Linx/Base/SeqUtils.h" // IsRange
 #include "Splider/mixins/Builder.h"
 
 #include <initializer_list>
@@ -95,7 +96,7 @@ public:
   /**
    * @brief Range-based constructor.
    */
-  template <typename TV>
+  template <typename TV, typename std::enable_if_t<Linx::IsRange<TV>::value>* = nullptr>
   explicit C2SplineMixin(const Domain& u, const TV& v) : C2SplineMixin(u, std::begin(v), std::end(v)) {}
 
   /**
@@ -123,7 +124,7 @@ public:
   /**
    * @brief Assign the knot values.
    */
-  template <typename TV>
+  template <typename TV, typename std::enable_if_t<Linx::IsRange<TV>::value>* = nullptr>
   void assign(const TV& v) {
     assign(std::begin(v), std::end(v));
   }
@@ -168,7 +169,7 @@ public:
   /**
    * @brief Evaluate the spline for multiple arguments.
    */
-  template <typename TX>
+  template <typename TX, typename std::enable_if_t<Linx::IsRange<TX>::value>* = nullptr>
   std::vector<Value> operator()(const TX& x) {
     return operator()(std::begin(x), std::end(x));
   }
