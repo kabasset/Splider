@@ -5,6 +5,7 @@
 #include "Linx/Data/Sequence.h"
 #include "Linx/Run/ProgramOptions.h"
 #include "Splider/C2.h"
+#include "Splider/Lagrange.h"
 
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
@@ -36,6 +37,7 @@ public:
     Linx::ProgramOptions options;
     options.positional("knots", "Number of knots", 101L);
     options.positional("args", "Number of arguments", 1001L);
+    options.positional("case", "The test case", std::string("c2"));
     return options.as_pair();
   }
 
@@ -43,6 +45,7 @@ public:
   {
     const auto knot_count = args["knots"].as<Linx::Index>();
     const auto arg_count = args["args"].as<Linx::Index>();
+    const auto setup = args["case"].as<std::string>();
 
     logger.info("Generating knots...");
     const auto u = Linx::Sequence<double>(knot_count).linspace(0, Linx::pi<double>() * 4);
@@ -51,9 +54,16 @@ public:
     const auto gt = sin(x);
 
     logger.info("Interpolating...");
-    const auto b = Splider::C2::builder(u);
-    auto cospline = b.cospline(x);
-    const auto y = cospline(v);
+    std::vector<double> y;
+    if (setup == "c2") {
+      const auto b = Splider::C2::builder(u);
+      auto cospline = b.cospline(x);
+      y = cospline(v);
+    } else if (setup == "lagrange") {
+      const auto b = Splider::Lagrange::builder(u);
+      auto cospline = b.cospline(x);
+      y = cospline(v);
+    }
     const auto gsl = resample_with_gsl(u, v, x);
 
     logger.info("i\tx\tsin(x)\tSplider\tGSL");
