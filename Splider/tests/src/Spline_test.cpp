@@ -15,7 +15,8 @@ BOOST_AUTO_TEST_SUITE(Spline_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(index_test) {
+BOOST_AUTO_TEST_CASE(index_test)
+{
   const Splider::Partition<> u {1, 2, 3, 4};
   for (std::size_t i = 0; i < u.size() - 1; ++i) {
     BOOST_TEST(u.index(u[i]) == i);
@@ -29,7 +30,8 @@ BOOST_AUTO_TEST_CASE(index_test) {
 }
 
 template <typename U, typename V, typename X>
-std::vector<double> resample_with_gsl(const U& u, const V& v, const X& x) {
+std::vector<double> resample_with_gsl(const U& u, const V& v, const X& x)
+{
   gsl_interp_accel* acc = gsl_interp_accel_alloc();
   gsl_spline* spline = gsl_spline_alloc(gsl_interp_cspline, u.size());
   std::vector<double> y;
@@ -65,7 +67,8 @@ struct RealRandomFixture {
   Linx::Sequence<double> v = Linx::Sequence<double>(u.size()).generate(Linx::UniformNoise<double>(0, 1));
 };
 
-BOOST_FIXTURE_TEST_CASE(real_lin_spline_test, RealLinFixture) {
+BOOST_FIXTURE_TEST_CASE(real_lin_spline_test, RealLinFixture)
+{
   Splider::Spline<double> spline(domain, v);
   std::vector<double> out;
   for (const auto& e : x) {

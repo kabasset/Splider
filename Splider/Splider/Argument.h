@@ -20,7 +20,6 @@ namespace Splider {
  */
 template <typename T = double>
 class SplineArg {
-
   template <typename, typename, Mode>
   friend class Spline;
 
@@ -28,6 +27,7 @@ class SplineArg {
   friend class BiCospline;
 
 public:
+
   /**
    * @brief The real number type.
    */
@@ -44,7 +44,8 @@ public:
    * @brief Constructor.
    */
   template <typename TDomain>
-  explicit SplineArg(const TDomain& domain, Value x) {
+  explicit SplineArg(const TDomain& domain, Value x)
+  {
     m_index = domain.index(x);
     const auto h = domain.length(m_index);
     const auto left = x - domain[m_index];
@@ -61,7 +62,8 @@ public:
    * @param index The subinterval length
    * @param left The distance between the subinterval min and the argument
    */
-  explicit SplineArg(Linx::Index index, Value length, Value left) {
+  explicit SplineArg(Linx::Index index, Value length, Value left)
+  {
     m_index = index;
     const auto right = length - left;
     m_cv0 = right / length;
@@ -71,6 +73,7 @@ public:
   }
 
 private:
+
   Linx::Index m_index; ///< The interval index
   Value m_cv0; ///< The v[i] coefficient
   Value m_cv1; ///< The v[i + 1] coefficient
@@ -83,7 +86,6 @@ private:
 */
 template <typename T = double>
 class Args {
-
   template <typename, typename, Mode>
   friend class Spline;
 
@@ -91,6 +93,7 @@ class Args {
   friend class BiCospline;
 
 public:
+
   /**
    * @brief The real number type.
    */
@@ -100,7 +103,8 @@ public:
    * @brief Iterator-based constructor.
    */
   template <typename TDomain, typename TIt>
-  explicit Args(const TDomain& domain, TIt begin, TIt end) : m_args() {
+  explicit Args(const TDomain& domain, TIt begin, TIt end) : m_args()
+  {
     m_args.reserve(std::distance(begin, end));
     for (; begin != end; ++begin) {
       m_args.emplace_back(domain, *begin);
@@ -111,29 +115,34 @@ public:
    * @brief Range-based constructor.
    */
   template <typename TDomain, typename TRange>
-  explicit Args(const TDomain& domain, const TRange& u) : Args(domain, u.begin(), u.end()) {}
+  explicit Args(const TDomain& domain, const TRange& u) : Args(domain, u.begin(), u.end())
+  {}
 
   /**
    * @brief List-based constructor.
    */
   template <typename TDomain>
-  Args(const TDomain& domain, std::initializer_list<Value> u) : Args(domain, u.begin(), u.end()) {}
+  Args(const TDomain& domain, std::initializer_list<Value> u) : Args(domain, u.begin(), u.end())
+  {}
 
   /**
    * @brief Get the number of arguments.
    */
-  std::size_t size() const {
+  std::size_t size() const
+  {
     return m_args.size();
   }
 
   /**
    * @copybrief size()
    */
-  Linx::Index ssize() const {
+  Linx::Index ssize() const
+  {
     return static_cast<Linx::Index>(size());
   }
 
 private:
+
   std::vector<SplineArg<Value>> m_args; ///< The arguments
 };
 

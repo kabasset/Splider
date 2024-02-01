@@ -44,8 +44,8 @@ using Trajectory = Linx::Sequence<Linx::Vector<T, N>>;
  */
 template <typename T, typename TDomain = Partition<double>>
 class BiCospline {
-
 public:
+
   /**
    * @brief The dimension.
    */
@@ -79,7 +79,8 @@ public:
       m_domain0(domain0), m_domain1(domain1), // FIXME useful?
       m_splines0(m_domain1.size(), Spline<Value, Domain>(m_domain0)), m_spline1(m_domain1),
       m_x(std::distance(begin, end)),
-      m_mask(Linx::Position<Dimension>::zero(), {m_domain0.ssize() - 1, m_domain1.ssize() - 1}, false) {
+      m_mask(Linx::Position<Dimension>::zero(), {m_domain0.ssize() - 1, m_domain1.ssize() - 1}, false)
+  {
     for (auto it = m_x.begin(); begin != end; ++begin, ++it) {
       *it = {Arg(m_domain0, (*begin)[0]), Arg(m_domain1, (*begin)[1])};
       const auto i0 = (*it)[0].m_index;
@@ -101,19 +102,22 @@ public:
    */
   template <typename TRange>
   BiCospline(const Domain& domain0, const Domain& domain1, const TRange& x) :
-      BiCospline(domain0, domain1, x.begin(), x.end()) {}
+      BiCospline(domain0, domain1, x.begin(), x.end())
+  {}
 
   /**
    * @brief List-based constructor.
    */
   BiCospline(const Domain& domain0, const Domain& domain1, std::initializer_list<Value> x) :
-      BiCospline(domain0, domain1, x.begin(), x.end()) {}
+      BiCospline(domain0, domain1, x.begin(), x.end())
+  {}
 
   /**
    * @brief Resample an input raster of knot values.
    */
   template <typename TRaster>
-  std::vector<Value> operator()(const TRaster& v) {
+  std::vector<Value> operator()(const TRaster& v)
+  {
     for (const auto& p : m_mask) {
       m_splines0[p[1]].v(p[0], v[p]);
     }
@@ -132,6 +136,7 @@ public:
   }
 
 private:
+
   const Domain& m_domain0; ///< The intervals along axis 0
   const Domain& m_domain1; ///< The intervals along axis 1
   std::vector<Spline<Value, Domain>> m_splines0; ///< Splines along axis 0

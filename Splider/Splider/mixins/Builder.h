@@ -18,6 +18,7 @@ namespace Splider {
 template <typename TDerived>
 class BuilderMixin {
 public:
+
   /**
    * @brief The underlying method.
    */
@@ -27,7 +28,8 @@ public:
    * @brief Make a builder.
    */
   template <typename TIt>
-  static auto builder(TIt begin, TIt end) {
+  static auto builder(TIt begin, TIt end)
+  {
     using T = typename std::iterator_traits<TIt>::value_type;
     using Real = std::decay_t<T>;
     return Builder<Partition<Real>, Method>(begin, end);
@@ -37,7 +39,8 @@ public:
    * @brief Make a builder.
    */
   template <typename TRange>
-  static auto builder(const TRange& range) {
+  static auto builder(const TRange& range)
+  {
     return builder(std::begin(range), std::end(range));
   }
 
@@ -45,7 +48,8 @@ public:
    * @brief Make a builder.
    */
   template <typename T>
-  static auto builder(std::initializer_list<T> list) {
+  static auto builder(std::initializer_list<T> list)
+  {
     return builder(list.begin(), list.end());
   }
 };

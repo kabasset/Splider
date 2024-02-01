@@ -17,12 +17,14 @@ enum class Mode : char {
   Manual = 0 ///< Manual calling of an evaluation function
 };
 
-constexpr Mode operator|(Mode lhs, Mode rhs) {
+constexpr Mode operator|(Mode lhs, Mode rhs)
+{
   // FIXME forbid Manual
   return static_cast<Mode>(static_cast<char>(lhs) | static_cast<char>(rhs));
 }
 
-constexpr Mode operator&(Mode lhs, Mode rhs) {
+constexpr Mode operator&(Mode lhs, Mode rhs)
+{
   return static_cast<Mode>(static_cast<char>(lhs) & static_cast<char>(rhs));
 }
 

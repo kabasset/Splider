@@ -16,7 +16,8 @@ BOOST_AUTO_TEST_SUITE(Cospline_test)
 //-----------------------------------------------------------------------------
 
 template <typename U, typename V, typename X>
-std::vector<double> resample_with_gsl(const U& u, const V& v, const X& x) {
+std::vector<double> resample_with_gsl(const U& u, const V& v, const X& x)
+{
   gsl_interp_accel* acc = gsl_interp_accel_alloc();
   gsl_spline* spline = gsl_spline_alloc(gsl_interp_cspline, u.size());
   std::vector<double> y;
@@ -52,7 +53,8 @@ struct RealRandomFixture {
   Linx::Sequence<double> v = Linx::Sequence<double>(u.size()).generate(Linx::UniformNoise<double>(0, 1));
 };
 
-BOOST_FIXTURE_TEST_CASE(real_lin_cospline_test, RealLinFixture) {
+BOOST_FIXTURE_TEST_CASE(real_lin_cospline_test, RealLinFixture)
+{
   Splider::Cospline<double> cospline(domain, x);
   const auto out = cospline(v);
   BOOST_TEST(out.size() == x.size());
@@ -64,7 +66,8 @@ BOOST_FIXTURE_TEST_CASE(real_lin_cospline_test, RealLinFixture) {
   BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
 }
 
-BOOST_FIXTURE_TEST_CASE(real_random_cospline_test, RealRandomFixture) {
+BOOST_FIXTURE_TEST_CASE(real_random_cospline_test, RealRandomFixture)
+{
   Splider::Cospline<double> cospline(domain, x);
   const auto out = cospline(v);
   BOOST_TEST(out.size() == x.size());
@@ -72,7 +75,8 @@ BOOST_FIXTURE_TEST_CASE(real_random_cospline_test, RealRandomFixture) {
   BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
 }
 
-BOOST_FIXTURE_TEST_CASE(complex_lin_cospline_test, ComplexLinFixture) {
+BOOST_FIXTURE_TEST_CASE(complex_lin_cospline_test, ComplexLinFixture)
+{
   Splider::Cospline<std::complex<double>> cospline(domain, x);
   const auto out = cospline(v);
   BOOST_TEST(out.size() == x.size());

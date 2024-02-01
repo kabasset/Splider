@@ -17,7 +17,8 @@ static Elements::Logging logger = Elements::Logging::getLogger("SpliderBenchmark
 using Duration = std::chrono::milliseconds;
 
 template <typename U, typename V, typename X>
-std::vector<double> resample_with_gsl(const U& u0, const U& u1, const V& v, const X& x) {
+std::vector<double> resample_with_gsl(const U& u0, const U& u1, const V& v, const X& x)
+{
   gsl_interp_accel* xacc = gsl_interp_accel_alloc();
   gsl_interp_accel* yacc = gsl_interp_accel_alloc();
   gsl_spline2d* spline = gsl_spline2d_alloc(gsl_interp2d_bicubic, u0.size(), u1.size());
@@ -38,7 +39,8 @@ std::vector<double> resample_with_gsl(const U& u0, const U& u1, const V& v, cons
 }
 
 template <typename TDuration, typename U, typename V, typename X, typename Y>
-TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup) {
+TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup)
+{
   Linx::Chronometer<TDuration> chrono;
   chrono.start();
   if (setup == 's') {
@@ -57,9 +59,10 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup) {
 }
 
 class SpliderBenchmark : public Elements::Program {
-
 public:
-  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
+
+  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
+  {
     Linx::ProgramOptions options;
     options.named("case", "Test case: s (Splider), g (GSL)", 's');
     options.named("knots", "Number of knots along each axis", 100L);
@@ -69,7 +72,8 @@ public:
     return options.as_pair();
   }
 
-  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
+  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override
+  {
     const auto setup = args["case"].as<char>();
     const auto u_size = args["knots"].as<Linx::Index>();
     const auto x_size = args["args"].as<Linx::Index>();

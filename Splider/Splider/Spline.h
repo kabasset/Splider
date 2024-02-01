@@ -26,8 +26,8 @@ namespace Splider {
  */
 template <typename T, typename TDomain = Partition<double>, Mode M = Mode::Solve | Mode::Early>
 class Spline {
-
 public:
+
   /**
    * @brief The knot value type.
    */
@@ -57,8 +57,8 @@ public:
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit Spline(const Domain& u, TIt begin, TIt end) :
-      m_domain(u), m_v(begin, end), m_6s(m_v.size()), m_valid(false) {
+  explicit Spline(const Domain& u, TIt begin, TIt end) : m_domain(u), m_v(begin, end), m_6s(m_v.size()), m_valid(false)
+  {
     early_update();
   }
 
@@ -66,18 +66,21 @@ public:
    * @brief Range-based constructor.
    */
   template <typename TRange>
-  explicit Spline(const Domain& u, const TRange& v) : Spline(u, v.begin(), v.end()) {}
+  explicit Spline(const Domain& u, const TRange& v) : Spline(u, v.begin(), v.end())
+  {}
 
   /**
    * @brief List-based constructor.
    */
   template <typename TV>
-  explicit Spline(const Domain& u, std::initializer_list<TV> v) : Spline(u, v.begin(), v.end()) {}
+  explicit Spline(const Domain& u, std::initializer_list<TV> v) : Spline(u, v.begin(), v.end())
+  {}
 
   /**
    * @brief Get the knots abscissae.
    */
-  const Domain& domain() const {
+  const Domain& domain() const
+  {
     return m_domain;
   }
 
@@ -85,7 +88,8 @@ public:
    * @brief Assign knot values from an iterator.
    */
   template <typename TIt>
-  void assign(TIt begin, TIt end) {
+  void assign(TIt begin, TIt end)
+  {
     m_valid = false;
     m_v.assign(begin, end);
     early_update();
@@ -95,7 +99,8 @@ public:
    * @brief Assign knot values from a range.
    */
   template <typename TRange>
-  void assign(const TRange& v) {
+  void assign(const TRange& v)
+  {
     assign(v.begin(), v.end());
   }
 
@@ -103,14 +108,16 @@ public:
    * @brief Assign knot values from a list.
    */
   template <typename TV>
-  void assign(std::initializer_list<TV> v) {
+  void assign(std::initializer_list<TV> v)
+  {
     assign(v.begin(), v.end());
   }
 
   /**
    * @brief Check whether the evaluation mode matches a given mode.
    */
-  static constexpr bool mode_matches(Mode mode) {
+  static constexpr bool mode_matches(Mode mode)
+  {
     if constexpr (M == Mode::Manual && mode == Mode::Manual) {
       return true;
     } else {
@@ -121,7 +128,8 @@ public:
   /**
    * @brief Check whether the coefficients have been evaluated already.
    */
-  bool is_valid(Linx::Index i) const {
+  bool is_valid(Linx::Index i) const
+  {
     // FIXME check around i
     return m_valid;
   }
@@ -129,14 +137,16 @@ public:
   /**
    * @brief Get the i-th knot value.
   */
-  inline const Value& v(Linx::Index i) const {
+  inline const Value& v(Linx::Index i) const
+  {
     return m_v[i];
   }
 
   /**
    * @brief Set the i-th knot value.
    */
-  inline void v(Linx::Index i, const Value& value) {
+  inline void v(Linx::Index i, const Value& value)
+  {
     m_v[i] = value;
     m_valid = false;
     early_update();
@@ -145,7 +155,8 @@ public:
   /**
    * @brief Get the i-th second derivative.
    */
-  inline const Value& dv2(Linx::Index i) {
+  inline const Value& dv2(Linx::Index i)
+  {
     lazy_update(i);
     return m_6s[i];
   }
@@ -153,20 +164,23 @@ public:
   /**
    * @brief Evaluate the spline.
    */
-  inline Value operator()(Real x) {
+  inline Value operator()(Real x)
+  {
     return operator()(Arg(m_domain, x));
   }
 
   /**
    * @brief Evaluate the spline.
    */
-  inline Value operator()(const Arg& x) {
+  inline Value operator()(const Arg& x)
+  {
     const auto i = x.m_index;
     lazy_update(i);
     return m_v[i] * x.m_cv0 + m_v[i + 1] * x.m_cv1 + m_6s[i] * x.m_c6s0 + m_6s[i + 1] * x.m_c6s1;
   }
 
-  std::vector<Value> operator()(const Args<Real>& x) {
+  std::vector<Value> operator()(const Args<Real>& x)
+  {
     lazy_update(0); // FIXME i
     std::vector<Value> out;
     out.reserve(x.size());
@@ -184,7 +198,8 @@ public:
    * The iterator can either point to `Real`s or `Arg`s.
    */
   template <typename TIt>
-  inline std::vector<Value> operator()(TIt begin, TIt end) {
+  inline std::vector<Value> operator()(TIt begin, TIt end)
+  {
     return operator()(Args<Real>(m_domain, begin, end));
   }
 
@@ -195,7 +210,8 @@ public:
    * The range can either contain `Real`s or `Arg`s.
    */
   template <typename TRange>
-  std::vector<Value> operator()(const TRange& x) {
+  std::vector<Value> operator()(const TRange& x)
+  {
     return operator()(x.begin(), x.end());
   }
 
@@ -206,14 +222,16 @@ public:
    * The list can either contain `Real`s or `Arg`s.
    */
   template <typename TX>
-  std::vector<Value> operator()(std::initializer_list<TX> x) {
+  std::vector<Value> operator()(std::initializer_list<TX> x)
+  {
     return operator()(x.begin(), x.end());
   }
 
   /**
    * @brief Solve the tridiagonal system.
    */
-  void solve() {
+  void solve()
+  {
     if constexpr (Domain::IsEven) {
       solve_even();
     } else {
@@ -224,7 +242,8 @@ public:
   /**
    * @brief Approximate the second derivatives with finite differences.
    */
-  void approximate() { // FIXME take i as input
+  void approximate()
+  { // FIXME take i as input
     for (Linx::Index i = 1; i < m_6s.size() - 1; ++i) {
       auto d = (m_v[i + 1] - m_v[i]) * m_domain.m_g[i] - (m_v[i] - m_v[i - 1]) * m_domain.m_g[i - 1];
       m_6s[i] = d * 2. / (m_domain.m_h[i] + m_domain.m_h[i - 1]);
@@ -233,7 +252,9 @@ public:
   }
 
 private:
-  void solve_even() {
+
+  void solve_even()
+  {
     const Linx::Index n = m_6s.size();
     const auto h = m_domain.length(0);
     const auto g = 1. / h;
@@ -264,7 +285,8 @@ private:
     m_valid = true;
   }
 
-  void solve_uneven() {
+  void solve_uneven()
+  {
     const Linx::Index n = m_6s.size();
     std::vector<Real> b(n);
     std::vector<Value> d(n);
@@ -304,7 +326,8 @@ private:
   /**
    * @brief Update if early.
    */
-  inline void early_update() {
+  inline void early_update()
+  {
     if constexpr (mode_matches(Mode::Early)) {
       update();
     }
@@ -313,7 +336,8 @@ private:
   /**
    * @brief Update if lazy.
    */
-  inline void lazy_update(Linx::Index i) {
+  inline void lazy_update(Linx::Index i)
+  {
     if constexpr (mode_matches(Mode::Lazy)) {
       // FIXME update around i only
       update();
@@ -323,7 +347,8 @@ private:
   /**
    * @brief Evaluate the internal coefficients.
    */
-  inline void update() {
+  inline void update()
+  {
     if constexpr (mode_matches(Mode::Manual)) {
       return;
     } else {
@@ -339,6 +364,7 @@ private:
   }
 
 private:
+
   const Domain& m_domain; ///< The knots domain
   std::vector<Value> m_v; ///< The knot values
   std::vector<Value> m_6s; ///< The knot second derivatives times 6

@@ -21,8 +21,8 @@ class Partition;
  */
 template <typename TSpline>
 class Co {
-
 public:
+
   /**
    * @brief The spline type.
    */
@@ -52,7 +52,8 @@ public:
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit Co(const Domain& domain, TIt begin, TIt end) : m_spline(domain), m_args() {
+  explicit Co(const Domain& domain, TIt begin, TIt end) : m_spline(domain), m_args()
+  {
     assign(begin, end);
   }
 
@@ -60,18 +61,21 @@ public:
    * @brief Range-based constructor.
    */
   template <typename TX, typename std::enable_if_t<Linx::IsRange<TX>::value>* = nullptr>
-  explicit Co(const Domain& u, const TX& x) : Co(u, std::begin(x), std::end(x)) {}
+  explicit Co(const Domain& u, const TX& x) : Co(u, std::begin(x), std::end(x))
+  {}
 
   /**
    * @brief List-based constructor.
    */
   template <typename TX>
-  explicit Co(const Domain& u, std::initializer_list<TX> x) : Co(u, x.begin(), x.end()) {}
+  explicit Co(const Domain& u, std::initializer_list<TX> x) : Co(u, x.begin(), x.end())
+  {}
 
   /**
    * @brief Get the knots abscissae.
    */
-  const Domain& domain() const {
+  const Domain& domain() const
+  {
     return m_spline.domain();
   }
 
@@ -79,7 +83,8 @@ public:
    * @brief Assign arguments from an iterator.
    */
   template <typename TIt>
-  void assign(TIt begin, TIt end) {
+  void assign(TIt begin, TIt end)
+  {
     m_args.clear();
     m_args.reserve(std::distance(begin, end));
     const auto& d = domain();
@@ -92,7 +97,8 @@ public:
    * @brief Assign arguments from a range.
    */
   template <typename TX, typename std::enable_if_t<Linx::IsRange<TX>::value>* = nullptr>
-  void assign(const TX& x) {
+  void assign(const TX& x)
+  {
     assign(std::begin(x), std::end(x));
   }
 
@@ -100,7 +106,8 @@ public:
    * @brief Assign arguments from a list.
    */
   template <typename TX>
-  void assign(const std::initializer_list<TX>& x) {
+  void assign(const std::initializer_list<TX>& x)
+  {
     assign(x.begin(), x.end());
   }
 
@@ -108,7 +115,8 @@ public:
    * @brief Resample a spline defined by an iterator over knot values.
    */
   template <typename TIt>
-  std::vector<Value> operator()(TIt begin, TIt end) {
+  std::vector<Value> operator()(TIt begin, TIt end)
+  {
     m_spline.assign(begin, end);
     return m_spline(m_args);
   }
@@ -117,7 +125,8 @@ public:
    * @brief Resample a spline defined by a range of knot values.
    */
   template <typename TV, typename std::enable_if_t<Linx::IsRange<TV>::value>* = nullptr>
-  std::vector<Value> operator()(const TV& v) {
+  std::vector<Value> operator()(const TV& v)
+  {
     return operator()(std::begin(v), std::end(v));
   }
 
@@ -125,11 +134,13 @@ public:
    * @brief Resample a spline defined by a list of knot values.
    */
   template <typename TV>
-  std::vector<Value> operator()(std::initializer_list<TV> v) {
+  std::vector<Value> operator()(std::initializer_list<TV> v)
+  {
     return operator()(v.begin(), v.end());
   }
 
 private:
+
   Method m_spline; ///< The cached spline
   std::vector<Arg> m_args; ///< The resampling abscissae
 };

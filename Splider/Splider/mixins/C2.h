@@ -22,6 +22,7 @@ class C2Arg {
   // at the cost of more template parameters.
 
 public:
+
   /**
    * @brief The domain type.
    */
@@ -35,7 +36,8 @@ public:
   /**
    * @brief Constructor.
    */
-  explicit C2Arg(const Domain& domain, Real x) {
+  explicit C2Arg(const Domain& domain, Real x)
+  {
     m_i = domain.index(x);
     const auto h = domain.length(m_i);
     const auto left = x - domain[m_i];
@@ -47,6 +49,7 @@ public:
   }
 
 private:
+
   Linx::Index m_i; ///< The subinterval index
   Real m_cv0; ///< The `m_v[i]` coefficient
   Real m_cv1; ///< The `m_v[i + 1]` coefficient
@@ -61,6 +64,7 @@ template <typename TDomain, typename T, typename TDerived>
 class C2SplineMixin { // FIXME Upper mixin for operator()?
 
 public:
+
   /**
    * @brief The knots domain.
    */
@@ -91,24 +95,28 @@ public:
    */
   template <typename TIt>
   explicit C2SplineMixin(const Domain& u, TIt begin, TIt end) :
-      m_domain(u), m_v(begin, end), m_6s(m_v.size()), m_valid(false) {}
+      m_domain(u), m_v(begin, end), m_6s(m_v.size()), m_valid(false)
+  {}
 
   /**
    * @brief Range-based constructor.
    */
   template <typename TV, typename std::enable_if_t<Linx::IsRange<TV>::value>* = nullptr>
-  explicit C2SplineMixin(const Domain& u, const TV& v) : C2SplineMixin(u, std::begin(v), std::end(v)) {}
+  explicit C2SplineMixin(const Domain& u, const TV& v) : C2SplineMixin(u, std::begin(v), std::end(v))
+  {}
 
   /**
    * @brief List-based constructor.
    */
   template <typename TV>
-  explicit C2SplineMixin(const Domain& u, std::initializer_list<TV> v) : C2SplineMixin(u, v.begin(), v.end()) {}
+  explicit C2SplineMixin(const Domain& u, std::initializer_list<TV> v) : C2SplineMixin(u, v.begin(), v.end())
+  {}
 
   /**
    * @brief Get the knots domain.
    */
-  inline const Domain& domain() const {
+  inline const Domain& domain() const
+  {
     return m_domain;
   }
 
@@ -116,7 +124,8 @@ public:
    * @brief Assign the knot values.
    */
   template <typename TIt>
-  void assign(TIt begin, TIt end) {
+  void assign(TIt begin, TIt end)
+  {
     m_v.assign(begin, end);
     m_valid = false;
   }
@@ -125,7 +134,8 @@ public:
    * @brief Assign the knot values.
    */
   template <typename TV, typename std::enable_if_t<Linx::IsRange<TV>::value>* = nullptr>
-  void assign(const TV& v) {
+  void assign(const TV& v)
+  {
     assign(std::begin(v), std::end(v));
   }
 
@@ -133,21 +143,24 @@ public:
    * @brief Assign the knot values.
    */
   template <typename TV>
-  void assign(std::initializer_list<TV> v) {
+  void assign(std::initializer_list<TV> v)
+  {
     assign(v.begin(), v.end());
   }
 
   /**
    * @brief Evaluate the spline for a given argument.
    */
-  inline Value operator()(Real x) {
+  inline Value operator()(Real x)
+  {
     return operator()(Arg(m_domain, x));
   }
 
   /**
    * @brief Evaluate the spline for a given argument.
    */
-  Value operator()(const Arg& arg) {
+  Value operator()(const Arg& arg)
+  {
     const auto i = arg.m_i;
     static_cast<TDerived&>(*this).update(i);
     return m_v[i] * arg.m_cv0 + m_v[i + 1] * arg.m_cv1 + m_6s[i] * arg.m_c6s0 + m_6s[i + 1] * arg.m_c6s1;
@@ -157,7 +170,8 @@ public:
    * @brief Evaluate the spline for multiple arguments.
    */
   template <typename TIt>
-  std::vector<Value> operator()(TIt begin, TIt end) {
+  std::vector<Value> operator()(TIt begin, TIt end)
+  {
     std::vector<Value> out;
     out.reserve(std::distance(begin, end));
     for (; begin != end; ++begin) {
@@ -170,7 +184,8 @@ public:
    * @brief Evaluate the spline for multiple arguments.
    */
   template <typename TX, typename std::enable_if_t<Linx::IsRange<TX>::value>* = nullptr>
-  std::vector<Value> operator()(const TX& x) {
+  std::vector<Value> operator()(const TX& x)
+  {
     return operator()(std::begin(x), std::end(x));
   }
 
@@ -178,11 +193,13 @@ public:
    * @brief Evaluate the spline for multiple arguments.
    */
   template <typename TX>
-  std::vector<Value> operator()(std::initializer_list<TX> x) {
+  std::vector<Value> operator()(std::initializer_list<TX> x)
+  {
     return operator()(x.begin(), x.end());
   }
 
 protected:
+
   const Domain& m_domain; ///< The knots domain
   std::vector<Value> m_v; ///< The knot values
   std::vector<Value> m_6s; ///< The knot second derivatives times 6

@@ -11,7 +11,8 @@ BOOST_AUTO_TEST_SUITE(Partition_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(index_test) {
+BOOST_AUTO_TEST_CASE(index_test)
+{
   const Splider::Partition u {1, 2, 3, 4};
   for (std::size_t i = 0; i < u.size() - 1; ++i) {
     BOOST_TEST(u.index(u[i]) == i);

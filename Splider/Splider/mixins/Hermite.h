@@ -17,8 +17,8 @@ namespace Splider {
  */
 template <typename TDerived>
 class HermiteMixin : public BuilderMixin<TDerived> {
-
 protected:
+
   /**
    * @brief An argument.
    */
@@ -50,7 +50,8 @@ protected:
      * @brief Evaluate the spline for a given argument.
      */
     template <typename TReal>
-    Value operator()(const Arg<TReal>& arg) {
+    Value operator()(const Arg<TReal>& arg)
+    {
       const auto i = arg.index;
       return v[i] * arg.cv0 + v[i + 1] * arg.cv1 + d[i] * arg.cd0 + d[i + 1] * arg.cd1;
     }
@@ -62,6 +63,7 @@ protected:
 
 class Hermite {
 public:
+
   /**
    * @brief Finite difference Hermite spline.
    * 
@@ -75,6 +77,7 @@ public:
  */
 class CatmullRom {
 public:
+
   /**
    * @brief Catmull-Rom spline with uniform parametrization.
    */
@@ -85,7 +88,6 @@ public:
  * @brief Akima spline.
  */
 class Akima : public HermiteMixin<Akima> {
-
   /**
  * @brief Modified Akima spline.
  * 

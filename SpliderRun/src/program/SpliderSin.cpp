@@ -14,7 +14,8 @@ static Elements::Logging logger = Elements::Logging::getLogger("SpliderSin");
 using Duration = std::chrono::milliseconds;
 
 template <typename U, typename V, typename X>
-std::vector<double> resample_with_gsl(const U& u, const V& v, const X& x) {
+std::vector<double> resample_with_gsl(const U& u, const V& v, const X& x)
+{
   gsl_interp_accel* acc = gsl_interp_accel_alloc();
   gsl_spline* spline = gsl_spline_alloc(gsl_interp_cspline, u.size());
   std::vector<double> y;
@@ -28,16 +29,18 @@ std::vector<double> resample_with_gsl(const U& u, const V& v, const X& x) {
 }
 
 class SpliderBenchmark : public Elements::Program {
-
 public:
-  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
+
+  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
+  {
     Linx::ProgramOptions options;
     options.positional("knots", "Number of knots", 101L);
     options.positional("args", "Number of arguments", 1001L);
     return options.as_pair();
   }
 
-  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
+  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override
+  {
     const auto knot_count = args["knots"].as<Linx::Index>();
     const auto arg_count = args["args"].as<Linx::Index>();
 

@@ -15,8 +15,8 @@ namespace Splider {
  * This is the only C2 cubic spline, which comes at the cost of more computing.
  */
 class Natural : public BuilderMixin<Natural> {
-
 public:
+
   /**
    * @brief The argument type.
    */
@@ -31,13 +31,16 @@ public:
     using Mixin = C2SplineMixin<TDomain, T, Spline>;
 
   public:
+
     template <typename... TParams>
-    Spline(TParams&&... params) : Mixin(LINX_FORWARD(params)...) {}
+    Spline(TParams&&... params) : Mixin(LINX_FORWARD(params)...)
+    {}
 
     /**
      * @brief Solve the tridiagonal system using Thomas algorithm.
      */
-    void update(Linx::Index) {
+    void update(Linx::Index)
+    {
       if (Mixin::m_valid) {
         return;
       }

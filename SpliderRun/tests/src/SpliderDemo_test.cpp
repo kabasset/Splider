@@ -12,8 +12,8 @@ BOOST_AUTO_TEST_SUITE(SpliderDemo_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(default_interpolant_test) {
-
+BOOST_AUTO_TEST_CASE(default_interpolant_test)
+{
   //! [Default interpolant]
 
   using Spline = Splider::Natural;
@@ -24,8 +24,8 @@ BOOST_AUTO_TEST_CASE(default_interpolant_test) {
   //! [Default interpolant]
 }
 
-BOOST_AUTO_TEST_CASE(default_resampler_test) {
-
+BOOST_AUTO_TEST_CASE(default_resampler_test)
+{
   //! [Default resampler]
 
   using Spline = Splider::Natural;
@@ -36,8 +36,8 @@ BOOST_AUTO_TEST_CASE(default_resampler_test) {
   //! [Default resampler]
 }
 
-BOOST_AUTO_TEST_CASE(default_bivariate_resampler_test) {
-
+BOOST_AUTO_TEST_CASE(default_bivariate_resampler_test)
+{
   //! [Default bivariate resampler]
 
   Splider::Partition<> u0 {1, 2, 3, 4};
