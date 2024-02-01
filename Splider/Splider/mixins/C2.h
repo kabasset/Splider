@@ -17,6 +17,8 @@ template <typename TDomain>
 class C2Arg {
   template <typename, typename, typename>
   friend class C2SplineMixin;
+  // Friendship could be avoided by making C2Arg a nested class,
+  // at the cost of more template parameters.
 
 public:
   /**
@@ -38,18 +40,17 @@ public:
     const auto left = x - domain[m_i];
     const auto right = h - left;
     m_cv0 = right / h;
-    m_cv1 = 1 - m_cv0;
-    m_cs0 = right / 6. * (right * m_cv0 - h);
-    m_cs1 = left / 6. * (left * m_cv1 - h);
-    // FIXME rm 6 ?
+    m_cv1 = 1. - m_cv0;
+    m_c6s0 = right * (right * m_cv0 - h);
+    m_c6s1 = left * (left * m_cv1 - h);
   }
 
 private:
   Linx::Index m_i; ///< The subinterval index
-  Real m_cv0; ///< The `v[i]` coefficient
-  Real m_cv1; ///< The `v[i + 1]` coefficient
-  Real m_cs0; ///< The `s[i]` coefficient
-  Real m_cs1; ///< The `s[i + 1]` coefficient
+  Real m_cv0; ///< The `m_v[i]` coefficient
+  Real m_cv1; ///< The `m_v[i + 1]` coefficient
+  Real m_c6s0; ///< The `m_6s[i]` coefficient
+  Real m_c6s1; ///< The `m_6s[i + 1]` coefficient
 };
 
 /**
@@ -82,14 +83,14 @@ public:
   /**
    * @brief Null knots constructor.
    */
-  explicit C2SplineMixin(const Domain& u) : m_domain(u), m_v(m_domain.size()), m_s(m_domain.size()), m_valid(true) {}
+  explicit C2SplineMixin(const Domain& u) : m_domain(u), m_v(m_domain.size()), m_6s(m_domain.size()), m_valid(true) {}
 
   /**
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
   explicit C2SplineMixin(const Domain& u, TIt begin, TIt end) :
-      m_domain(u), m_v(begin, end), m_s(m_v.size()), m_valid(false) {}
+      m_domain(u), m_v(begin, end), m_6s(m_v.size()), m_valid(false) {}
 
   /**
    * @brief Range-based constructor.
@@ -148,7 +149,7 @@ public:
   Value operator()(const Arg& arg) {
     const auto i = arg.m_i;
     static_cast<TDerived&>(*this).update(i);
-    return m_v[i] * arg.m_cv0 + m_v[i + 1] * arg.m_cv1 + m_s[i] * arg.m_cs0 + m_s[i + 1] * arg.m_cs1;
+    return m_v[i] * arg.m_cv0 + m_v[i + 1] * arg.m_cv1 + m_6s[i] * arg.m_c6s0 + m_6s[i + 1] * arg.m_c6s1;
   }
 
   /**
@@ -183,7 +184,7 @@ public:
 protected:
   const Domain& m_domain; ///< The knots domain
   std::vector<Value> m_v; ///< The knot values
-  std::vector<Value> m_s; ///< The knot second derivatives
+  std::vector<Value> m_6s; ///< The knot second derivatives times 6
   bool m_valid; ///< Validity flag // FIXME to TDerived
 };
 

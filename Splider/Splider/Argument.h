@@ -50,9 +50,9 @@ public:
     const auto left = x - domain[m_index];
     const auto right = h - left;
     m_cv0 = right / h;
-    m_cv1 = 1 - m_cv0;
-    m_cs0 = right / 6. * (right * m_cv0 - h);
-    m_cs1 = left / 6. * (left * m_cv1 - h);
+    m_cv1 = 1. - m_cv0;
+    m_c6s0 = right * (right * m_cv0 - h);
+    m_c6s1 = left * (left * m_cv1 - h);
   }
 
   /**
@@ -66,16 +66,16 @@ public:
     const auto right = length - left;
     m_cv0 = right / length;
     m_cv1 = left / length;
-    m_cs0 = right / 6. * (right * m_cv0 - length);
-    m_cs1 = left / 6. * (left * m_cv1 - length);
+    m_c6s0 = right * (right * m_cv0 - length);
+    m_c6s1 = left * (left * m_cv1 - length);
   }
 
 private:
   Linx::Index m_index; ///< The interval index
   Value m_cv0; ///< The v[i] coefficient
   Value m_cv1; ///< The v[i + 1] coefficient
-  Value m_cs0; ///< The s[i] coefficient
-  Value m_cs1; ///< The s[i + 1] coefficient
+  Value m_c6s0; ///< The s[i] coefficient
+  Value m_c6s1; ///< The s[i + 1] coefficient
 };
 
 /**

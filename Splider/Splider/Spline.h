@@ -51,13 +51,14 @@ public:
   /**
    * @brief Null knots constructor.
    */
-  explicit Spline(const Domain& u) : m_domain(u), m_v(m_domain.size()), m_s(m_domain.size()), m_valid(true) {}
+  explicit Spline(const Domain& u) : m_domain(u), m_v(m_domain.size()), m_6s(m_domain.size()), m_valid(true) {}
 
   /**
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit Spline(const Domain& u, TIt begin, TIt end) : m_domain(u), m_v(begin, end), m_s(m_v.size()), m_valid(false) {
+  explicit Spline(const Domain& u, TIt begin, TIt end) :
+      m_domain(u), m_v(begin, end), m_6s(m_v.size()), m_valid(false) {
     early_update();
   }
 
@@ -146,7 +147,7 @@ public:
    */
   inline const Value& dv2(Linx::Index i) {
     lazy_update(i);
-    return m_s[i];
+    return m_6s[i];
   }
 
   /**
@@ -162,7 +163,7 @@ public:
   inline Value operator()(const Arg& x) {
     const auto i = x.m_index;
     lazy_update(i);
-    return m_v[i] * x.m_cv0 + m_v[i + 1] * x.m_cv1 + m_s[i] * x.m_cs0 + m_s[i + 1] * x.m_cs1;
+    return m_v[i] * x.m_cv0 + m_v[i + 1] * x.m_cv1 + m_6s[i] * x.m_c6s0 + m_6s[i + 1] * x.m_c6s1;
   }
 
   std::vector<Value> operator()(const Args<Real>& x) {
@@ -171,7 +172,7 @@ public:
     out.reserve(x.size());
     for (const auto& arg : x.m_args) {
       const auto i = arg.m_index;
-      out.push_back(m_v[i] * arg.m_cv0 + m_v[i + 1] * arg.m_cv1 + m_s[i] * arg.m_cs0 + m_s[i + 1] * arg.m_cs1);
+      out.push_back(m_v[i] * arg.m_cv0 + m_v[i + 1] * arg.m_cv1 + m_6s[i] * arg.m_c6s0 + m_6s[i + 1] * arg.m_c6s1);
     }
     return out;
   }
@@ -224,23 +225,23 @@ public:
    * @brief Approximate the second derivatives with finite differences.
    */
   void approximate() { // FIXME take i as input
-    for (Linx::Index i = 1; i < m_s.size() - 1; ++i) {
+    for (Linx::Index i = 1; i < m_6s.size() - 1; ++i) {
       auto d = (m_v[i + 1] - m_v[i]) * m_domain.m_g[i] - (m_v[i] - m_v[i - 1]) * m_domain.m_g[i - 1];
-      m_s[i] = d * 2. / (m_domain.m_h[i] + m_domain.m_h[i - 1]);
+      m_6s[i] = d * 2. / (m_domain.m_h[i] + m_domain.m_h[i - 1]);
     }
     m_valid = true;
   }
 
 private:
   void solve_even() {
-    const Linx::Index n = m_s.size();
+    const Linx::Index n = m_6s.size();
     const auto h = m_domain.length(0);
     const auto g = 1. / h;
     std::vector<Real> b(n, 4. * h);
     std::vector<Value> d(n);
 
     for (Linx::Index i = 1; i < n - 1; ++i) {
-      d[i] = 6. * (m_v[i + 1] - 2 * m_v[i] + m_v[i - 1]) * g;
+      d[i] = (m_v[i + 1] - 2 * m_v[i] + m_v[i - 1]) * g;
     }
 
     // Forward
@@ -251,20 +252,20 @@ private:
     }
 
     // Backward
-    m_s[n - 2] = d[n - 2] / b[n - 2];
+    m_6s[n - 2] = d[n - 2] / b[n - 2];
     for (auto i = n - 3; i > 0; --i) {
-      m_s[i] = (d[i] - h * m_s[i + 1]) / b[i];
+      m_6s[i] = (d[i] - h * m_6s[i + 1]) / b[i];
     }
 
     // Natutal spline // FIXME useful?
-    m_s[0] = 0;
-    m_s[n - 1] = 0;
+    m_6s[0] = 0;
+    m_6s[n - 1] = 0;
 
     m_valid = true;
   }
 
   void solve_uneven() {
-    const Linx::Index n = m_s.size();
+    const Linx::Index n = m_6s.size();
     std::vector<Real> b(n);
     std::vector<Value> d(n);
 
@@ -274,7 +275,7 @@ private:
     auto dv0 = (m_v[1] - m_v[0]) / h0;
     auto dv1 = (m_v[2] - m_v[1]) / h1;
     b[1] = 2. * (h0 + h1);
-    d[1] = 6. * (dv1 - dv0);
+    d[1] = dv1 - dv0;
 
     // Initialization and forward pass
     for (Linx::Index i = 2; i < n - 1; ++i) {
@@ -284,18 +285,18 @@ private:
       dv1 = (m_v[i + 1] - m_v[i]) / h1;
       const auto w = h1 / b[i - 1];
       b[i] = 2. * (h0 + h1) - w * h1;
-      d[i] = 6. * (dv1 - dv0) - w * d[i - 1];
+      d[i] = dv1 - dv0 - w * d[i - 1];
     }
 
     // Backward pass
-    m_s[n - 2] = d[n - 2] / b[n - 2];
+    m_6s[n - 2] = d[n - 2] / b[n - 2];
     for (auto i = n - 3; i > 0; --i) {
-      m_s[i] = (d[i] - m_domain.length(i) * m_s[i + 1]) / b[i];
+      m_6s[i] = (d[i] - m_domain.length(i) * m_6s[i + 1]) / b[i];
     }
 
     // Natutal spline // FIXME useful?
-    m_s[0] = 0;
-    m_s[n - 1] = 0;
+    m_6s[0] = 0;
+    m_6s[n - 1] = 0;
 
     m_valid = true;
   }
@@ -340,7 +341,7 @@ private:
 private:
   const Domain& m_domain; ///< The knots domain
   std::vector<Value> m_v; ///< The knot values
-  std::vector<Value> m_s; ///< The knot second derivatives
+  std::vector<Value> m_6s; ///< The knot second derivatives times 6
   bool m_valid; ///< Validity flags
   // FIXME local validity
 };
