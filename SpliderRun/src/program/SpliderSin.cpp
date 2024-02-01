@@ -4,7 +4,7 @@
 #include "ElementsKernel/ProgramHeaders.h"
 #include "Linx/Data/Sequence.h"
 #include "Linx/Run/ProgramOptions.h"
-#include "Splider/Natural.h"
+#include "Splider/C2.h"
 
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
@@ -51,7 +51,7 @@ public:
     const auto gt = sin(x);
 
     logger.info("Interpolating...");
-    const auto b = Splider::Natural::builder(u);
+    const auto b = Splider::C2::builder(u);
     auto cospline = b.cospline(x);
     const auto y = cospline(v);
     const auto gsl = resample_with_gsl(u, v, x);

@@ -1,8 +1,8 @@
 /// @copyright 2023, Antoine Basset
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef _SPLIDER_NATURAL_H
-#define _SPLIDER_NATURAL_H
+#ifndef _SPLIDER_C2_H
+#define _SPLIDER_C2_H
 
 #include "Linx/Base/SeqUtils.h" // IsRange
 #include "Splider/mixins/C2.h"
@@ -10,11 +10,9 @@
 namespace Splider {
 
 /**
- * @brief Natural cubic C2 spline.
- * 
- * This is the only C2 cubic spline, which comes at the cost of more computing.
+ * @brief \f$C^2\f$ cubic spline.
  */
-class Natural : public BuilderMixin<Natural> {
+class C2 : public BuilderMixin<C2> {
 public:
 
   /**
@@ -84,7 +82,7 @@ public:
 };
 
 namespace FiniteDiff {
-class Natural : public BuilderMixin<FiniteDiff::Natural> {};
+class C2 : public BuilderMixin<FiniteDiff::C2> {};
 } // namespace FiniteDiff
 
 } // namespace Splider

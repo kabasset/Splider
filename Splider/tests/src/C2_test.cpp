@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "Linx/Data/Sequence.h"
-#include "Splider/Natural.h"
+#include "Splider/C2.h"
 
 #include <boost/test/unit_test.hpp>
 #include <complex>
@@ -11,11 +11,11 @@
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(Natural_test)
+BOOST_AUTO_TEST_SUITE(C2_test)
 
 //-----------------------------------------------------------------------------
 
-using Spline = Splider::Natural;
+using Spline = Splider::C2;
 
 template <typename U, typename V, typename X>
 std::vector<double> resample_with_gsl(const U& u, const V& v, const X& x)

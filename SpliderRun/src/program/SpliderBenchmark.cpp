@@ -7,8 +7,8 @@
 #include "Linx/Data/Tiling.h"
 #include "Linx/Run/Chronometer.h"
 #include "Linx/Run/ProgramOptions.h"
+#include "Splider/C2.h"
 #include "Splider/Cospline.h"
-#include "Splider/Natural.h"
 
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
@@ -67,14 +67,14 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, const std::string& 
       y = spline(args);
     }
   } else if (setup == "c2") {
-    using Spline = Splider::Natural;
+    using Spline = Splider::C2;
     const auto b = Spline::builder(u);
     auto cospline = b.cospline(x);
     for (const auto& row : sections(v)) {
       y = cospline(row);
     }
   } else if (setup == "s2") {
-    using Spline = Splider::Natural;
+    using Spline = Splider::C2;
     const auto b = Spline::builder(u);
     const auto args = b.args(x);
     auto spline = b.template spline<double>();

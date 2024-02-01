@@ -1,8 +1,8 @@
 /// @copyright 2023, Antoine Basset
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef _SPLIDER_CO_H
-#define _SPLIDER_CO_H
+#ifndef _SPLIDER_MULTI_H
+#define _SPLIDER_MULTI_H
 
 #include "Linx/Base/SeqUtils.h" // IsRange
 
@@ -12,11 +12,16 @@
 namespace Splider {
 
 /**
- * @brief Cospline.
+ * @brief Multi-dimensional spline.
  */
-template <typename TSpline>
-class Co {
+template <Linx::Index N, typename TSpline>
+class Multi {
 public:
+
+  /**
+   * @brief The domain dimension.
+   */
+  static constexpr Linx::Index Dimension = N;
 
   /**
    * @brief The spline type.
@@ -36,7 +41,7 @@ public:
   /**
    * @brief The argument type.
    */
-  using Arg = typename Method::Arg;
+  using Arg = Linx::Vector<typename Method::Arg, N>;
 
   /**
    * @brief The knot value type.
@@ -47,7 +52,7 @@ public:
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit Co(const Domain& domain, TIt begin, TIt end) : m_spline(domain), m_args()
+  explicit Multi(const Domain& domain, TIt begin, TIt end) : m_spline(domain), m_args()
   {
     assign(begin, end);
   }
@@ -56,14 +61,14 @@ public:
    * @brief Range-based constructor.
    */
   template <typename TX, typename std::enable_if_t<Linx::IsRange<TX>::value>* = nullptr>
-  explicit Co(const Domain& u, const TX& x) : Co(u, std::begin(x), std::end(x))
+  explicit Multi(const Domain& u, const TX& x) : Multi(u, std::begin(x), std::end(x))
   {}
 
   /**
    * @brief List-based constructor.
    */
   template <typename TX>
-  explicit Co(const Domain& u, std::initializer_list<TX> x) : Co(u, x.begin(), x.end())
+  explicit Multi(const Domain& u, std::initializer_list<TX> x) : Multi(u, x.begin(), x.end())
   {}
 
   /**
@@ -136,8 +141,8 @@ public:
 
 private:
 
-  Method m_spline; ///< The cached spline
-  std::vector<Arg> m_args; ///< The resampling abscissae
+  Linx::Vector<Method, Dimension> m_splines; ///< The cached splines
+  Linx::Vector<std::vector<Arg>, Dimension> m_args; ///< The resampling abscissae
 };
 
 } // namespace Splider

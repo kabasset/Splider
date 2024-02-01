@@ -18,13 +18,18 @@ elements_add_unit_test(
     LINK_LIBRARIES Splider GSL
     TYPE Boost)
 elements_add_unit_test(
+    C2 tests/src/C2_test.cpp 
+    EXECUTABLE Splider_C2_test
+    LINK_LIBRARIES Splider GSL
+    TYPE Boost)
+elements_add_unit_test(
     Cospline tests/src/Cospline_test.cpp 
     EXECUTABLE Splider_Cospline_test
     LINK_LIBRARIES Splider GSL
     TYPE Boost)
 elements_add_unit_test(
-    Natural tests/src/Natural_test.cpp 
-    EXECUTABLE Splider_Natural_test
+    Lagrange tests/src/Lagrange_test.cpp 
+    EXECUTABLE Splider_Lagrange_test
     LINK_LIBRARIES Splider GSL
     TYPE Boost)
 elements_add_unit_test(
