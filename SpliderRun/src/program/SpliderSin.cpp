@@ -5,6 +5,7 @@
 #include "Linx/Data/Sequence.h"
 #include "Linx/Run/ProgramOptions.h"
 #include "Splider/C2.h"
+#include "Splider/CatmullRom.h"
 #include "Splider/Hermite.h"
 #include "Splider/Lagrange.h"
 
@@ -66,6 +67,10 @@ public:
       y = cospline(v);
     } else if (setup == "hermite") {
       const auto build = Splider::Hermite::FiniteDiff::builder(u);
+      auto cospline = build.cospline(x);
+      y = cospline(v);
+    } else if (setup == "cr") {
+      const auto build = Splider::CatmullRom::Uniform::builder(u);
       auto cospline = build.cospline(x);
       y = cospline(v);
     } else if (setup == "lagrange") {

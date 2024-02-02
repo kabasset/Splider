@@ -1,8 +1,8 @@
 /// @copyright 2023, Antoine Basset
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef _SPLIDER_HERMITE_H
-#define _SPLIDER_HERMITE_H
+#ifndef _SPLIDER_CATMULLROM_H
+#define _SPLIDER_CATMULLROM_H
 
 #include "Linx/Base/SeqUtils.h" // IsRange
 #include "Splider/Partition.h" // FIXME rm
@@ -11,28 +11,26 @@
 namespace Splider {
 
 /**
- * @brief Cubic Hermite splines.
+ * @brief Cubic Catmull-Rom splines.
  */
-struct Hermite {
-  struct FiniteDiff;
-  struct Akima;
-  struct CatmullRom;
+struct CatmullRom {
+  struct Uniform;
 };
 
 /**
- * @brief The finite difference Hermite splines boundary conditions.
+ * @brief The finite difference Catmull-Rom splines boundary conditions.
  */
-enum class FiniteDiffHermiteBounds {
+enum class CatmullRomBounds {
   OneSided = 0, ///< One-sided finite difference
 };
 
 /**
- * @brief The Hermite spline evaluator.
+ * @brief The Catmull-Rom spline evaluator.
  */
-template <typename TDomain, typename TValue, FiniteDiffHermiteBounds B>
-class FiniteDiffHermiteSpline :
-    public HermiteSplineMixin<TDomain, TValue, FiniteDiffHermiteSpline<TDomain, TValue, B>> {
-  using Mixin = HermiteSplineMixin<TDomain, TValue, FiniteDiffHermiteSpline>;
+template <typename TDomain, typename TValue, CatmullRomBounds B>
+class UniformCatmullRomSpline :
+    public HermiteSplineMixin<TDomain, TValue, UniformCatmullRomSpline<TDomain, TValue, B>> {
+  using Mixin = HermiteSplineMixin<TDomain, TValue, UniformCatmullRomSpline>;
 
 public:
 
@@ -40,7 +38,7 @@ public:
    * @brief Constructor.
    */
   template <typename... TParams>
-  FiniteDiffHermiteSpline(TParams&&... params) : Mixin(LINX_FORWARD(params)...)
+  UniformCatmullRomSpline(TParams&&... params) : Mixin(LINX_FORWARD(params)...)
   {}
 
   /**
@@ -59,9 +57,7 @@ public:
     for (Linx::Index i = 1; i < n - 1; ++i) {
       auto h0 = this->m_domain.length(i - 1);
       auto h1 = this->m_domain.length(i);
-      auto d0 = (this->m_v[i] - this->m_v[i - 1]) / h0;
-      auto d1 = (this->m_v[i + 1] - this->m_v[i]) / h1;
-      this->m_d[i] = (d1 + d0) * 0.5;
+      this->m_d[i] = (this->m_v[i + 1] - this->m_v[i - 1]) / (h0 + h1);
       // FIXME optimize
     }
 
@@ -73,13 +69,13 @@ public:
 
 /**
  * @ingroup builders
- * @brief Cubic Hermite spline with finite difference approximation of the derivatives.
+ * @brief Cubic Catmull-Rom spline with finite difference approximation of the derivatives.
  */
-struct Hermite::FiniteDiff : BuilderMixin<Hermite::FiniteDiff, FiniteDiffHermiteBounds> {
+struct CatmullRom::Uniform : BuilderMixin<CatmullRom::Uniform, CatmullRomBounds> {
   /**
    * @brief The boundary conditions.
    */
-  using Bounds = FiniteDiffHermiteBounds;
+  using Bounds = CatmullRomBounds;
 
   /**
    * @brief The knots domain type.
@@ -96,8 +92,8 @@ struct Hermite::FiniteDiff : BuilderMixin<Hermite::FiniteDiff, FiniteDiffHermite
   /**
    * @brief The spline evaluator.
    */
-  template <typename TDomain, typename TValue, FiniteDiffHermiteBounds B>
-  using Spline = FiniteDiffHermiteSpline<TDomain, TValue, B>;
+  template <typename TDomain, typename TValue, CatmullRomBounds B>
+  using Spline = UniformCatmullRomSpline<TDomain, TValue, B>;
 };
 
 } // namespace Splider
