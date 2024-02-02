@@ -59,6 +59,10 @@ public:
       const auto build = Splider::C2::builder(u);
       auto cospline = build.cospline(x);
       y = cospline(v);
+    } else if (setup == "c2fd") {
+      const auto build = Splider::C2::FiniteDiff::builder(u);
+      auto cospline = build.cospline(x);
+      y = cospline(v);
     } else if (setup == "lagrange") {
       const auto build = Splider::Lagrange::builder(u);
       auto cospline = build.cospline(x);

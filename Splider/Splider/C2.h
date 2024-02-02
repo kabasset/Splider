@@ -107,11 +107,85 @@ struct C2 : BuilderMixin<C2, C2Bounds> {
    */
   template <typename TDomain, typename TValue, C2Bounds B>
   using Spline = C2Spline<TDomain, TValue, B>;
+
+  struct FiniteDiff;
 };
 
-namespace FiniteDiff {
-struct C2 : BuilderMixin<FiniteDiff::C2, C2Bounds> {};
-} // namespace FiniteDiff
+/**
+ * @brief The \f$C^2\f$ spline evaluator.
+ */
+template <typename TDomain, typename TValue, C2Bounds B>
+class FiniteDiffC2Spline : public C2SplineMixin<TDomain, TValue, FiniteDiffC2Spline<TDomain, TValue, B>> {
+  using Mixin = C2SplineMixin<TDomain, TValue, FiniteDiffC2Spline>;
+
+public:
+
+  /**
+   * @brief Constructor.
+   */
+  template <typename... TParams>
+  FiniteDiffC2Spline(TParams&&... params) : Mixin(LINX_FORWARD(params)...)
+  {}
+
+  /**
+   * @brief Solve the tridiagonal system using Thomas algorithm.
+   */
+  void update(Linx::Index) // FIXME use index
+  {
+    if (Mixin::m_valid) {
+      return;
+    }
+
+    const Linx::Index n = this->m_6s.size();
+
+    for (Linx::Index i = 1; i < n - 1; ++i) {
+      auto h0 = this->m_domain.length(i - 1);
+      auto h1 = this->m_domain.length(i);
+      auto d0 = (this->m_v[i] - this->m_v[i - 1]) / h0;
+      auto d1 = (this->m_v[i + 1] - this->m_v[i]) / h1;
+      this->m_6s[i] = (d1 - d0) * 2. / (h1 + h0);
+      // FIXME optimize
+    }
+
+    // Natutal spline // FIXME useful?
+    this->m_6s[0] = 0;
+    this->m_6s[n - 1] = 0;
+
+    this->m_valid = true;
+  }
+};
+
+/**
+ * @ingroup builders
+ * @brief \f$C^2\f$ cubic spline with finite difference approximation of the second derivatives.
+ * 
+ * This is an approximation of `C2` which enables local evaluation of the coefficients,
+ * in lieu of the global tridiagonal system solving of the latter.
+ */
+struct C2::FiniteDiff : BuilderMixin<C2::FiniteDiff, C2Bounds> {
+  /**
+   * @brief The boundary conditions.
+   */
+  using Bounds = C2Bounds;
+
+  /**
+   * @brief The knots domain type.
+   */
+  template <typename TReal>
+  using Domain = Partition<TReal>; // FIXME C2Domain
+
+  /**
+   * @brief The argument type.
+   */
+  template <typename TDomain>
+  using Arg = C2Arg<TDomain>;
+
+  /**
+   * @brief The spline evaluator.
+   */
+  template <typename TDomain, typename TValue, C2Bounds B>
+  using Spline = FiniteDiffC2Spline<TDomain, TValue, B>; // FIXME
+};
 
 } // namespace Splider
 
