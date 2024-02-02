@@ -28,23 +28,41 @@ Its result at \f$x \in \mathbb{R}^N\f$ will be denoted as \f$y\f$:
 y = S_{u,v}(x) \,.
 \f]
 
-In Splider, basic splines are modeled as objects of class `Spline`,
-while `Cospline` technically performs the same operations but in a different order, and with a different caching strategy.
-Both are built up from the same components.
+In addition to splines, Splider introduces cosplines.
+A cospline technically performs the same operations as the corresponding spline but in a different order, and with a different caching strategy.
+Both are built up from the same components, namely:
 
+- a knots domain, \f$u\f$.
+- knot values, \f$v\f$,
+- arguments, \f$x\f$,
+- spline type,
+- boundary conditions.
+
+The components are built from so-called... spline builders!
 
 \section basics-spline Splines
 
+As an introduction, let us first demonstrate how to work with a natural cubic spline (named `C2` in Splider):
 
-TODO
+\snippet SpliderDemo_test.cpp Default spline
+
+In this example, we have provided the spline type, `C2`, the knots and the argument.
+The boundary conditions defaulted to the first value of `C2::Bounds` (i.e. `Natural`).
+They can be specified as a template parameter of the builder:
+
+\snippet SpliderDemo_test.cpp Custom bounds
+
+Only the first line has to be modified to change the spline type, here for a mere collection of Lagrange polynomial:
+
+\snippet SpliderDemo_test.cpp Lagrange spline
 
 
 \section basics-cospline Cosplines
 
 
 Splider defines cosplines as a dual concept of splines, which can be very handy for parametric splines.
-Specifically, for a set of knots \f$(u,v)\f$, the spline \f$S_{u,v}\f$ is a function
-which can be called on any set of arguments \f$x\f$,
+Specifically, for a set of knots \f$(u,v)\f$,
+the spline \f$S_{u,v}\f$ is a function which can be called on any set of arguments \f$x\f$,
 while a cospline \f$C_{u,x}\f$ is parametrized by \f$u\f$ and \f$x\f$ and is called on \f$v\f$:
 
 \f[
@@ -54,6 +72,10 @@ y = C_{u,x}(v)
 
 When the spline has to be evaluated repeatedly over the same \f$x\f$'s with varying \f$v\f$'s,
 the cospline is much more efficient.
+
+Cosplines are built similarly to splines:
+
+\snippet SpliderDemo_test.cpp Default cospline
 
 */
 }

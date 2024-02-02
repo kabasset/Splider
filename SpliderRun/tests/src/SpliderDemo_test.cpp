@@ -13,16 +13,28 @@ BOOST_AUTO_TEST_SUITE(SpliderDemo_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(default_interpolant_test)
+BOOST_AUTO_TEST_CASE(default_spline_test)
 {
-  //! [Default interpolant]
+  //! [Default spline]
+
+  using Spline = Splider::C2;
+  const auto build = Spline::builder({1, 2, 3, 4});
+  auto spline = build.spline({10, 20, 30, 40});
+  auto y = spline({1.1, 2.5, 3.9});
+
+  //! [Default spline]
+}
+
+BOOST_AUTO_TEST_CASE(lagrange_spline_test)
+{
+  //! [Lagrange spline]
 
   using Spline = Splider::Lagrange;
   const auto build = Spline::builder({1, 2, 3, 4});
   auto spline = build.spline({10, 20, 30, 40});
   auto y = spline({1.1, 2.5, 3.9});
 
-  //! [Default interpolant]
+  //! [Lagrange spline]
 }
 
 BOOST_AUTO_TEST_CASE(custom_bounds_test)
@@ -37,31 +49,31 @@ BOOST_AUTO_TEST_CASE(custom_bounds_test)
   //! [Custom bounds]
 }
 
-BOOST_AUTO_TEST_CASE(default_resampler_test)
+BOOST_AUTO_TEST_CASE(default_cospline_test)
 {
-  //! [Default resampler]
+  //! [Default cospline]
 
   using Spline = Splider::C2;
   const auto build = Spline::builder({1, 2, 3, 4});
   auto cospline = build.cospline({1.1, 2.5, 3.9});
   auto y = cospline({10, 20, 30, 40});
 
-  //! [Default resampler]
+  //! [Default cospline]
 }
 
-BOOST_AUTO_TEST_CASE(default_bivariate_resampler_test)
+BOOST_AUTO_TEST_CASE(default_bivariate_cospline_test)
 {
-  //! [Default bivariate resampler]
+  //! [Default bivariate cospline]
 
   Splider::Partition<> u0 {1, 2, 3, 4};
   Splider::Partition<> u1 {1, 10, 100};
   Splider::Trajectory<2> x {{1.1, 2.}, {2.5, 10.}, {2.5, 20.}, {2.5, 50.}, {3.9, 50.}};
-  Splider::BiCospline<double> resampler(u0, u1, x);
+  Splider::BiCospline<double> cospline(u0, u1, x);
 
   Linx::Raster<double> v({u0.ssize(), u1.ssize()}, {1, 2, 3, 4, 10, 20, 30, 40, 100, 200, 300, 400});
-  auto y = resampler(v);
+  auto y = cospline(v);
 
-  //! [Default bivariate resampler]
+  //! [Default bivariate cospline]
 }
 
 //-----------------------------------------------------------------------------
