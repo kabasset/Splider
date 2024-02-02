@@ -31,8 +31,8 @@ This allows recomputing only what has changed.
 With Splider, the above example writes:
 
 ```cpp
-const auto b = Spline::builder(u); // Compute domain-related coefficients
-auto spline = b.spline(v); // Compute knot-related coefficients
+const auto build = Spline::builder(u); // Compute domain-related coefficients
+auto spline = build.spline(v); // Compute knot-related coefficients
 auto y = spline(x); // Compute argument-related coefficients
 ```
 
@@ -41,16 +41,16 @@ Yet, sometimes, one wish to initialize them with `u` and `x` and apply them to `
 This is known as a "cospline" in Splider:
 
 ```cpp
-const auto b = Spline::builder(u); // Compute domain-related coefficients
-auto cospline = b.cospline(x); // Compute arguments-related coefficients
+const auto build = Spline::builder(u); // Compute domain-related coefficients
+auto cospline = build.cospline(x); // Compute arguments-related coefficients
 auto y = cospline(v); // Compute knots-related coefficients
 ```
 
 This is especially efficient when several functions must be interpolated with the same `x`:
 
 ```cpp
-const auto b = Spline::builder(u); // Compute domain-related coefficients
-auto cospline = b.cospline(x);
+const auto build = Spline::builder(u); // Compute domain-related coefficients
+auto cospline = build.cospline(x);
 auto y0 = cospline(v0);
 auto y1 = cospline(v1);
 auto y2 = cospline(v2);

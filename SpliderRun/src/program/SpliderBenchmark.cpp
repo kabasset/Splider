@@ -69,24 +69,24 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, const std::string& 
     }
   } else if (setup == "c2") {
     using Spline = Splider::C2;
-    const auto b = Spline::builder(u);
-    auto cospline = b.cospline(x);
+    const auto build = Spline::builder(u);
+    auto cospline = build.cospline(x);
     for (const auto& row : sections(v)) {
       y = cospline(row);
     }
   } else if (setup == "s2") {
     using Spline = Splider::C2;
-    const auto b = Spline::builder(u);
-    const auto args = b.args(x);
-    auto spline = b.template spline<double>();
+    const auto build = Spline::builder(u);
+    const auto args = build.args(x);
+    auto spline = build.template spline<double>();
     for (const auto& row : sections(v)) {
       spline.assign(row);
       y = spline(args);
     }
   } else if (setup == "lagrange") {
     using Spline = Splider::Lagrange;
-    const auto b = Spline::builder(u);
-    auto cospline = b.cospline(x);
+    const auto build = Spline::builder(u);
+    auto cospline = build.cospline(x);
     for (const auto& row : sections(v)) {
       y = cospline(row);
     }

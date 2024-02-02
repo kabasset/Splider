@@ -11,7 +11,7 @@
 namespace Splider {
 
 /**
- * @brief The boundary conditions.
+ * @brief The \f$C^2\f$ splines boundary conditions.
  */
 enum class C2Bounds {
   Natural = 0, ///< Null second derivatives at bounds
@@ -19,7 +19,7 @@ enum class C2Bounds {
 };
 
 /**
- * @brief The spline evaluator.
+ * @brief The \f$C^2\f$ spline evaluator.
  */
 template <typename TDomain, typename TValue, C2Bounds B>
 class C2Spline : public C2SplineMixin<TDomain, TValue, C2Spline<TDomain, TValue, B>> {
@@ -27,6 +27,9 @@ class C2Spline : public C2SplineMixin<TDomain, TValue, C2Spline<TDomain, TValue,
 
 public:
 
+  /**
+   * @brief Constructor.
+   */
   template <typename... TParams>
   C2Spline(TParams&&... params) : Mixin(LINX_FORWARD(params)...)
   {}

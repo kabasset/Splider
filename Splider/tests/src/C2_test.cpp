@@ -54,8 +54,8 @@ struct RealRandomFixture {
 
 BOOST_FIXTURE_TEST_CASE(real_lin_spline_test, RealLinFixture)
 {
-  const auto b = Spline::builder(u);
-  auto spline = b.spline(v);
+  const auto build = Spline::builder(u);
+  auto spline = build.spline(v);
   auto out = spline(x);
   BOOST_TEST(out.size() == x.size());
   for (std::size_t i = 0; i < out.size(); ++i) {
@@ -68,8 +68,8 @@ BOOST_FIXTURE_TEST_CASE(real_lin_spline_test, RealLinFixture)
 
 BOOST_FIXTURE_TEST_CASE(real_lin_cospline_test, RealLinFixture)
 {
-  const auto b = Spline::builder(u);
-  auto cospline = b.cospline(x);
+  const auto build = Spline::builder(u);
+  auto cospline = build.cospline(x);
   auto out = cospline(v);
   BOOST_TEST(out.size() == x.size());
   for (std::size_t i = 0; i < out.size(); ++i) {

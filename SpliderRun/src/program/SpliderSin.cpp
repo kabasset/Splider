@@ -56,12 +56,12 @@ public:
     logger.info("Interpolating...");
     std::vector<double> y;
     if (setup == "c2") {
-      const auto b = Splider::C2::builder(u);
-      auto cospline = b.cospline(x);
+      const auto build = Splider::C2::builder(u);
+      auto cospline = build.cospline(x);
       y = cospline(v);
     } else if (setup == "lagrange") {
-      const auto b = Splider::Lagrange::builder(u);
-      auto cospline = b.cospline(x);
+      const auto build = Splider::Lagrange::builder(u);
+      auto cospline = build.cospline(x);
       y = cospline(v);
     }
     const auto gsl = resample_with_gsl(u, v, x);

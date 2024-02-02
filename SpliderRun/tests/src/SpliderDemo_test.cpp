@@ -18,8 +18,8 @@ BOOST_AUTO_TEST_CASE(default_interpolant_test)
   //! [Default interpolant]
 
   using Spline = Splider::Lagrange;
-  const auto b = Spline::builder({1, 2, 3, 4});
-  auto spline = b.spline({10, 20, 30, 40});
+  const auto build = Spline::builder({1, 2, 3, 4});
+  auto spline = build.spline({10, 20, 30, 40});
   auto y = spline({1.1, 2.5, 3.9});
 
   //! [Default interpolant]
@@ -30,8 +30,8 @@ BOOST_AUTO_TEST_CASE(custom_bounds_test)
   //! [Custom bounds]
 
   using Spline = Splider::C2;
-  const auto b = Spline::builder<Spline::Bounds::NotAKnot>({1, 2, 3, 4});
-  auto spline = b.spline({10, 20, 30, 40});
+  const auto build = Spline::builder<Spline::Bounds::NotAKnot>({1, 2, 3, 4});
+  auto spline = build.spline({10, 20, 30, 40});
   auto y = spline({1.1, 2.5, 3.9});
 
   //! [Custom bounds]
@@ -42,8 +42,8 @@ BOOST_AUTO_TEST_CASE(default_resampler_test)
   //! [Default resampler]
 
   using Spline = Splider::C2;
-  const auto b = Spline::builder({1, 2, 3, 4});
-  auto cospline = b.cospline({1.1, 2.5, 3.9});
+  const auto build = Spline::builder({1, 2, 3, 4});
+  auto cospline = build.cospline({1.1, 2.5, 3.9});
   auto y = cospline({10, 20, 30, 40});
 
   //! [Default resampler]

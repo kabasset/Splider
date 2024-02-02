@@ -16,19 +16,17 @@ template <typename TReal>
 using C2Domain = Partition<TReal>; // FIXME
 
 /**
- * @brief An argument.
+ * @brief A \f$C^2\f$ spline argument.
  */
 template <typename TDomain>
 class C2Arg {
   template <typename, typename, typename>
   friend class C2SplineMixin;
-  // Friendship could be avoided by making C2Arg a nested class,
-  // at the cost of more template parameters.
 
 public:
 
   /**
-   * @brief The domain type.
+   * @brief The knots domain type.
    */
   using Domain = TDomain;
 
@@ -62,15 +60,15 @@ private:
 };
 
 /**
- * @brief The parameters.
+ * @brief \f$C^2\f$ spline parameters.
  */
 template <typename TDomain, typename TValue, typename TDerived>
-class C2SplineMixin { // FIXME Upper mixin for operator()?
+class C2SplineMixin { // FIXME Upper mixin
 
 public:
 
   /**
-   * @brief The knots domain.
+   * @brief The knots domain type.
    */
   using Domain = TDomain;
 
@@ -103,20 +101,6 @@ public:
   {}
 
   /**
-   * @brief Range-based constructor.
-   */
-  template <typename TV, typename std::enable_if_t<Linx::IsRange<TV>::value>* = nullptr>
-  explicit C2SplineMixin(const Domain& u, const TV& v) : C2SplineMixin(u, std::begin(v), std::end(v))
-  {}
-
-  /**
-   * @brief List-based constructor.
-   */
-  template <typename TV>
-  explicit C2SplineMixin(const Domain& u, std::initializer_list<TV> v) : C2SplineMixin(u, v.begin(), v.end())
-  {}
-
-  /**
    * @brief Get the knots domain.
    */
   inline const Domain& domain() const
@@ -131,7 +115,7 @@ public:
   void assign(TIt begin, TIt end)
   {
     m_v.assign(begin, end);
-    m_valid = false;
+    m_valid = false; // FIXME TDerived::invalidate()
   }
 
   /**
@@ -150,6 +134,15 @@ public:
   void assign(std::initializer_list<TV> v)
   {
     assign(v.begin(), v.end());
+  }
+
+  /**
+   * @brief Set a knot value.
+   */
+  void set(Linx::Index i, Value v)
+  {
+    m_v[i] = v;
+    m_valid = false; // FIXME TDerived::invalidate(i)
   }
 
   /**
