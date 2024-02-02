@@ -5,13 +5,21 @@
 #define _SPLIDER_LAGRANGE_H
 
 #include "Linx/Base/SeqUtils.h" // IsRange
+#include "Splider/Partition.h" // FIXME rm
 #include "Splider/mixins/Builder.h"
 
 namespace Splider {
 
+/**
+ * @brief The boundary conditions.
+ */
+enum class LagrangeBounds {
+  NotAKnot = 0 ///< Use neighboring polynomials
+};
+
 template <typename TDomain>
 class LagrangeArg {
-  template <typename, typename>
+  template <typename, typename, LagrangeBounds>
   friend class LagrangeSpline;
 
 public:
@@ -55,7 +63,7 @@ private:
 /**
  * @brief The spline evaluator.
  */
-template <typename TDomain, typename T>
+template <typename TDomain, typename T, LagrangeBounds B>
 class LagrangeSpline {
 public:
 
@@ -205,8 +213,14 @@ protected:
  * In the first and last subintervals, cubic polynomials cannot be fitted,
  * and the next and previous ones are used, respectively.
  */
-class Lagrange : public BuilderMixin<Lagrange> {
+class Lagrange : public BuilderMixin<Lagrange, LagrangeBounds> {
 public:
+
+  /**
+   * @brief The knots domain type.
+   */
+  template <typename TReal>
+  using Domain = Partition<TReal>; // FIXME LagrangeDomain
 
   /**
    * @brief The argument type.
@@ -217,8 +231,8 @@ public:
   /**
    * @brief The spline evaluator.
    */
-  template <typename TDomain, typename T>
-  using Spline = LagrangeSpline<TDomain, T>;
+  template <typename TDomain, typename T, LagrangeBounds B>
+  using Spline = LagrangeSpline<TDomain, T, B>;
 };
 
 } // namespace Splider

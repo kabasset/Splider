@@ -18,7 +18,7 @@ namespace Splider {
 /**
  * @brief Spline builder.
  */
-template <typename TDomain, typename TMethod>
+template <typename TDomain, typename TMethod, typename TBounds, TBounds B>
 class Builder {
 public:
 
@@ -104,7 +104,7 @@ public:
   template <typename TV>
   auto spline() const
   {
-    return typename Method::Spline<Domain, TV>(m_domain);
+    return typename Method::Spline<Domain, TV, B>(m_domain);
   }
 
   /**
@@ -115,7 +115,7 @@ public:
   {
     using T = typename std::iterator_traits<TIt>::value_type;
     using Value = std::decay_t<T>;
-    return typename Method::Spline<Domain, Value>(m_domain, begin, end);
+    return typename Method::Spline<Domain, Value, B>(m_domain, begin, end);
   }
 
   /**
@@ -144,7 +144,7 @@ public:
   {
     using T = typename std::iterator_traits<TIt>::value_type;
     using Value = std::decay_t<T>;
-    return Co<typename Method::Spline<Domain, Value>>(m_domain, begin, end);
+    return Co<typename Method::Spline<Domain, Value, B>>(m_domain, begin, end);
   }
 
   /**

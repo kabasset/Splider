@@ -5,8 +5,6 @@
 #define _SPLIDER_MIXINS_BUILDER_H
 
 #include "Splider/Builder.h"
-#include "Splider/Linspace.h"
-#include "Splider/Partition.h"
 
 #include <initializer_list>
 
@@ -15,42 +13,36 @@ namespace Splider {
 /**
  * @brief Mixin for cubic spline methods.
  */
-template <typename TDerived>
-class BuilderMixin {
-public:
-
-  /**
-   * @brief The underlying method.
-   */
-  using Method = TDerived;
-
+template <typename TDerived, typename TBounds>
+struct BuilderMixin {
   /**
    * @brief Make a builder.
    */
-  template <typename TIt>
+  template <TBounds B = static_cast<TBounds>(0), typename TIt>
   static auto builder(TIt begin, TIt end)
   {
     using T = typename std::iterator_traits<TIt>::value_type;
     using Real = std::decay_t<T>;
-    return Builder<Partition<Real>, Method>(begin, end);
+    using Domain = typename TDerived::Domain<Real>;
+    return Builder<Domain, TDerived, TBounds, B>(begin, end);
   }
 
   /**
    * @brief Make a builder.
    */
-  template <typename TRange>
+  template <TBounds B = static_cast<TBounds>(0), typename TRange>
   static auto builder(const TRange& range)
   {
-    return builder(std::begin(range), std::end(range));
+    return builder<B>(std::begin(range), std::end(range));
   }
 
   /**
    * @brief Make a builder.
    */
-  template <typename T>
+  template <TBounds B = static_cast<TBounds>(0), typename T>
   static auto builder(std::initializer_list<T> list)
   {
-    return builder(list.begin(), list.end());
+    return builder<B>(list.begin(), list.end());
   }
 };
 

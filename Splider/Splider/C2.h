@@ -5,15 +5,86 @@
 #define _SPLIDER_C2_H
 
 #include "Linx/Base/SeqUtils.h" // IsRange
+#include "Splider/Partition.h" // FIXME rm
 #include "Splider/mixins/C2.h"
 
 namespace Splider {
 
 /**
+ * @brief The boundary conditions.
+ */
+enum class C2Bounds {
+  Natural = 0 ///< Null second derivatives at bounds
+};
+
+/**
+ * @brief The spline evaluator.
+ */
+template <typename TDomain, typename TValue, C2Bounds B>
+class C2Spline : public C2SplineMixin<TDomain, TValue, C2Spline<TDomain, TValue, B>> {
+  using Mixin = C2SplineMixin<TDomain, TValue, C2Spline>;
+
+public:
+
+  template <typename... TParams>
+  C2Spline(TParams&&... params) : Mixin(LINX_FORWARD(params)...)
+  {}
+
+  /**
+   * @brief Solve the tridiagonal system using Thomas algorithm.
+   */
+  void update(Linx::Index)
+  {
+    if (Mixin::m_valid) {
+      return;
+    }
+
+    const Linx::Index n = this->m_6s.size();
+    std::vector<typename Mixin::Real> diag(n);
+    std::vector<typename Mixin::Value> rhs(n);
+
+    // Initialize i = 1 for merging initialization and forward pass
+    auto h0 = this->m_domain.length(0);
+    auto h1 = this->m_domain.length(1);
+    auto dv0 = (this->m_v[1] - this->m_v[0]) / h0;
+    auto dv1 = (this->m_v[2] - this->m_v[1]) / h1;
+    diag[1] = 2. * (h0 + h1);
+    rhs[1] = dv1 - dv0;
+
+    // Initialization and forward pass
+    for (Linx::Index i = 2; i < n - 1; ++i) {
+      h0 = h1;
+      h1 = this->m_domain.length(i);
+      dv0 = dv1;
+      dv1 = (this->m_v[i + 1] - this->m_v[i]) / h1;
+      const auto w = h1 / diag[i - 1];
+      diag[i] = 2. * (h0 + h1) - w * h1;
+      rhs[i] = dv1 - dv0 - w * rhs[i - 1];
+    }
+
+    // Backward pass
+    this->m_6s[n - 2] = rhs[n - 2] / diag[n - 2];
+    for (auto i = n - 3; i > 0; --i) {
+      this->m_6s[i] = (rhs[i] - this->m_domain.length(i) * this->m_6s[i + 1]) / diag[i];
+    }
+
+    // Natutal spline // FIXME useful?
+    this->m_6s[0] = 0;
+    this->m_6s[n - 1] = 0;
+
+    this->m_valid = true;
+  }
+};
+
+/**
  * @brief \f$C^2\f$ cubic spline.
  */
-class C2 : public BuilderMixin<C2> {
-public:
+struct C2 : BuilderMixin<C2, C2Bounds> {
+  /**
+   * @brief The knots domain type.
+   */
+  template <typename TReal>
+  using Domain = Partition<TReal>; // FIXME C2Domain
 
   /**
    * @brief The argument type.
@@ -24,65 +95,12 @@ public:
   /**
    * @brief The spline evaluator.
    */
-  template <typename TDomain, typename T>
-  class Spline : public C2SplineMixin<TDomain, T, Spline<TDomain, T>> {
-    using Mixin = C2SplineMixin<TDomain, T, Spline>;
-
-  public:
-
-    template <typename... TParams>
-    Spline(TParams&&... params) : Mixin(LINX_FORWARD(params)...)
-    {}
-
-    /**
-     * @brief Solve the tridiagonal system using Thomas algorithm.
-     */
-    void update(Linx::Index)
-    {
-      if (Mixin::m_valid) {
-        return;
-      }
-
-      const Linx::Index n = this->m_6s.size();
-      std::vector<typename Mixin::Real> diag(n);
-      std::vector<typename Mixin::Value> rhs(n);
-
-      // Initialize i = 1 for merging initialization and forward pass
-      auto h0 = this->m_domain.length(0);
-      auto h1 = this->m_domain.length(1);
-      auto dv0 = (this->m_v[1] - this->m_v[0]) / h0;
-      auto dv1 = (this->m_v[2] - this->m_v[1]) / h1;
-      diag[1] = 2. * (h0 + h1);
-      rhs[1] = dv1 - dv0;
-
-      // Initialization and forward pass
-      for (Linx::Index i = 2; i < n - 1; ++i) {
-        h0 = h1;
-        h1 = this->m_domain.length(i);
-        dv0 = dv1;
-        dv1 = (this->m_v[i + 1] - this->m_v[i]) / h1;
-        const auto w = h1 / diag[i - 1];
-        diag[i] = 2. * (h0 + h1) - w * h1;
-        rhs[i] = dv1 - dv0 - w * rhs[i - 1];
-      }
-
-      // Backward pass
-      this->m_6s[n - 2] = rhs[n - 2] / diag[n - 2];
-      for (auto i = n - 3; i > 0; --i) {
-        this->m_6s[i] = (rhs[i] - this->m_domain.length(i) * this->m_6s[i + 1]) / diag[i];
-      }
-
-      // Natutal spline // FIXME useful?
-      this->m_6s[0] = 0;
-      this->m_6s[n - 1] = 0;
-
-      this->m_valid = true;
-    }
-  };
+  template <typename TDomain, typename TValue, C2Bounds B>
+  using Spline = C2Spline<TDomain, TValue, B>;
 };
 
 namespace FiniteDiff {
-class C2 : public BuilderMixin<FiniteDiff::C2> {};
+struct C2 : BuilderMixin<FiniteDiff::C2, C2Bounds> {};
 } // namespace FiniteDiff
 
 } // namespace Splider

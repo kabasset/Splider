@@ -14,11 +14,11 @@ namespace Splider {
 
 /**
  * @brief The knot abscissae.
- * @tparam T The real number type
+ * @tparam TReal The real number type
  * 
  * This class stores both the abscissae of the knots and precomputes some spline coefficients to speed-up spline evaluation.
  */
-template <typename T = double>
+template <typename TReal = double>
 class Partition {
 public:
 
@@ -30,7 +30,7 @@ public:
   /**
    * @brief The real number type
    */
-  using Value = T;
+  using Value = TReal;
 
   /**
    * @brief Iterator-based constructor.

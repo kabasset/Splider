@@ -5,11 +5,15 @@
 #define _SPLIDER_MIXINS_C2_H
 
 #include "Linx/Base/SeqUtils.h" // IsRange
+#include "Splider/Partition.h" // FIXME rm
 #include "Splider/mixins/Builder.h"
 
 #include <initializer_list>
 
 namespace Splider {
+
+template <typename TReal>
+using C2Domain = Partition<TReal>; // FIXME
 
 /**
  * @brief An argument.
@@ -60,7 +64,7 @@ private:
 /**
  * @brief The parameters.
  */
-template <typename TDomain, typename T, typename TDerived>
+template <typename TDomain, typename TValue, typename TDerived>
 class C2SplineMixin { // FIXME Upper mixin for operator()?
 
 public:
@@ -83,7 +87,7 @@ public:
   /**
    * @brief The knot value type.
    */
-  using Value = T;
+  using Value = TValue;
 
   /**
    * @brief Null knots constructor.
