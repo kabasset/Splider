@@ -1,6 +1,6 @@
 # Project Overview
 
-![Splider logo](doc/diagrams/logo_square.svg)
+<br/>![Splider logo](doc/diagrams/logo_square.svg)
 
 ## Purpose
 
