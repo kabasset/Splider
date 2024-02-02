@@ -81,6 +81,7 @@ public:
 };
 
 /**
+ * @ingroup builders
  * @brief \f$C^2\f$ cubic spline.
  */
 struct C2 : BuilderMixin<C2, C2Bounds> {

@@ -3,10 +3,7 @@
 \defgroup basics Basics
 \brief Basic concepts and usage
 
-\defgroup 1d 1D interpolation
-\brief 1D data classes and splines
-
-\defgroup nd ND interpolation
-\brief ND data classes and splines
+\defgroup builders Spline types
+\brief List of available spline builders
 
 */

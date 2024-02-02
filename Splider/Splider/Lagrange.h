@@ -205,17 +205,16 @@ protected:
 };
 
 /**
- * @brief Piecewise Lagrange cubic polynomials (\f$C^0\f$).
+ * @ingroup builders
+ * @brief Piecewise cubic Lagrange polynomials (\f$C^0\f$).
  * 
- * This spline is built by fitting a Lagrange cubic polynomial over a sliding 4-knot window.
+ * This spline is built by fitting a cubic Lagrange polynomial over a sliding 4-knot window.
  * It is only guaranteed to be (\f$C^0\f$).
  * 
  * In the first and last subintervals, cubic polynomials cannot be fitted,
  * and the next and previous ones are used, respectively.
  */
-class Lagrange : public BuilderMixin<Lagrange, LagrangeBounds> {
-public:
-
+struct Lagrange : BuilderMixin<Lagrange, LagrangeBounds> {
   /**
    * @brief The knots domain type.
    */
