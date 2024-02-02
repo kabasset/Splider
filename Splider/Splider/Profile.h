@@ -1,10 +1,11 @@
 /// @copyright 2023, Antoine Basset
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef _SPLIDER_MULTI_H
-#define _SPLIDER_MULTI_H
+#ifndef _SPLIDER_PROFILE_H
+#define _SPLIDER_PROFILE_H
 
 #include "Linx/Base/SeqUtils.h" // IsRange
+#include "Linx/Data/Vector.h"
 
 #include <initializer_list>
 #include <vector>
@@ -12,10 +13,10 @@
 namespace Splider {
 
 /**
- * @brief Multi-dimensional spline.
+ * @brief Profile along a path over a multi-dimensional spline.
  */
-template <Linx::Index N, typename TSpline>
-class Multi {
+template <typename TSpline, Linx::Index N = 2>
+class Profile {
 public:
 
   /**
@@ -29,19 +30,24 @@ public:
   using Method = TSpline;
 
   /**
-   * @brief The knot domain type.
+   * @brief The knot multidimensional domain type.
    */
-  using Domain = typename Method::Domain;
+  using Domain = Linx::Vector<typename Method::Domain, Dimension>;
 
   /**
    * @brief The abscissae floating point type.
    */
-  using Real = typename Domain::Value;
+  using Real = typename Method::Domain::Value;
 
   /**
-   * @brief The argument type.
+   * @brief The multidimensional argument type.
    */
-  using Arg = Linx::Vector<typename Method::Arg, N>;
+  using Arg = Linx::Vector<typename Method::Arg, Dimension>;
+
+  /**
+   * @brief The path type.
+   */
+  using Path = std::vector<Arg>;
 
   /**
    * @brief The knot value type.
@@ -52,7 +58,8 @@ public:
    * @brief Iterator-based constructor.
    */
   template <typename TIt>
-  explicit Multi(const Domain& domain, TIt begin, TIt end) : m_spline(domain), m_args()
+  explicit Profile(const Domain& domain, TIt begin, TIt end) :
+      m_splines(domain.begin(), domain.end()), m_args(shape(domain))
   {
     assign(begin, end);
   }
@@ -61,14 +68,14 @@ public:
    * @brief Range-based constructor.
    */
   template <typename TX, typename std::enable_if_t<Linx::IsRange<TX>::value>* = nullptr>
-  explicit Multi(const Domain& u, const TX& x) : Multi(u, std::begin(x), std::end(x))
+  explicit Profile(const Domain& u, const TX& x) : Profile(u, std::begin(x), std::end(x))
   {}
 
   /**
    * @brief List-based constructor.
    */
   template <typename TX>
-  explicit Multi(const Domain& u, std::initializer_list<TX> x) : Multi(u, x.begin(), x.end())
+  explicit Profile(const Domain& u, std::initializer_list<TX> x) : Profile(u, x.begin(), x.end())
   {}
 
   /**
@@ -89,7 +96,7 @@ public:
     m_args.reserve(std::distance(begin, end));
     const auto& d = domain();
     for (; begin != end; ++begin) {
-      m_args.emplace_back(d, *begin);
+      m_args.emplace_back(d, *begin); // FIXME
     }
   }
 
