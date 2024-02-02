@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "Splider/C2.h"
-#include "SpliderRun/Demo.h"
+#include "Splider/Lagrange.h"
+#include "SpliderRun/Demo.h" // FIXME rm
 
 #include <boost/test/unit_test.hpp>
 
@@ -16,12 +17,24 @@ BOOST_AUTO_TEST_CASE(default_interpolant_test)
 {
   //! [Default interpolant]
 
-  using Spline = Splider::C2;
+  using Spline = Splider::Lagrange;
   const auto b = Spline::builder({1, 2, 3, 4});
   auto spline = b.spline({10, 20, 30, 40});
   auto y = spline({1.1, 2.5, 3.9});
 
   //! [Default interpolant]
+}
+
+BOOST_AUTO_TEST_CASE(custom_bounds_test)
+{
+  //! [Custom bounds]
+
+  using Spline = Splider::C2;
+  const auto b = Spline::builder<Spline::Bounds::NotAKnot>({1, 2, 3, 4});
+  auto spline = b.spline({10, 20, 30, 40});
+  auto y = spline({1.1, 2.5, 3.9});
+
+  //! [Custom bounds]
 }
 
 BOOST_AUTO_TEST_CASE(default_resampler_test)

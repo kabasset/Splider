@@ -14,7 +14,8 @@ namespace Splider {
  * @brief The boundary conditions.
  */
 enum class C2Bounds {
-  Natural = 0 ///< Null second derivatives at bounds
+  Natural = 0, ///< Null second derivatives at bounds
+  NotAKnot ///< Neighboring subinterval fitting
 };
 
 /**
@@ -80,6 +81,11 @@ public:
  * @brief \f$C^2\f$ cubic spline.
  */
 struct C2 : BuilderMixin<C2, C2Bounds> {
+  /**
+   * @brief The boundary conditions.
+   */
+  using Bounds = C2Bounds;
+
   /**
    * @brief The knots domain type.
    */
