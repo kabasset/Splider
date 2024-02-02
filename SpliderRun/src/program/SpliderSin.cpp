@@ -5,6 +5,7 @@
 #include "Linx/Data/Sequence.h"
 #include "Linx/Run/ProgramOptions.h"
 #include "Splider/C2.h"
+#include "Splider/Hermite.h"
 #include "Splider/Lagrange.h"
 
 #include <gsl/gsl_interp.h>
@@ -61,6 +62,10 @@ public:
       y = cospline(v);
     } else if (setup == "c2fd") {
       const auto build = Splider::C2::FiniteDiff::builder(u);
+      auto cospline = build.cospline(x);
+      y = cospline(v);
+    } else if (setup == "hermite") {
+      const auto build = Splider::Hermite::FiniteDiff::builder(u);
       auto cospline = build.cospline(x);
       y = cospline(v);
     } else if (setup == "lagrange") {
