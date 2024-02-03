@@ -10,8 +10,6 @@
 
 #include <iostream>
 
-using Duration = std::chrono::milliseconds;
-
 int main(int argc, const char* const argv[])
 {
   Linx::ProgramOptions options;
@@ -38,7 +36,7 @@ int main(int argc, const char* const argv[])
 
   std::vector<std::vector<double>> y;
   std::cout << "i\tx\tsin(x)";
-  std::cout << "\tC2";
+  std::cout << "\tC2 Natural";
   y.push_back(Splider::C2::eval(u, v, x));
   std::cout << "\tC2 FD";
   y.push_back(Splider::C2::FiniteDiff::eval(u, v, x));
