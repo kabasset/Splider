@@ -15,11 +15,12 @@ using Duration = std::chrono::milliseconds;
 int main(int argc, const char* const argv[])
 {
   Linx::ProgramOptions options;
-  options.positional("knots", "Number of knots", 101L);
-  options.positional("args", "Number of arguments", 1001L);
+  options.positional("knots", "Number of knots", 7L);
+  options.positional("args", "Number of arguments", 101L);
   options.parse(argc, argv);
   const auto knot_count = options.as<Linx::Index>("knots");
   const auto arg_count = options.as<Linx::Index>("args");
+  // FIXME std::cout << options << std::endl;
 
   std::cout << "\nGenerating knots...\n" << std::endl;
 
@@ -56,4 +57,6 @@ int main(int argc, const char* const argv[])
     }
     std::cout << std::endl;
   }
+
+  std::cout << std::endl;
 }

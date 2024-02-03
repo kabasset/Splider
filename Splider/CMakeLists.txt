@@ -2,14 +2,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 elements_subdir(Splider)
 
-elements_depends_on_subdirs(Linx ElementsKernel)
+elements_depends_on_subdirs(Linx)
 
 find_package(GSL)
 
 elements_add_library(
     Splider src/lib/*.cpp
-    INCLUDE_DIRS Linx GSL ElementsKernel
-    LINK_LIBRARIES Linx GSL ElementsKernel
+    INCLUDE_DIRS Linx GSL
+    LINK_LIBRARIES Linx GSL
     PUBLIC_HEADERS Splider)
 
 elements_add_unit_test(

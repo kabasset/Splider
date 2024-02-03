@@ -1,7 +1,6 @@
 /// @copyright 2023, Antoine Basset
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "ElementsKernel/ProgramHeaders.h"
 #include "Linx/Data/Raster.h"
 #include "Linx/Data/Sequence.h"
 #include "Linx/Data/Tiling.h"
@@ -11,8 +10,7 @@
 
 #include <gsl/gsl_interp2d.h>
 #include <gsl/gsl_spline2d.h>
-
-static Elements::Logging logger = Elements::Logging::getLogger("SpliderBenchmark");
+#include <iostream>
 
 using Duration = std::chrono::milliseconds;
 
@@ -58,68 +56,60 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup)
   return chrono.stop();
 }
 
-class SpliderBenchmark : public Elements::Program {
-public:
+int main(int argc, const char* const argv[])
+{
+  Linx::ProgramOptions options;
+  options.named("case", "Test case: s (Splider), g (GSL)", 's');
+  options.named("knots", "Number of knots along each axis", 100L);
+  options.named("args", "Number of arguments", 100L);
+  options.named("iters", "Numper of iterations", 1L);
+  options.named("seed", "Random seed", -1L);
+  options.parse(argc, argv);
+  const auto setup = options.as<char>("case");
+  const auto u_size = options.as<Linx::Index>("knots");
+  const auto x_size = options.as<Linx::Index>("args");
+  const auto v_iters = options.as<Linx::Index>("iters");
+  const auto seed = options.as<Linx::Index>("seed");
 
-  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
-  {
-    Linx::ProgramOptions options;
-    options.named("case", "Test case: s (Splider), g (GSL)", 's');
-    options.named("knots", "Number of knots along each axis", 100L);
-    options.named("args", "Number of arguments", 100L);
-    options.named("iters", "Numper of iterations", 1L);
-    options.named("seed", "Random seed", -1L);
-    return options.as_pair();
-  }
+  std::cout << "\nGenerating knots...\n" << std::endl;
 
-  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override
-  {
-    const auto setup = args["case"].as<char>();
-    const auto u_size = args["knots"].as<Linx::Index>();
-    const auto x_size = args["args"].as<Linx::Index>();
-    const auto v_iters = args["iters"].as<Linx::Index>();
-    const auto seed = args["seed"].as<Linx::Index>();
+  const auto u = Linx::Sequence<double>(u_size).linspace(0, Linx::pi<double>() * 4);
+  auto v = Linx::Raster<double, 3>({u_size, u_size, v_iters});
+  v.generate(
+      [&](const auto& p) {
+        auto s = std::sin(u[p[0]]);
+        auto c = std::cos(u[p[1]]);
+        return s * c * (p[2] + 1);
+      },
+      v.domain());
+  std::cout << "  u: " << u << std::endl;
+  std::cout << "  v: " << v << std::endl;
 
-    logger.info("Generating knots...");
-    const auto u = Linx::Sequence<double>(u_size).linspace(0, Linx::pi<double>() * 4);
-    auto v = Linx::Raster<double, 3>({u_size, u_size, v_iters});
-    v.generate(
-        [&](const auto& p) {
-          auto s = std::sin(u[p[0]]);
-          auto c = std::cos(u[p[1]]);
-          return s * c * (p[2] + 1);
-        },
-        v.domain());
+  std::cout << "\nGenerating trajectory...\n" << std::endl;
 
-    logger.info("Generating trajectory...");
-    Splider::Trajectory<2> x(x_size);
-    auto si = seed;
-    for (auto& xi : x) {
-      if (seed != -1) {
-        ++si;
-      }
-      xi.generate(Linx::UniformNoise<double>(u[1], u[u_size - 2], si));
+  Splider::Trajectory<2> x(x_size);
+  auto si = seed;
+  for (auto& xi : x) {
+    if (seed != -1) {
+      ++si;
     }
-    std::vector<double> y;
-    logger.info() << "  u: " << u;
-    logger.info() << "  v: " << v;
-    logger.info() << "  x: " << x;
-
-    logger.info("Interpolating...");
-    const auto duration = resample<Duration>(u, v, x, y, setup);
-    logger.info() << "  y: " << Linx::Sequence<double>(y);
-
-    logger.debug("i\t\tx0\tx1\tf(x0, x1)\ty");
-    for (Linx::Index i = 0; i < x_size; ++i) {
-      const auto x0 = x[i][0];
-      const auto x1 = x[i][1];
-      logger.debug() << i << '\t' << x0 << '\t' << x1 << '\t' << std::sin(x0) * std::cos(x1) * v_iters << '\t' << y[i];
-    }
-
-    logger.info() << "  Done in " << duration.count() << "ms";
-
-    return ExitCode::OK;
+    xi.generate(Linx::UniformNoise<double>(u[1], u[u_size - 2], si));
   }
-};
+  std::vector<double> y;
+  std::cout << "  x: " << x << std::endl;
 
-MAIN_FOR(SpliderBenchmark)
+  std::cout << "\nInterpolating...\n" << std::endl;
+  const auto duration = resample<Duration>(u, v, x, y, setup);
+  std::cout << "  y: " << Linx::Sequence<double>(y) << std::endl;
+
+  // logger.debug("i\t\tx0\tx1\tf(x0, x1)\ty");
+  // for (Linx::Index i = 0; i < x_size; ++i) {
+  //   const auto x0 = x[i][0];
+  //   const auto x1 = x[i][1];
+  //   logger.debug() << i << '\t' << x0 << '\t' << x1 << '\t' << std::sin(x0) * std::cos(x1) * v_iters << '\t' << y[i];
+  // }
+
+  std::cout << "  Done in " << duration.count() << "ms" << std::endl;
+
+  std::cout << std::endl;
+}
