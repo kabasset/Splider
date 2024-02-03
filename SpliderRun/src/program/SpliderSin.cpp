@@ -49,12 +49,19 @@ public:
     const auto arg_count = args["args"].as<Linx::Index>();
     const auto setup = args["case"].as<std::string>();
 
+    logger.info();
     logger.info("Generating knots...");
     const auto u = Linx::Sequence<double>(knot_count).linspace(0, Linx::pi<double>() * 4);
     const auto x = Linx::Sequence<double>(arg_count).linspace(0, Linx::pi<double>() * 4);
     const auto v = sin(u);
     const auto gt = sin(x);
 
+    logger.info("i\tu\tv");
+    for (std::size_t i = 0; i < u.size(); ++i) {
+      logger.info() << i << '\t' << u[i] << '\t' << v[i];
+    }
+
+    logger.info();
     logger.info("Interpolating...");
     std::vector<double> y;
     if (setup == "c2") {
