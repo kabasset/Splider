@@ -59,6 +59,12 @@ Only the first line has to be modified to change the spline type, here for a mer
 
 The list of available builders can be found in a dedicated page: \ref builders.
 
+In such simple cases, where only one evaluation is made, shortcut `eval()` is a convenient one-liner:
+
+\snippet SpliderDemo_test.cpp Eval shortcut
+
+Be careful with the order of the parameters: knots and then arguments.
+
 
 \section basics-cospline Cosplines
 

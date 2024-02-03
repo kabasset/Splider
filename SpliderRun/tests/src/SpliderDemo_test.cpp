@@ -49,6 +49,20 @@ BOOST_AUTO_TEST_CASE(custom_bounds_test)
   //! [Custom bounds]
 }
 
+BOOST_AUTO_TEST_CASE(eval_shortcut_test)
+{
+  //! [Eval shortcut]
+
+  std::vector<double> u {1, 2, 3, 4};
+  std::vector<double> v {10, 20, 30, 40};
+  std::vector<double> x {1.1, 2.5, 3.9};
+
+  using Spline = Splider::C2;
+  auto y = Spline::eval<Spline::Bounds::NotAKnot>(u, v, x);
+
+  //! [Eval shortcut]
+}
+
 BOOST_AUTO_TEST_CASE(default_cospline_test)
 {
   //! [Default cospline]
