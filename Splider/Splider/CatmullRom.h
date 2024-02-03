@@ -18,7 +18,7 @@ struct CatmullRom {
 };
 
 /**
- * @brief The finite difference Catmull-Rom splines boundary conditions.
+ * @brief The Catmull-Rom splines boundary conditions.
  */
 enum class CatmullRomBounds {
   OneSided = 0, ///< One-sided finite difference
@@ -42,7 +42,7 @@ public:
   {}
 
   /**
-   * @brief Solve the tridiagonal system using Thomas algorithm.
+   * @brief Update the derivatives.
    */
   void update(Linx::Index) // FIXME use index
   {
@@ -69,7 +69,7 @@ public:
 
 /**
  * @ingroup builders
- * @brief Cubic Catmull-Rom spline with finite difference approximation of the derivatives.
+ * @brief Catmull-Rom spline with uniform parametrization.
  */
 struct CatmullRom::Uniform : BuilderMixin<CatmullRom::Uniform, CatmullRomBounds> {
   /**
