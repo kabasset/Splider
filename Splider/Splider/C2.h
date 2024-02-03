@@ -66,15 +66,15 @@ public:
       rhs[i] = dv1 - dv0 - w * rhs[i - 1];
     }
 
+    this->m_6s[n - 1] = 0;
+
     // Backward pass
     this->m_6s[n - 2] = rhs[n - 2] / diag[n - 2];
     for (auto i = n - 3; i > 0; --i) {
       this->m_6s[i] = (rhs[i] - this->m_domain.length(i) * this->m_6s[i + 1]) / diag[i];
     }
 
-    // Natutal spline // FIXME useful?
     this->m_6s[0] = 0;
-    this->m_6s[n - 1] = 0;
 
     this->m_valid = true;
   }
@@ -128,7 +128,7 @@ public:
   {}
 
   /**
-   * @brief Solve the tridiagonal system using Thomas algorithm.
+   * @brief Update the second derivatives.
    */
   void update(Linx::Index) // FIXME use index
   {
@@ -137,6 +137,8 @@ public:
     }
 
     const Linx::Index n = this->m_6s.size();
+
+    this->m_6s[0] = 0;
 
     for (Linx::Index i = 1; i < n - 1; ++i) {
       auto h0 = this->m_domain.length(i - 1);
@@ -147,8 +149,6 @@ public:
       // FIXME optimize
     }
 
-    // Natutal spline // FIXME useful?
-    this->m_6s[0] = 0;
     this->m_6s[n - 1] = 0;
 
     this->m_valid = true;
