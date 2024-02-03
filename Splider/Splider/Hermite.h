@@ -44,7 +44,7 @@ public:
   {}
 
   /**
-   * @brief Solve the tridiagonal system using Thomas algorithm.
+   * @brief Update the derivatives.
    */
   void update(Linx::Index) // FIXME use index
   {

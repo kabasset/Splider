@@ -42,11 +42,12 @@ public:
   HermiteArg(const Domain& domain, Real x)
   {
     m_i = domain.index(x);
-    const auto t = (x - domain[m_i]) / domain.length(m_i);
+    const auto h = domain.length(m_i);
+    const auto t = (x - domain[m_i]) / h;
     m_cv0 = (1 + 2 * t) * (1 - t) * (1 - t);
     m_cv1 = t * t * (3 - 2 * t);
-    m_cd0 = t * (1 - t) * (1 - t);
-    m_cd1 = t * t * (t - 1);
+    m_cd0 = t * (1 - t) * (1 - t) * h;
+    m_cd1 = t * t * (t - 1) * h;
     // FIXME optimize
   }
 
