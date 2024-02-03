@@ -4,6 +4,7 @@
 #ifndef _SPLIDER_MIXINS_HERMITE_H
 #define _SPLIDER_MIXINS_HERMITE_H
 
+#include "Splider/Partition.h" // FIXME rm
 #include "Splider/mixins/Builder.h"
 
 #include <initializer_list>

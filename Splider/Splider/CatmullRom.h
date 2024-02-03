@@ -5,15 +5,14 @@
 #define _SPLIDER_CATMULLROM_H
 
 #include "Linx/Base/SeqUtils.h" // IsRange
-#include "Splider/Partition.h" // FIXME rm
-#include "Splider/mixins/Hermite.h"
+#include "Splider/Hermite.h"
 
 namespace Splider {
 
 /**
  * @brief Cubic Catmull-Rom splines.
  */
-struct CatmullRom {
+struct Hermite::CatmullRom {
   struct Uniform;
 };
 
@@ -71,7 +70,7 @@ public:
  * @ingroup builders
  * @brief Catmull-Rom spline with uniform parametrization.
  */
-struct CatmullRom::Uniform : BuilderMixin<CatmullRom::Uniform, CatmullRomBounds> {
+struct Hermite::CatmullRom::Uniform : BuilderMixin<Hermite::CatmullRom::Uniform, CatmullRomBounds> {
   /**
    * @brief The boundary conditions.
    */

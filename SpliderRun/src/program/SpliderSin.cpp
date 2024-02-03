@@ -51,8 +51,8 @@ public:
 
     logger.info();
     logger.info("Generating knots...");
-    const auto u = Linx::Sequence<double>(knot_count).linspace(0, Linx::pi<double>() * 4);
-    const auto x = Linx::Sequence<double>(arg_count).linspace(0, Linx::pi<double>() * 4);
+    const auto u = Linx::Sequence<double>(knot_count).linspace(0, Linx::pi<double>() * 4).pow(2);
+    const auto x = Linx::Sequence<double>(arg_count).linspace(0, max(u));
     const auto v = sin(u);
     const auto gt = sin(x);
 
@@ -77,7 +77,7 @@ public:
       auto cospline = build.cospline(x);
       y = cospline(v);
     } else if (setup == "cr") {
-      const auto build = Splider::CatmullRom::Uniform::builder(u);
+      const auto build = Splider::Hermite::CatmullRom::Uniform::builder(u);
       auto cospline = build.cospline(x);
       y = cospline(v);
     } else if (setup == "lagrange") {

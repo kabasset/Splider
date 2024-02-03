@@ -5,7 +5,6 @@
 #define _SPLIDER_HERMITE_H
 
 #include "Linx/Base/SeqUtils.h" // IsRange
-#include "Splider/Partition.h" // FIXME rm
 #include "Splider/mixins/Hermite.h"
 
 namespace Splider {
