@@ -44,6 +44,17 @@ struct BuilderMixin {
   {
     return builder<B>(list.begin(), list.end());
   }
+
+  /**
+   * @brief Evaluate a spline.
+   */
+  template <TBounds B = static_cast<TBounds>(0), typename TU, typename TV, typename TX>
+  static auto eval(const TU& u, const TV& v, const TX& x)
+  {
+    const auto build = builder<B>(u);
+    auto spline = build.spline(v);
+    return spline(x);
+  }
 };
 
 } // namespace Splider
