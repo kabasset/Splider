@@ -145,7 +145,7 @@ public:
       auto h1 = this->m_domain.length(i);
       auto d0 = (this->m_v[i] - this->m_v[i - 1]) / h0;
       auto d1 = (this->m_v[i + 1] - this->m_v[i]) / h1;
-      this->m_6s[i] = (d1 - d0) * 2. / (h1 + h0);
+      this->m_6s[i] = (d1 - d0) / ((h1 + h0) * 3);
       // FIXME optimize
     }
 
