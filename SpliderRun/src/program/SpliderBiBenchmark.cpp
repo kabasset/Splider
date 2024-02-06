@@ -42,9 +42,10 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup)
   Linx::Chronometer<TDuration> chrono;
   chrono.start();
   if (setup == 's') {
-    Splider::Partition<> domain0(u);
-    Splider::Partition<> domain1(u);
-    Splider::BiCospline<double> cospline(domain0, domain1, x);
+    using Spline = Splider::Lagrange;
+    const auto build = Spline::builder(u);
+    using Method = decltype(build.template spline<double>());
+    Splider::BiCospline<Method> cospline(build.domain(), build.domain(), x); // FIXME update to new design
     for (const auto& plane : sections(v)) {
       y = cospline(plane);
     }

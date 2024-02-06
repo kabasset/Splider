@@ -40,11 +40,20 @@ struct RealLinExpSplineFixture {
   Linx::Raster<double> v {
       {domain0.ssize(), domain1.ssize()},
       {1, 2, 3, 4, 10, 20, 30, 40, 100, 200, 300, 400, 1000, 2000, 3000, 4000}};
-  Splider::BiCospline<double> resampler {domain0, domain1, x};
+
+  auto make()
+  {
+    using Spline = Splider::Lagrange;
+    const auto build0 = Spline::builder(u0);
+    const auto build1 = Spline::builder(u1);
+    using Method = decltype(build0.spline<double>());
+    return Splider::BiCospline<Method>(build0.domain(), build1.domain(), x); // FIXME update to new design
+  }
 };
 
 BOOST_FIXTURE_TEST_CASE(real_resampler_test, RealLinExpSplineFixture)
 {
+  auto resampler = make();
   const auto y = resampler(v);
   BOOST_TEST(y.size() == x.size());
   for (std::size_t i = 0; i < x.size(); ++i) {
@@ -66,6 +75,7 @@ BOOST_FIXTURE_TEST_CASE(real_resampler_test, RealLinExpSplineFixture)
 
 BOOST_FIXTURE_TEST_CASE(real_resampler_vs_gsl_test, RealLinExpSplineFixture)
 {
+  auto resampler = make();
   const auto out = resampler(v);
   const auto gsl = resample_with_gsl(u0, u1, v, x);
   BOOST_TEST(out.size() == gsl.size());

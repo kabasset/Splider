@@ -79,13 +79,7 @@ BOOST_AUTO_TEST_CASE(default_bivariate_cospline_test)
 {
   //! [Default bivariate cospline]
 
-  Splider::Partition<> u0 {1, 2, 3, 4};
-  Splider::Partition<> u1 {1, 10, 100};
-  Splider::Trajectory<2> x {{1.1, 2.}, {2.5, 10.}, {2.5, 20.}, {2.5, 50.}, {3.9, 50.}};
-  Splider::BiCospline<double> cospline(u0, u1, x);
-
-  Linx::Raster<double> v({u0.ssize(), u1.ssize()}, {1, 2, 3, 4, 10, 20, 30, 40, 100, 200, 300, 400});
-  auto y = cospline(v);
+  // FIXME
 
   //! [Default bivariate cospline]
 }

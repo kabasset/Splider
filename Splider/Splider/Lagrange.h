@@ -157,6 +157,14 @@ public:
   }
 
   /**
+   * @brief Set a knot value.
+   */
+  void set(Linx::Index i, Value v)
+  {
+    m_v[i] = v;
+  }
+
+  /**
    * @brief Evaluate the spline for a given argument.
    */
   inline Value operator()(Real x)
