@@ -52,6 +52,14 @@ public:
     // FIXME optimize
   }
 
+  /**
+   * @brief Get the subinterval index.
+   */
+  inline Linx::Index index() const
+  {
+    return m_i;
+  }
+
 private:
 
   Linx::Index m_i; ///< The subinterval index

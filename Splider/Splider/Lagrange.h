@@ -54,6 +54,14 @@ public:
     // FIXME optimize, e.g. through LagrangeDomain
   }
 
+  /**
+   * @brief Get the subinterval index.
+   */
+  inline Linx::Index index() const
+  {
+    return m_i;
+  }
+
 private:
 
   Linx::Index m_i;

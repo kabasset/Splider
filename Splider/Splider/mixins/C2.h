@@ -50,6 +50,14 @@ public:
     m_c6s1 = left * (left * m_cv1 - h);
   }
 
+  /**
+   * @brief Get the subinterval index.
+   */
+  inline Linx::Index index() const
+  {
+    return m_i;
+  }
+
 private:
 
   Linx::Index m_i; ///< The subinterval index
