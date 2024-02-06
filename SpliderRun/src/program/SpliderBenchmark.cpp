@@ -8,6 +8,7 @@
 #include "Linx/Run/ProgramOptions.h"
 #include "Splider/C2.h"
 #include "Splider/Cospline.h"
+#include "Splider/Hermite.h"
 #include "Splider/Lagrange.h"
 
 #include <gsl/gsl_interp.h>
@@ -47,15 +48,6 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, const std::string& 
     for (const auto& row : sections(v)) {
       y = cospline(row);
     }
-  } else if (setup == "s") {
-    using Domain = Splider::Partition<double>;
-    const Domain domain(u);
-    const Splider::Args<double> args(domain, x);
-    Splider::Spline<double, Domain> spline(domain);
-    for (const auto& row : sections(v)) {
-      spline.assign(row);
-      y = spline(args);
-    }
   } else if (setup == "l") {
     using Domain = Splider::Linspace<double>;
     const Domain domain(u[0], u[1], u.size()); // FIXME add ssize() to Linx
@@ -72,14 +64,19 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, const std::string& 
     for (const auto& row : sections(v)) {
       y = cospline(row);
     }
-  } else if (setup == "s2") {
-    using Spline = Splider::C2;
+  } else if (setup == "c2fd") {
+    using Spline = Splider::C2::FiniteDiff;
     const auto build = Spline::builder(u);
-    const auto args = build.args(x);
-    auto spline = build.template spline<double>();
+    auto cospline = build.cospline(x);
     for (const auto& row : sections(v)) {
-      spline.assign(row);
-      y = spline(args);
+      y = cospline(row);
+    }
+  } else if (setup == "h") {
+    using Spline = Splider::Hermite::FiniteDiff;
+    const auto build = Spline::builder(u);
+    auto cospline = build.cospline(x);
+    for (const auto& row : sections(v)) {
+      y = cospline(row);
     }
   } else if (setup == "lagrange") {
     using Spline = Splider::Lagrange;
