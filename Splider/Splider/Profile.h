@@ -13,7 +13,7 @@
 namespace Splider {
 
 /**
- * @brief Profile along a path over a multi-dimensional spline.
+ * @brief Profile along a path (sparse positions) over a multi-dimensional spline.
  */
 template <typename TSpline, Linx::Index N = 2>
 class Profile {
@@ -59,7 +59,7 @@ public:
    */
   template <typename TIt>
   explicit Profile(const Domain& domain, TIt begin, TIt end) :
-      m_splines(domain.begin(), domain.end()), m_args(shape(domain))
+      m_splines(domain.begin(), domain.end()), m_x(std::distance(begin, end)), m_mask(shape(domain))
   {
     assign(begin, end);
   }
@@ -79,24 +79,32 @@ public:
   {}
 
   /**
-   * @brief Get the knots abscissae.
-   */
-  const Domain& domain() const
-  {
-    return m_spline.domain();
-  }
-
-  /**
    * @brief Assign arguments from an iterator.
    */
   template <typename TIt>
   void assign(TIt begin, TIt end)
   {
-    m_args.clear();
-    m_args.reserve(std::distance(begin, end));
-    const auto& d = domain();
-    for (; begin != end; ++begin) {
-      m_args.emplace_back(d, *begin); // FIXME
+    using T = std::decay_t<typename std::iterator_traits<TIt>::value_type>;
+
+    // Assign the arguments
+    std::vector<T> x(std::distance(begin, end));
+    for (Linx::Index i = 0; i < m_args.ssize(); ++i) {
+      std::transform(begin, end, x.begin(), [=](const auto& xj) {
+        return xj[i];
+      });
+      m_args[i].assign(x);
+    }
+
+    // Assign the mask
+    m_mask.clear();
+    Linx::Position<Dimension> p(m_args.ssize());
+    for (std::size_t j = 0; j < x.size(); ++j) {
+      for (Linx::Index i = 0; i < m_args.ssize(); ++i) {
+        p[i] = m_args[i][j].index();
+      }
+      Linx::Box<Dimension> neighborhood(p - 1, p + 2); // FIXME use Method::Radius
+      neighborhood &= m_mask.domain();
+      m_mask(neighborhood).fill(true);
     }
   }
 
@@ -119,13 +127,20 @@ public:
   }
 
   /**
-   * @brief Resample a spline defined by an iterator over knot values.
+   * @brief Resample a spline defined by knot values data.
    */
-  template <typename TIt>
-  std::vector<Value> operator()(TIt begin, TIt end)
+  template <typename T>
+  std::vector<Value> operator()(const T* data)
   {
-    m_spline.assign(begin, end);
-    return m_spline(m_args);
+    Linx::PtrRaster<Value, const T> v(m_shape, data);
+    std::array<Value, 4> v; // FIXME use Method::Radius
+    for (const auto& e : m_args) {
+      for (Linx::Index j = -1; j < 3; ++j) {
+        // FIXME
+      }
+    }
+    m_cospline.assign(begin, end);
+    return 0; // FIXME
   }
 
   /**
@@ -148,8 +163,24 @@ public:
 
 private:
 
+  /**
+   * @brief Compute the shape of a given multidimensional domain.
+   */
+  static Position<Dimension> shape(const Domain& u)
+  {
+    Position<Dimension> domain(u.size());
+    domain.generate(
+        [](const auto& ui) {
+          return ui.ssize();
+        },
+        u);
+    return domain;
+  }
+
   Linx::Vector<Method, Dimension> m_splines; ///< The cached splines
-  Linx::Vector<std::vector<Arg>, Dimension> m_args; ///< The resampling abscissae
+  Linx::Vector<std::vector<typename Method::Arg>, Dimension> m_x; ///< The cached arguments
+  // FIXME as Raster<Arg, 2>?
+  Linx::Raster<bool, Dimension> m_mask; ///< The neighboring knot abscissae
 };
 
 } // namespace Splider
