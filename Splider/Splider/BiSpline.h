@@ -80,18 +80,17 @@ public:
    */
   template <typename TIt>
   BiCospline(const Domain& domain0, const Domain& domain1, TIt begin, TIt end) :
-      m_domain0(domain0), m_domain1(domain1), // FIXME useful?
-      m_splines0(m_domain1.size(), Method(m_domain0)), m_spline1(m_domain1), m_x(),
-      m_mask(Linx::Position<Dimension>::zero(), {m_domain0.ssize() - 1, m_domain1.ssize() - 1}, false)
+      m_splines0(domain1.size(), Method(domain0)), m_spline1(domain1), m_x(),
+      m_mask(Linx::Position<Dimension>::zero(), {domain0.ssize() - 1, domain1.ssize() - 1}, false)
   {
     for (; begin != end; ++begin) {
-      std::array<Arg, Dimension> xi {Arg(m_domain0, (*begin)[0]), Arg(m_domain1, (*begin)[1])};
+      std::array<Arg, Dimension> xi {Arg(domain0, (*begin)[0]), Arg(domain1, (*begin)[1])};
       const auto i0 = xi[0].index();
       const auto i1 = xi[1].index();
       const auto min0 = std::max(i0 - 1, 0L);
-      const auto max0 = std::min(i0 + 2, m_domain0.ssize() - 1);
+      const auto max0 = std::min(i0 + 2, domain0.ssize() - 1);
       const auto min1 = std::max(i1 - 1, 0L);
-      const auto max1 = std::min(i1 + 2, m_domain1.ssize() - 1);
+      const auto max1 = std::min(i1 + 2, domain1.ssize() - 1);
       for (auto j1 = min1; j1 <= max1; ++j1) {
         for (auto j0 = min0; j0 <= max0; ++j0) {
           m_mask[{j0, j1}] = true;
@@ -127,10 +126,11 @@ public:
     }
     std::vector<Value> y;
     y.reserve(m_x.size());
+    const auto max1 = m_spline1.domain().ssize() - 1;
     for (const auto& x : m_x) {
       const auto i1 = x[1].index();
       const auto min = std::max(i1 - 1, 0L);
-      const auto max = std::min(i1 + 2, m_domain1.ssize() - 1);
+      const auto max = std::min(i1 + 2, max1);
       for (auto i = min; i <= max; ++i) {
         m_spline1.set(i, m_splines0[i](x[0]));
       }
@@ -141,8 +141,6 @@ public:
 
 private:
 
-  const Domain& m_domain0; ///< The intervals along axis 0
-  const Domain& m_domain1; ///< The intervals along axis 1
   std::vector<Method> m_splines0; ///< Splines along axis 0
   Method m_spline1; ///< Spline along axis 1
   std::vector<std::array<Arg, Dimension>> m_x; ///< The arguments
