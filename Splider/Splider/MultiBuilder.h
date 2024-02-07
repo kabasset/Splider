@@ -52,8 +52,8 @@ public:
    * @brief Constructor.
    * @param us The domains
    */
-  template <typename... TUs>
-  MultiBuilder(TUs&&... us) : m_domains {Domain(LINX_FORWARD(us))...}
+  template <typename... TIts>
+  MultiBuilder(std::pair<TIts, TIts>... us) : m_domains {Domain(us.first, us.second)...}
   {}
 
   /**

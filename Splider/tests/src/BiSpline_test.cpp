@@ -44,7 +44,7 @@ struct RealLinExpSplineFixture {
   auto build_walker()
   {
     using Spline = Splider::Lagrange;
-    const auto build = Spline::multi_builder(u0, u1);
+    const auto build = Spline::Multi::builder(u0, u1);
     return build.walker(x);
   }
 };
