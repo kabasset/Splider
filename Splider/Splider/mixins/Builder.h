@@ -5,6 +5,7 @@
 #define _SPLIDER_MIXINS_BUILDER_H
 
 #include "Splider/Builder.h"
+#include "Splider/MultiBuilder.h"
 
 #include <initializer_list>
 
@@ -15,6 +16,19 @@ namespace Splider {
  */
 template <typename TDerived, typename TBounds>
 struct BuilderMixin {
+  /**
+   * @brief Make a ND builder.
+   */
+  template <TBounds B = static_cast<TBounds>(0), typename TU0, typename... TUs>
+  static auto multi_builder(TU0&& u0, TUs&&... us)
+  {
+    using T = typename std::iterator_traits<decltype(std::begin(u0))>::value_type; // Safer than TU0::value_type?
+    using Real = std::decay_t<T>;
+    using Domain = typename TDerived::Domain<Real>;
+    static constexpr Linx::Index N = sizeof...(TUs) + 1;
+    return MultiBuilder<N, Domain, TDerived, TBounds, B>(LINX_FORWARD(u0), LINX_FORWARD(us)...);
+  }
+
   /**
    * @brief Make a builder.
    */

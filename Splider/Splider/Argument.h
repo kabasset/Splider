@@ -23,7 +23,7 @@ class SplineArg {
   template <typename, typename, Mode>
   friend class Spline;
 
-  template <typename, typename>
+  template <typename>
   friend class BiCospline;
 
 public:
@@ -89,8 +89,8 @@ class Args {
   template <typename, typename, Mode>
   friend class Spline;
 
-  template <typename, typename>
-  friend class BiCospline;
+  template <typename>
+  friend class BiCospline; // FIXME rm
 
 public:
 

@@ -1,7 +1,7 @@
 /// @copyright 2023, Antoine Basset
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "Splider/BiSpline.h"
+#include "Splider/Lagrange.h"
 
 #include <boost/test/unit_test.hpp>
 #include <complex>
@@ -41,20 +41,18 @@ struct RealLinExpSplineFixture {
       {domain0.ssize(), domain1.ssize()},
       {1, 2, 3, 4, 10, 20, 30, 40, 100, 200, 300, 400, 1000, 2000, 3000, 4000}};
 
-  auto make()
+  auto build_walker()
   {
     using Spline = Splider::Lagrange;
-    const auto build0 = Spline::builder(u0);
-    const auto build1 = Spline::builder(u1);
-    using Method = decltype(build0.spline<double>());
-    return Splider::BiCospline<Method>(build0.domain(), build1.domain(), x); // FIXME update to new design
+    const auto build = Spline::multi_builder(u0, u1);
+    return build.walker(x);
   }
 };
 
-BOOST_FIXTURE_TEST_CASE(real_resampler_test, RealLinExpSplineFixture)
+BOOST_FIXTURE_TEST_CASE(real_walker_test, RealLinExpSplineFixture)
 {
-  auto resampler = make();
-  const auto y = resampler(v);
+  auto walker = build_walker();
+  const auto y = walker(v);
   BOOST_TEST(y.size() == x.size());
   for (std::size_t i = 0; i < x.size(); ++i) {
     Linx::Position<2> p;
@@ -73,10 +71,10 @@ BOOST_FIXTURE_TEST_CASE(real_resampler_test, RealLinExpSplineFixture)
   }
 }
 
-BOOST_FIXTURE_TEST_CASE(real_resampler_vs_gsl_test, RealLinExpSplineFixture)
+BOOST_FIXTURE_TEST_CASE(real_walker_vs_gsl_test, RealLinExpSplineFixture)
 {
-  auto resampler = make();
-  const auto out = resampler(v);
+  auto walker = build_walker();
+  const auto out = walker(v);
   const auto gsl = resample_with_gsl(u0, u1, v, x);
   BOOST_TEST(out.size() == gsl.size());
   for (std::size_t i = 0; i < out.size(); ++i) {

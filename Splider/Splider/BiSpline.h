@@ -7,7 +7,6 @@
 #include "Linx/Data/Mask.h"
 #include "Linx/Data/Raster.h"
 #include "Linx/Data/Sequence.h"
-#include "Splider/Lagrange.h"
 
 #include <algorithm>
 #include <stdexcept>

@@ -6,7 +6,7 @@
 #include "Linx/Data/Tiling.h"
 #include "Linx/Run/Chronometer.h"
 #include "Linx/Run/ProgramOptions.h"
-#include "Splider/BiSpline.h"
+#include "Splider/Lagrange.h"
 
 #include <gsl/gsl_interp2d.h>
 #include <gsl/gsl_spline2d.h>
@@ -43,9 +43,8 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup)
   chrono.start();
   if (setup == 's') {
     using Spline = Splider::Lagrange;
-    const auto build = Spline::builder(u);
-    using Method = decltype(build.template spline<double>());
-    Splider::BiCospline<Method> cospline(build.domain(), build.domain(), x); // FIXME update to new design
+    const auto build = Spline::multi_builder(u, u);
+    auto cospline = build.walker(x);
     for (const auto& plane : sections(v)) {
       y = cospline(plane);
     }
