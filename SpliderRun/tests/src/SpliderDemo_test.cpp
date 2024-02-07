@@ -3,7 +3,6 @@
 
 #include "Splider/C2.h"
 #include "Splider/Lagrange.h"
-#include "SpliderRun/Demo.h" // FIXME rm
 
 #include <boost/test/unit_test.hpp>
 
@@ -79,7 +78,10 @@ BOOST_AUTO_TEST_CASE(default_bivariate_cospline_test)
 {
   //! [Default bivariate cospline]
 
-  // FIXME
+  using Spline = Splider::Lagrange;
+  const auto build = Spline::Multi::builder({1, 2, 3, 4}, {10, 20, 30, 40});
+  // auto walker = build.walker({{1.1, 11}, {2.5, 25}, {3.9, 39}});
+  // FIXME walker(v)
 
   //! [Default bivariate cospline]
 }

@@ -178,7 +178,6 @@ public:
   Value operator()(const Arg& arg)
   {
     const auto i = arg.m_i;
-    // FIXME if i < 1
     return std::inner_product(arg.m_l.begin(), arg.m_l.end(), &m_v[i - 1], Value());
   }
 

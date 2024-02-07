@@ -16,6 +16,7 @@ int main(int argc, const char* const argv[])
   options.positional("knots", "Number of knots", 7L);
   options.positional("args", "Number of arguments", 101L);
   options.parse(argc, argv);
+  // FIXME add --help
   const auto knot_count = options.as<Linx::Index>("knots");
   const auto arg_count = options.as<Linx::Index>("args");
   // FIXME std::cout << options << std::endl;
