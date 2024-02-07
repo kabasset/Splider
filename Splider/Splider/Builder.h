@@ -47,7 +47,7 @@ public:
    * @param params The domain constructor parameters
    */
   template <typename... Ts>
-  Builder(Ts... params) : m_domain(LINX_FORWARD(params)...)
+  Builder(Ts&&... params) : m_domain(LINX_FORWARD(params)...)
   {}
 
   /**
