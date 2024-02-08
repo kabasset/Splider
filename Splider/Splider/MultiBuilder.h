@@ -90,7 +90,7 @@ public:
    * @brief Create a walker with given arguments.
    */
   template <typename TX>
-  auto walker(std::initializer_list<TX> x) const
+  auto walker(std::initializer_list<std::array<TX, Dimension>> x) const
   {
     return walker(x.begin(), x.end());
   }
