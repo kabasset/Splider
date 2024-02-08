@@ -44,7 +44,7 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup)
   if (setup == 's') {
     using Spline = Splider::Lagrange;
     const auto build = Spline::Multi::builder(u, u);
-    auto cospline = build.walker(x);
+    auto cospline = build.cospline(x);
     for (const auto& plane : sections(v)) {
       y = cospline(plane);
     }

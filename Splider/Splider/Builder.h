@@ -139,30 +139,28 @@ public:
   /**
    * @brief Create a cospline with given arguments.
    */
-  template <typename TIt>
+  template <typename TV = Real, typename TIt>
   auto cospline(TIt begin, TIt end) const
   {
-    using T = typename std::iterator_traits<TIt>::value_type;
-    using Value = std::decay_t<T>;
-    return Co<typename Method::Spline<Domain, Value, B>>(m_domain, begin, end);
+    return Co<typename Method::Spline<Domain, TV, B>>(m_domain, begin, end);
   }
 
   /**
    * @brief Create a cospline with given arguments.
    */
-  template <typename TX, typename std::enable_if_t<Linx::IsRange<TX>::value>* = nullptr>
+  template <typename TV = Real, typename TX, typename std::enable_if_t<Linx::IsRange<TX>::value>* = nullptr>
   auto cospline(const TX& x) const
   {
-    return cospline(std::begin(x), std::end(x));
+    return cospline<TV>(std::begin(x), std::end(x));
   }
 
   /**
    * @brief Create a cospline with given arguments.
    */
-  template <typename TX>
+  template <typename TV = Real, typename TX>
   auto cospline(std::initializer_list<TX> x) const
   {
-    return cospline(x.begin(), x.end());
+    return cospline<TV>(x.begin(), x.end());
   }
 
 private:

@@ -85,8 +85,8 @@ BOOST_AUTO_TEST_CASE(default_bivariate_cospline_test)
 
   using Spline = Splider::Lagrange;
   const auto build = Spline::Multi::builder(u0, u1);
-  auto walker = build.walker(x);
-  auto y = walker(v);
+  auto cospline = build.cospline(x);
+  auto y = cospline(v);
 
   //! [Default bivariate cospline]
 }

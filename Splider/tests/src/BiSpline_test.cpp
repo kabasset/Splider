@@ -41,18 +41,18 @@ struct RealLinExpSplineFixture {
       {domain0.ssize(), domain1.ssize()},
       {1, 2, 3, 4, 10, 20, 30, 40, 100, 200, 300, 400, 1000, 2000, 3000, 4000}};
 
-  auto build_walker()
+  auto build_cospline()
   {
     using Spline = Splider::Lagrange;
     const auto build = Spline::Multi::builder(u0, u1);
-    return build.walker(x);
+    return build.cospline(x);
   }
 };
 
-BOOST_FIXTURE_TEST_CASE(real_walker_test, RealLinExpSplineFixture)
+BOOST_FIXTURE_TEST_CASE(real_cospline_test, RealLinExpSplineFixture)
 {
-  auto walker = build_walker();
-  const auto y = walker(v);
+  auto cospline = build_cospline();
+  const auto y = cospline(v);
   BOOST_TEST(y.size() == x.size());
   for (std::size_t i = 0; i < x.size(); ++i) {
     Linx::Position<2> p;
@@ -71,10 +71,10 @@ BOOST_FIXTURE_TEST_CASE(real_walker_test, RealLinExpSplineFixture)
   }
 }
 
-BOOST_FIXTURE_TEST_CASE(real_walker_vs_gsl_test, RealLinExpSplineFixture)
+BOOST_FIXTURE_TEST_CASE(real_cospline_vs_gsl_test, RealLinExpSplineFixture)
 {
-  auto walker = build_walker();
-  const auto out = walker(v);
+  auto cospline = build_cospline();
+  const auto out = cospline(v);
   const auto gsl = resample_with_gsl(u0, u1, v, x);
   BOOST_TEST(out.size() == gsl.size());
   for (std::size_t i = 0; i < out.size(); ++i) {

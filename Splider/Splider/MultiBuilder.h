@@ -65,34 +65,32 @@ public:
   }
 
   /**
-   * @brief Create a walker with given arguments.
+   * @brief Create a cospline with given arguments.
    */
-  template <typename TIt>
-  auto walker(TIt begin, TIt end) const
+  template <typename TV = Real, typename TIt>
+  auto cospline(TIt begin, TIt end) const
   {
     static_assert(Dimension == 2, "Case N != 2 not yet implemented.");
-    using T = typename std::iterator_traits<TIt>::value_type;
-    using Value = typename std::decay_t<T>::value_type;
-    using Spline = typename Method::Spline<Domain, Value, B>;
+    using Spline = typename Method::Spline<Domain, TV, B>;
     return BiCospline<Spline>(m_domains[0], m_domains[1], begin, end);
   }
 
   /**
-   * @brief Create a walker with given arguments.
+   * @brief Create a cospline with given arguments.
    */
-  template <typename TX, typename std::enable_if_t<Linx::IsRange<TX>::value>* = nullptr>
-  auto walker(const TX& x) const
+  template <typename TV = Real, typename TX, typename std::enable_if_t<Linx::IsRange<TX>::value>* = nullptr>
+  auto cospline(const TX& x) const
   {
-    return walker(std::begin(x), std::end(x));
+    return cospline<TV>(std::begin(x), std::end(x));
   }
 
   /**
-   * @brief Create a walker with given arguments.
+   * @brief Create a cospline with given arguments.
    */
-  template <typename TX>
-  auto walker(std::initializer_list<std::array<TX, Dimension>> x) const
+  template <typename TV = Real, typename TX>
+  auto cospline(std::initializer_list<std::array<TX, Dimension>> x) const
   {
-    return walker(x.begin(), x.end());
+    return cospline<TV>(x.begin(), x.end());
   }
 
 private:
