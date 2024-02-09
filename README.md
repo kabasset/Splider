@@ -24,7 +24,7 @@ In this case, many spline coefficients remain valid while changing `v`.
 
 ## Approach
 
-Splider separates the spline classes in components (subintervals, knots and arguments), which each hold their cache.
+Splider separates the spline classes into components (subintervals, knots and arguments), which each hold their cache.
 For example the subintervals hold not only their bounds but also associated byproducts like their lengths.
 This allows recomputing only what has changed.
 
@@ -36,9 +36,15 @@ auto spline = build.spline(v); // Compute knot-related coefficients
 auto y = spline(x); // Compute argument-related coefficients
 ```
 
+Or, for such simple use cases:
+
+```cpp
+auto y = Spline::eval(u, v, x);
+```
+
 In general splines are initialized with `u` and `v` and applied to `x`.
 Yet, sometimes, one wish to initialize them with `u` and `x` and apply them to `v`.
-This is known as a "cospline" in Splider:
+This is known as a _cospline_ in Splider:
 
 ```cpp
 const auto build = Spline::builder(u); // Compute domain-related coefficients
@@ -64,5 +70,11 @@ Splider relies on [Linx](https://github.com/kabasset/Linx) for the data structur
 
 ## Status
 
-Prototype is being validated!
+Prototype is being validated with:
 
+* 1D splines and cosplines,
+* 2D cosplines.
+
+To be developed:
+
+* ND splines and cosplines.
