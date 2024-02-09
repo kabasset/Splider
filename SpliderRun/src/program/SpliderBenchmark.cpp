@@ -50,7 +50,7 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, const std::string& 
     }
   } else if (setup == "l") {
     using Domain = Splider::Linspace<double>;
-    const Domain domain(u[0], u[1], u.size()); // FIXME add ssize() to Linx
+    const Domain domain(u[0], u[1], u.ssize());
     const Splider::Args<double> args(domain, x);
     Splider::Spline<double, Domain> spline(domain);
     for (const auto& row : sections(v)) {

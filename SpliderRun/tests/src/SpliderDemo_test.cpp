@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(default_bivariate_cospline_test)
   Linx::Sequence<double> u0 {1, 2, 3, 4};
   Linx::Sequence<double> u1 {1, 10, 100};
   Splider::Trajectory<2> x {{1.1, 2.}, {2.5, 10.}, {2.5, 20.}, {2.5, 50.}, {3.9, 50.}};
-  Linx::Raster<double> v({u0.size(), u1.size()}, {1, 2, 3, 4, 10, 20, 30, 40, 100, 200, 300, 400}); // FIXME ssize()
+  Linx::Raster<double> v({u0.ssize(), u1.ssize()}, {1, 2, 3, 4, 10, 20, 30, 40, 100, 200, 300, 400});
 
   using Spline = Splider::Lagrange;
   const auto build = Spline::Multi::builder(u0, u1);
