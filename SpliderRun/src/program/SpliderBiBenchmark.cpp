@@ -58,7 +58,7 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup)
 
 int main(int argc, const char* const argv[])
 {
-  Linx::ProgramOptions options;
+  Linx::ProgramOptions options("2D cospline benchmark.");
   options.named("case", "Test case: s (Splider), g (GSL)", 's');
   options.named("knots", "Number of knots along each axis", 100L);
   options.named("args", "Number of arguments", 100L);

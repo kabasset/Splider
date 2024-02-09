@@ -95,7 +95,7 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, const std::string& 
 
 int main(int argc, const char* const argv[])
 {
-  Linx::ProgramOptions options;
+  Linx::ProgramOptions options("1D cospline benchmark.");
   options.named("case", "Test case: d (double), f (float), s (Spline), g (GSL)", std::string("d"));
   options.named("knots", "Number of knots", 100L);
   options.named("args", "Number of arguments", 100L);
