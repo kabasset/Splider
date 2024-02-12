@@ -1,4 +1,5 @@
-/// @copyright 2023, Antoine Basset
+/// @copyright 2023-2024, Antoine Basset (CNES)
+// This file is part of Splider <github.com/kabasset/Splider>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "Splider/Lagrange.h"

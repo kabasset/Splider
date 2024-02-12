@@ -1,5 +1,6 @@
-/// @copyright 2023, Antoine Basset
-// SPDX-License-Identifier: GPL-3.0-or-later
+/// @copyright 2023-2024, Antoine Basset (CNES)
+// This file is part of Splider <github.com/kabasset/Splider>
+// SPDX-License-Identifier: Apache-2.0
 
 #ifndef _SPLIDER_MODE_H
 #define _SPLIDER_MODE_H

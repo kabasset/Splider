@@ -2,7 +2,7 @@
 
 <br/>![Splider logo](doc/diagrams/logo_square.svg)
 
-## Purpose
+# Purpose
 
 Cubic splines are parametric functions, whose parameters are the domain intervals and knot values.
 Spline libraries generally allow instantiating a spline and calling it on an argument, e.g.:
@@ -22,7 +22,7 @@ This is generally adequate, but in some cases yields huge recomputation where ca
 For example, assume we need to call `spline` on the same `x` for many variations of `v`.
 In this case, many spline coefficients remain valid while changing `v`.
 
-## Approach
+# Approach
 
 Splider separates the spline classes into components (subintervals, knots and arguments), which each hold their cache.
 For example the subintervals hold not only their bounds but also associated byproducts like their lengths.
@@ -68,7 +68,24 @@ Extrapolation to N-dimensional splines is under development.
 
 Splider relies on [Linx](https://github.com/kabasset/Linx) for the data structures and basic operations.
 
-## Status
+# License
+
+The license of the library is [Apache-2.0](LICENSE.txt).
+Installation instructions in the next section only install the Apache-2.0 software.
+
+The license of the executables, including unit tests, is [GPL-2.0-or-later](https://spdx.org/licenses/GPL-2.0-or-later.html)
+because they depend on the GNU Scientific Library.
+
+# Installation
+
+The simplest way to use Splider, which is a header-only library, is to copy the deepest `Splider` folder into your include directory:
+
+```sh
+git clone https://github.com/kabasset/Splider.git
+cp -r Splider/Splider/Splider /usr/include/
+```
+
+# Status
 
 Prototype is being validated with:
 
