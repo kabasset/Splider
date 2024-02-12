@@ -131,7 +131,7 @@ public:
    */
   bool is_valid(Linx::Index i) const
   {
-    // FIXME check around i
+    // TODO check around i
     return m_valid;
   }
 
@@ -182,7 +182,7 @@ public:
 
   std::vector<Value> operator()(const Args<Real>& x)
   {
-    lazy_update(0); // FIXME i
+    lazy_update(0); // TODO i
     std::vector<Value> out;
     out.reserve(x.size());
     for (const auto& arg : x.m_args) {
@@ -244,7 +244,7 @@ public:
    * @brief Approximate the second derivatives with finite differences.
    */
   void approximate()
-  { // FIXME take i as input
+  { // TODO take i as input
     for (Linx::Index i = 1; i < m_6s.size() - 1; ++i) {
       auto d = (m_v[i + 1] - m_v[i]) * m_domain.m_g[i] - (m_v[i] - m_v[i - 1]) * m_domain.m_g[i - 1];
       m_6s[i] = d * 2. / (m_domain.m_h[i] + m_domain.m_h[i - 1]);
@@ -340,7 +340,7 @@ private:
   inline void lazy_update(Linx::Index i)
   {
     if constexpr (mode_matches(Mode::Lazy)) {
-      // FIXME update around i only
+      // TODO update around i only
       update();
     }
   }
@@ -370,7 +370,7 @@ private:
   std::vector<Value> m_v; ///< The knot values
   std::vector<Value> m_6s; ///< The knot second derivatives times 6
   bool m_valid; ///< Validity flags
-  // FIXME local validity
+  // TODO local validity
 };
 
 } // namespace Splider

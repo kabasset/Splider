@@ -6,7 +6,7 @@
 #define _SPLIDER_MIXINS_C2_H
 
 #include "Linx/Base/SeqUtils.h" // IsRange
-#include "Splider/Partition.h" // FIXME rm
+#include "Splider/Partition.h" // TODO rm
 #include "Splider/mixins/Builder.h"
 
 #include <initializer_list>
@@ -14,7 +14,7 @@
 namespace Splider {
 
 template <typename TReal>
-using C2Domain = Partition<TReal>; // FIXME
+using C2Domain = Partition<TReal>; // TODO
 
 /**
  * @brief A \f$C^2\f$ spline argument.

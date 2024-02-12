@@ -91,7 +91,7 @@ class Args {
   friend class Spline;
 
   template <typename>
-  friend class BiCospline; // FIXME rm
+  friend class BiCospline; // TODO rm
 
 public:
 

@@ -5,7 +5,7 @@
 #ifndef _SPLIDER_MIXINS_HERMITE_H
 #define _SPLIDER_MIXINS_HERMITE_H
 
-#include "Splider/Partition.h" // FIXME rm
+#include "Splider/Partition.h" // TODO rm
 #include "Splider/mixins/Builder.h"
 
 #include <initializer_list>
@@ -16,7 +16,7 @@ namespace Splider {
  * @brief The Hermite spline knot domain.
  */
 template <typename TReal>
-using HermiteDomain = Partition<TReal>; // FIXME
+using HermiteDomain = Partition<TReal>; // TODO
 
 /**
  * @brief A Hermite spline argument.
@@ -50,7 +50,7 @@ public:
     m_cv1 = t * t * (3 - 2 * t);
     m_cd0 = t * (1 - t) * (1 - t) * h;
     m_cd1 = t * t * (t - 1) * h;
-    // FIXME optimize
+    // TODO optimize
   }
 
   /**

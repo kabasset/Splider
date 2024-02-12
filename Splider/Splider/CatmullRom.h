@@ -44,7 +44,7 @@ public:
   /**
    * @brief Update the derivatives.
    */
-  void update(Linx::Index) // FIXME use index
+  void update(Linx::Index) // TODO use index
   {
     if (Mixin::m_valid) {
       return;
@@ -58,7 +58,7 @@ public:
       auto h0 = this->m_domain.length(i - 1);
       auto h1 = this->m_domain.length(i);
       this->m_d[i] = (this->m_v[i + 1] - this->m_v[i - 1]) / (h0 + h1);
-      // FIXME optimize
+      // TODO optimize
     }
 
     this->m_d[n - 1] = (this->m_v[n - 1] - this->m_v[n - 1]) / this->m_domain.length(n - 2);
@@ -81,7 +81,7 @@ struct Hermite::CatmullRom::Uniform : BuilderMixin<Hermite::CatmullRom::Uniform,
    * @brief The knots domain type.
    */
   template <typename TReal>
-  using Domain = Partition<TReal>; // FIXME HermiteDomain
+  using Domain = Partition<TReal>; // TODO HermiteDomain
 
   /**
    * @brief The argument type.

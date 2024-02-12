@@ -46,7 +46,7 @@ public:
   /**
    * @brief Update the derivatives.
    */
-  void update(Linx::Index) // FIXME use index
+  void update(Linx::Index) // TODO use index
   {
     if (Mixin::m_valid) {
       return;
@@ -62,7 +62,7 @@ public:
       auto d0 = (this->m_v[i] - this->m_v[i - 1]) / h0;
       auto d1 = (this->m_v[i + 1] - this->m_v[i]) / h1;
       this->m_d[i] = (d1 + d0) * 0.5;
-      // FIXME optimize
+      // TODO optimize
     }
 
     this->m_d[n - 1] = (this->m_v[n - 1] - this->m_v[n - 1]) / this->m_domain.length(n - 2);
@@ -85,7 +85,7 @@ struct Hermite::FiniteDiff : BuilderMixin<Hermite::FiniteDiff, FiniteDiffHermite
    * @brief The knots domain type.
    */
   template <typename TReal>
-  using Domain = Partition<TReal>; // FIXME HermiteDomain
+  using Domain = Partition<TReal>; // TODO HermiteDomain
 
   /**
    * @brief The argument type.

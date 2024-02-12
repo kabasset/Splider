@@ -6,7 +6,7 @@
 #define _SPLIDER_C2_H
 
 #include "Linx/Base/SeqUtils.h" // IsRange
-#include "Splider/Partition.h" // FIXME rm
+#include "Splider/Partition.h" // TODO rm
 #include "Splider/mixins/C2.h"
 
 namespace Splider {
@@ -95,7 +95,7 @@ struct C2 : BuilderMixin<C2, C2Bounds> {
    * @brief The knots domain type.
    */
   template <typename TReal>
-  using Domain = Partition<TReal>; // FIXME C2Domain
+  using Domain = Partition<TReal>; // TODO C2Domain
 
   /**
    * @brief The argument type.
@@ -131,7 +131,7 @@ public:
   /**
    * @brief Update the second derivatives.
    */
-  void update(Linx::Index) // FIXME use index
+  void update(Linx::Index) // TODO use index
   {
     if (Mixin::m_valid) {
       return;
@@ -147,7 +147,7 @@ public:
       auto d0 = (this->m_v[i] - this->m_v[i - 1]) / h0;
       auto d1 = (this->m_v[i + 1] - this->m_v[i]) / h1;
       this->m_6s[i] = (d1 - d0) / ((h1 + h0) * 3);
-      // FIXME optimize
+      // TODO optimize
     }
 
     this->m_6s[n - 1] = 0;
@@ -173,7 +173,7 @@ struct C2::FiniteDiff : BuilderMixin<C2::FiniteDiff, C2Bounds> {
    * @brief The knots domain type.
    */
   template <typename TReal>
-  using Domain = Partition<TReal>; // FIXME C2Domain
+  using Domain = Partition<TReal>; // TODO C2Domain
 
   /**
    * @brief The argument type.
@@ -185,7 +185,7 @@ struct C2::FiniteDiff : BuilderMixin<C2::FiniteDiff, C2Bounds> {
    * @brief The spline evaluator.
    */
   template <typename TDomain, typename TValue, C2Bounds B>
-  using Spline = FiniteDiffC2Spline<TDomain, TValue, B>; // FIXME
+  using Spline = FiniteDiffC2Spline<TDomain, TValue, B>;
 };
 
 } // namespace Splider

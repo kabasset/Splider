@@ -6,7 +6,7 @@
 #define _SPLIDER_LAGRANGE_H
 
 #include "Linx/Base/SeqUtils.h" // IsRange
-#include "Splider/Partition.h" // FIXME rm
+#include "Splider/Partition.h" // TODO rm
 #include "Splider/mixins/Builder.h"
 
 namespace Splider {
@@ -52,7 +52,7 @@ public:
     m_l[1] = l01 * l21 * l31;
     m_l[2] = l02 * l12 * l32;
     m_l[3] = l03 * l13 * l23;
-    // FIXME optimize, e.g. through LagrangeDomain
+    // TODO optimize, e.g. through LagrangeDomain
   }
 
   /**
@@ -235,7 +235,7 @@ struct Lagrange : BuilderMixin<Lagrange, LagrangeBounds> {
    * @brief The knots domain type.
    */
   template <typename TReal>
-  using Domain = Partition<TReal>; // FIXME LagrangeDomain
+  using Domain = Partition<TReal>; // TODO LagrangeDomain
 
   /**
    * @brief The argument type.
