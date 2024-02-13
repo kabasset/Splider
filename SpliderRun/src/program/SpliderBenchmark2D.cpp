@@ -8,34 +8,11 @@
 #include "Linx/Run/Chronometer.h"
 #include "Linx/Run/ProgramOptions.h"
 #include "Splider/Lagrange.h"
+#include "SpliderRun/GslInterp.h"
 
-#include <gsl/gsl_interp2d.h>
-#include <gsl/gsl_spline2d.h>
 #include <iostream>
 
 using Duration = std::chrono::milliseconds;
-
-template <typename U, typename V, typename X>
-std::vector<double> resample_with_gsl(const U& u0, const U& u1, const V& v, const X& x)
-{
-  gsl_interp_accel* xacc = gsl_interp_accel_alloc();
-  gsl_interp_accel* yacc = gsl_interp_accel_alloc();
-  gsl_spline2d* spline = gsl_spline2d_alloc(gsl_interp2d_bicubic, u0.size(), u1.size());
-  std::vector<double> y;
-  for (const auto& plane : sections(v)) {
-    y.clear();
-    gsl_spline2d_init(spline, u0.data(), u1.data(), plane.data(), u0.size(), u1.size());
-    for (const auto& e : x) {
-      y.push_back(gsl_spline2d_eval(spline, e[0], e[1], xacc, yacc));
-    }
-    gsl_interp_accel_reset(xacc); // FIXME needed?
-    gsl_interp_accel_reset(yacc); // FIXME needed?
-  }
-  gsl_interp_accel_free(xacc);
-  gsl_interp_accel_free(yacc);
-  gsl_spline2d_free(spline);
-  return y;
-}
 
 template <typename TDuration, typename U, typename V, typename X, typename Y>
 TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup)

@@ -11,31 +11,11 @@
 #include "Splider/Cospline.h"
 #include "Splider/Hermite.h"
 #include "Splider/Lagrange.h"
+#include "SpliderRun/GslInterp.h"
 
-#include <gsl/gsl_interp.h>
-#include <gsl/gsl_spline.h>
 #include <iostream>
 
 using Duration = std::chrono::milliseconds;
-
-template <typename U, typename V, typename X>
-std::vector<double> resample_with_gsl(const U& u, const V& v, const X& x)
-{
-  gsl_interp_accel* acc = gsl_interp_accel_alloc();
-  gsl_spline* spline = gsl_spline_alloc(gsl_interp_cspline, u.size());
-  std::vector<double> y;
-  for (const auto& row : sections(v)) {
-    y.clear();
-    gsl_spline_init(spline, u.data(), row.data(), u.size());
-    for (const auto& e : x) {
-      y.push_back(gsl_spline_eval(spline, e, acc));
-    }
-    gsl_interp_accel_reset(acc); // FIXME needed?
-  }
-  gsl_interp_accel_free(acc);
-  gsl_spline_free(spline);
-  return y;
-}
 
 template <typename TDuration, typename U, typename V, typename X, typename Y>
 TDuration resample(const U& u, const V& v, const X& x, Y& y, const std::string& setup)
