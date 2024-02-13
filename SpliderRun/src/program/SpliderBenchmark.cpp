@@ -100,7 +100,7 @@ int main(int argc, const char* const argv[])
   options.named("case", "Test case: d (double), f (float), s (Spline), g (GSL)", std::string("d"));
   options.named("knots", "Number of knots", 100L);
   options.named("args", "Number of arguments", 100L);
-  options.named("iters", "Numper of iterations", 1L);
+  options.named("iters", "Number of iterations", 1L);
   options.named("seed", "Random seed", -1L);
   options.parse(argc, argv);
   const auto setup = options.as<std::string>("case");
