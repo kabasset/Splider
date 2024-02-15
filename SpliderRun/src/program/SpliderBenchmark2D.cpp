@@ -7,6 +7,8 @@
 #include "Linx/Data/Tiling.h"
 #include "Linx/Run/Chronometer.h"
 #include "Linx/Run/ProgramOptions.h"
+#include "Splider/C2.h"
+#include "Splider/Hermite.h"
 #include "Splider/Lagrange.h"
 #include "SpliderRun/GslInterp.h"
 
@@ -14,19 +16,28 @@
 
 using Duration = std::chrono::milliseconds;
 
+template <typename TSpline, typename U, typename V, typename X, typename Y>
+void eval(const U& u, const V& v, const X& x, Y& y)
+{
+  const auto build = TSpline::Multi::builder(u, u);
+  auto cospline = build.cospline(x); // FIXME use Radius = -1 for C2
+  for (const auto& plane : sections(v)) {
+    y = cospline(plane);
+  }
+}
+
 template <typename TDuration, typename U, typename V, typename X, typename Y>
-TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup)
+TDuration resample(const U& u, const V& v, const X& x, Y& y, const std::string& setup)
 {
   Linx::Chronometer<TDuration> chrono;
   chrono.start();
-  if (setup == 's') {
-    using Spline = Splider::Lagrange;
-    const auto build = Spline::Multi::builder(u, u);
-    auto cospline = build.cospline(x);
-    for (const auto& plane : sections(v)) {
-      y = cospline(plane);
-    }
-  } else if (setup == 'g') {
+  if (setup == "c2") {
+    eval<Splider::C2>(u, v, x, y);
+  } else if (setup == "hermite") {
+    eval<Splider::Hermite::FiniteDiff>(u, v, x, y);
+  } else if (setup == "lagrange") {
+    eval<Splider::Lagrange>(u, v, x, y);
+  } else if (setup == "gsl") {
     y = resample_with_gsl(u, u, v, x);
   } else {
     throw std::runtime_error("Case not implemented");
@@ -37,13 +48,13 @@ TDuration resample(const U& u, const V& v, const X& x, Y& y, char setup)
 int main(int argc, const char* const argv[])
 {
   Linx::ProgramOptions options("2D cospline benchmark.");
-  options.named("case", "Test case: s (Splider), g (GSL)", 's');
+  options.named("case", "Test case: c2, hermite, lagrange, gsl", std::string("c2"));
   options.named("knots", "Number of knots along each axis", 100L);
   options.named("args", "Number of arguments", 100L);
   options.named("iters", "Numper of iterations", 1L);
   options.named("seed", "Random seed", -1L);
   options.parse(argc, argv);
-  const auto setup = options.as<char>("case");
+  const auto setup = options.as<std::string>("case");
   const auto u_size = options.as<Linx::Index>("knots");
   const auto x_size = options.as<Linx::Index>("args");
   const auto v_iters = options.as<Linx::Index>("iters");
