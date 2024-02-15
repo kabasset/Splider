@@ -16,7 +16,7 @@ template <typename TSpline, typename U, typename V, typename X>
 std::vector<double> eval(const U& u, const V& v, const X& x)
 {
   const auto build = TSpline::Multi::builder(u, u);
-  auto cospline = build.cospline(x);
+  auto cospline = build.cospline(x); // FIXME use Radius = -1 for C2
   return cospline(v);
 }
 
@@ -63,6 +63,8 @@ int main(int argc, const char* const argv[])
   std::cout << "i\tx0\tx1\tgt";
   std::cout << "\tGSL";
   y.push_back(eval_with_gsl(u, u, v, x));
+  std::cout << "\tC2";
+  y.push_back(eval<Splider::C2>(u, v, x));
   std::cout << "\tC2 FD";
   y.push_back(eval<Splider::C2::FiniteDiff>(u, v, x));
   std::cout << "\tHermite FD";
